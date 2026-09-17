@@ -1,0 +1,119 @@
+{
+  "_note": "Maps local markdown paths to Outline document IDs. No secrets, no host. The Outline host and API key come from the environment (see .env.example).",
+  "collections": {
+    ".": "88588434-2c93-4cf9-a6ef-fab7f6d72683",
+    "spec": "88588434-2c93-4cf9-a6ef-fab7f6d72683",
+    "research": "11d8feaa-0f57-495a-9a70-6e541c60b0c7",
+    "decisions": "844d45f0-9a77-42cd-b166-e270ff6dfe3c"
+  },
+  "autodiscover": [
+    "",
+    "spec",
+    "research",
+    "decisions"
+  ],
+  "documents": {
+    "README.md": {
+      "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
+      "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
+      "title": "Start Here \u2014 Project Praxis",
+      "hash": "381baccda6480cb7"
+    },
+    "spec/01-problem-statement.md": {
+      "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
+      "url": "/doc/problem-statement-OSGcnEh5Kd",
+      "title": "Problem Statement",
+      "hash": "e3f4d071262779aa"
+    },
+    "spec/02-requirements.md": {
+      "id": "80a66b80-2e08-4f47-9bb2-a20d2690fe40",
+      "url": "/doc/phase-0-requirements-PBSyxXMsdz",
+      "title": "Phase 0 Requirements",
+      "hash": "c1a759bb1e44cdd9"
+    },
+    "spec/03-pilot-design.md": {
+      "id": "d07d1370-66b9-4895-bea5-631b904197a0",
+      "url": "/doc/pilot-design-six-weeks-force-and-motion-g2P2SL48QB",
+      "title": "Pilot Design \u2014 Six Weeks, Force and Motion",
+      "hash": "2e4f62f5bfa98912"
+    },
+    "spec/04-data-model.md": {
+      "id": "d70dd1db-59ae-488c-a327-47d1bd8a6504",
+      "url": "/doc/data-model-prediction-card-confusion-log-error-signature-K9gvNHM59B",
+      "title": "Data Model \u2014 Prediction Card, Confusion Log, Error Signature",
+      "hash": "c934547235d7dfc1"
+    },
+    "spec/05-kill-criteria.md": {
+      "id": "2977b12d-ff0c-4339-a47a-438362d77c46",
+      "url": "/doc/kill-criteria-IpXsSuKucM",
+      "title": "Kill Criteria",
+      "hash": "30f0352a7dd5ad7d"
+    },
+    "spec/06-working-agreement.md": {
+      "id": "c92948cf-7677-43fb-a016-9c92505c751a",
+      "url": "/doc/working-agreement-BACM7HFwcI",
+      "title": "Working Agreement",
+      "hash": "4c5ed8c0fab15569"
+    },
+    "research/00-domain-map.md": {
+      "id": "b71451bb-e16d-430a-a09d-303793e90bdd",
+      "url": "/doc/domain-map-reading-path-YVUg5m2a3B",
+      "title": "Domain Map & Reading Path",
+      "hash": "ab3584974c9eed63"
+    },
+    "research/01-the-economics-flip.md": {
+      "id": "8a1b723b-fd81-44b6-8bca-59cbcfec75c1",
+      "url": "/doc/01-the-economics-flip-why-ai-breaks-learning-by-default-tDhsOGnb2x",
+      "title": "01 \u00b7 The Economics Flip \u2014 Why AI Breaks Learning By Default",
+      "hash": "f654dd0e36291f82"
+    },
+    "research/02-misconceptions-and-diagnostics.md": {
+      "id": "1320b0e1-e5b9-4b67-9af0-09f69d3623cc",
+      "url": "/doc/02-misconceptions-diagnostic-instruments-nGtCaObfF4",
+      "title": "02 \u00b7 Misconceptions & Diagnostic Instruments",
+      "hash": "a835449e8805521b"
+    },
+    "research/03-personalisation-axes.md": {
+      "id": "ff1c0a8d-c54e-4389-ba3c-53b60bcb1a80",
+      "url": "/doc/03-personalisation-axes-the-shared-context-tension-yQaP3NSyDn",
+      "title": "03 \u00b7 Personalisation Axes & The Shared-Context Tension",
+      "hash": "3c5817a9f99eb3fd"
+    },
+    "research/99-bibliography.md": {
+      "id": "dc86b44f-c668-4722-a017-067ca8090ff0",
+      "url": "/doc/bibliography-j4Jl476HfB",
+      "title": "Bibliography",
+      "hash": "34622f96211e9a54"
+    },
+    "decisions/0000-adr-template.md": {
+      "id": "a235c4e8-cb18-422f-a8b3-c3a60c9e8124",
+      "url": "/doc/adr-template-OXYIyWRN4J",
+      "title": "ADR Template",
+      "hash": "92cf652121575ddb"
+    },
+    "decisions/0001-audience-and-first-slice.md": {
+      "id": "2054c07f-a4bc-4397-bcd1-76eee226fe10",
+      "url": "/doc/adr-0001-audience-and-first-slice-1IPweZhefd",
+      "title": "ADR 0001 \u00b7 Audience and First Slice",
+      "hash": "d155ea2e3fba426f"
+    },
+    "decisions/0002-ai-never-writes-in-the-notebook.md": {
+      "id": "3f9230e7-a3ac-4441-a19d-5727b6ec6901",
+      "url": "/doc/adr-0002-ai-never-writes-in-the-notebook-fKPGzS3tDA",
+      "title": "ADR 0002 \u00b7 AI Never Writes In The Notebook",
+      "hash": "cc82dc03ca4d0cf4"
+    },
+    "decisions/0003-bait-error-signatures.md": {
+      "id": "0237b5fd-41be-4834-a65c-16cbb77c07b8",
+      "url": "/doc/adr-0003-bait-error-signatures-do-not-reduce-difficulty-p3zhr0U2EI",
+      "title": "ADR 0003 \u00b7 Bait Error Signatures, Do Not Reduce Difficulty",
+      "hash": "84be5695429e872b"
+    },
+    "decisions/0004-teacher-mediated-cohort.md": {
+      "id": "54804f5d-3223-4f7e-9850-f97067095f94",
+      "url": "/doc/adr-0004-teacher-mediated-cohort-not-direct-to-learner-MCHNmUP0Vj",
+      "title": "ADR 0004 \u00b7 Teacher-Mediated Cohort, Not Direct-to-Learner",
+      "hash": "081e8eb19d85e083"
+    }
+  }
+}
