@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets — credentials live in ~/.config/homelab/env, never here
+.env
+*.key
+secrets*
+
+# OS
+.DS_Store
