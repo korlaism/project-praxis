@@ -4,7 +4,8 @@ Documentation consistency checks.
 
 Run before syncing to Outline. Catches the drift that is easy to introduce and
 invisible in review: an ADR whose status no longer matches the decision table in
-README.md, or a status string that is not one the template permits.
+README.md, a status string that is not one the template permits, or an ADR
+accepted while it still rests on a claim the run has not yet settled.
 
 Usage:
     python3 tools/check-docs.py
@@ -18,6 +19,12 @@ FAIL = []
 
 def fail(msg):
     FAIL.append(msg)
+
+
+# Falsifiable claims from spec/02-requirements.md section 1. An ADR that rests on
+# one of these is wrong if the claim is false, so it cannot be Accepted until the
+# run settles it. Nothing is settled while Phase 0 is still ahead of us.
+UNSETTLED = ("R-001", "R-002", "R-003", "R-004", "R-005")
 
 
 def adr_statuses():
@@ -37,6 +44,17 @@ def adr_statuses():
         if not (status in VALID or status.startswith("Superseded by ")):
             fail(f"decisions/{fn}: status {status!r} is not one the template permits "
                  f"({', '.join(VALID)}, or 'Superseded by NNNN')")
+
+        r = re.search(r"\*\*Rests on:\*\*\s*([^\n*]+?)\s*(?:\*\*|$)", text, re.M)
+        if not r:
+            fail(f"decisions/{fn}: no '**Rests on:**' field — say 'judgment' for a design "
+                 f"stance, or name the requirement ids the decision depends on")
+        elif status == "Accepted":
+            depends = [c for c in UNSETTLED if c in r.group(1)]
+            if depends:
+                fail(f"decisions/{fn}: Accepted while resting on {', '.join(depends)} — "
+                     f"unproven until the run settles them. Either narrow the decision to "
+                     f"the part that stands on judgment, or leave it Proposed")
         out[num] = (status, fn)
     return out
 

@@ -17,7 +17,7 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "381baccda6480cb7"
+      "hash": "ed9b0c8f46a936f5"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
@@ -101,19 +101,19 @@
       "id": "3f9230e7-a3ac-4441-a19d-5727b6ec6901",
       "url": "/doc/adr-0002-ai-never-writes-in-the-notebook-fKPGzS3tDA",
       "title": "ADR 0002 \u00b7 AI Never Writes In The Notebook",
-      "hash": "cc82dc03ca4d0cf4"
+      "hash": "4844f1e1c808ab8b"
     },
     "decisions/0003-bait-error-signatures.md": {
       "id": "0237b5fd-41be-4834-a65c-16cbb77c07b8",
       "url": "/doc/adr-0003-bait-error-signatures-do-not-reduce-difficulty-p3zhr0U2EI",
       "title": "ADR 0003 \u00b7 Bait Error Signatures, Do Not Reduce Difficulty",
-      "hash": "84be5695429e872b"
+      "hash": "1e25a57f4070840a"
     },
     "decisions/0004-teacher-mediated-cohort.md": {
       "id": "54804f5d-3223-4f7e-9850-f97067095f94",
       "url": "/doc/adr-0004-teacher-mediated-cohort-not-direct-to-learner-MCHNmUP0Vj",
       "title": "ADR 0004 \u00b7 Teacher-Mediated Cohort, Not Direct-to-Learner",
-      "hash": "081e8eb19d85e083"
+      "hash": "20bd8946c0f62467"
     }
   }
 }

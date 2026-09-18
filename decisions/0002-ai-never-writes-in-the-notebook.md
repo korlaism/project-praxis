@@ -1,6 +1,6 @@
 # ADR 0002 · AI Never Writes in the Learner's Notebook
 
-**Date:** 2026-09-18 (accepted 2026-09-19) **Status:** Accepted **Tickets:** P-02
+**Date:** 2026-09-18 (accepted 2026-09-19) **Status:** Accepted **Tickets:** P-02 **Rests on:** judgment
 
 > Accepted as a **design stance**, not an empirical finding. What the pilot tests is
 > whether the constraint is survivable in practice — whether learners write enough,

@@ -1,11 +1,15 @@
 # ADR 0003 · Bait Error Signatures, Do Not Reduce Difficulty
 
-**Date:** 2026-09-18 (accepted 2026-09-19) **Status:** Accepted **Tickets:** P-02
+**Date:** 2026-09-18 (accepted 2026-09-19) **Status:** Accepted **Tickets:** P-02 **Rests on:** judgment (the direction only — see Decision)
 
-> Accepted with a **known unresolved conflict**: expertise reversal cuts against
-> signature baiting, and Phase 0 does not test it (`P-18`). Accepting now fixes the
-> direction of the adaptive mechanic — difficulty selection, not reduction — which is
-> what the item bank and the analysis plan need in order to be built at all.
+> Accepted **only as a direction**. P-02 originally accepted the whole ADR; P-19 narrowed
+> it, because the mechanism it described rests on `R-002` and `R-003` — both still unproven,
+> both marked *Guess.* in the requirements. What is accepted is that difficulty is selected
+> rather than reduced, which is what the item bank and the analysis plan need in order to be
+> built at all. The mechanism below is deferred, not decided.
+>
+> A known conflict also stands unresolved: expertise reversal cuts against signature baiting,
+> and Phase 0 does not test it (`P-18`).
 
 ## Context
 
@@ -19,17 +23,20 @@ If both hold, the right move is not to route a learner around their weakness. It
 
 ## Decision
 
-Difficulty is held within a target success band rather than lowered on struggle. Item selection targets the learner's named error signature deliberately, and the signature is named back to the learner in their own view.
+**Accepted:** difficulty is held rather than lowered on struggle. Personalisation in this product means difficulty **selection**, not difficulty **reduction**. That is a direction, it stands on judgment, and it is enough to build the item bank and the analysis plan against.
 
-Personalisation in this product means difficulty **selection**, not difficulty **reduction**.
+**Not accepted — deferred until `R-002` survives the run:**
 
-Phase 0 implements none of this. It tests the precondition — that signatures exist and are stable — by analysis of the pilot dataset. The mechanism is Phase 1 and gated on `R-002`.
+* **The success band.** Context cites 75–85%, which is read off the literature and is sourced to no requirement in this repo. A specific number needs its own requirement before it constrains anything.
+* **Targeting a learner's named signature.** This presupposes `R-002`, the claim `K-02` exists to kill. It is a mechanism whose feasibility is under test, not a direction.
+* **Naming the signature back to the learner.** This ADR's own Alternatives section calls the opposite option "the alternative most likely to win if K-06 triggers". An open question is not settled by appearing in a Decision section.
+
+Phase 0 implements none of it, and tests only the precondition — that signatures exist and are stable — by analysis of the pilot dataset. If `R-002` holds, each deferred element returns as its own decision rather than arriving by implication.
 
 ## Requirements addressed
 
-* `R-003` — baiting a named signature beats routing around it.
-* `R-002` — signatures exist and are stable; the precondition this decision rests on.
-* `R-011` — confidence capture, without which high-confidence errors cannot be identified.
+* `R-011` — confidence capture, without which high-confidence errors cannot be identified. The accepted direction rests on this and nothing else.
+* `R-002`, `R-003` — cited by the **deferred** elements above. The accepted direction does not depend on either, which is why this ADR's `Rests on` field reads `judgment`. If both fail, difficulty selection over reduction still stands; only the mechanism goes.
 
 ## Alternatives rejected
 
@@ -55,6 +62,6 @@ Keep the signature internal and use it only for selection. Rejected because nami
 
 ## Revisit when
 
-* `R-002` fails in Phase 0 — signatures are not stable, and this decision has nothing to stand on (K-02).
+* `R-002` fails in Phase 0 (K-02) — the deferred mechanism is then dead and should be withdrawn rather than left waiting. The accepted direction survives: holding difficulty rather than lowering it does not require signatures to exist.
 * K-06 triggers — the cohort experiences the loop as punishment. The mechanic is probably still right; the framing and the visibility of the error record are what change first.
 * Evidence on expertise reversal in this context suggests a success-band floor that should vary with learner strength.
