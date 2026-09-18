@@ -1,6 +1,6 @@
 # ADR 0004 · Teacher-Mediated Cohort, Not Direct-to-Learner
 
-**Date:** 2026-09-18 (accepted 2026-09-19) **Status:** Accepted **Tickets:** P-02
+**Date:** 2026-09-18 (accepted 2026-09-19) **Status:** Accepted **Tickets:** P-02 **Rests on:** judgment
 
 > Accepted because it is the **precondition for the rest of Phase 0**, not because the
 > evidence is in: `P-03` recruits the cohort, and no measurement is possible until it

@@ -1,6 +1,6 @@
 # ADR 0001 · Audience and First Slice
 
-**Date:** 2026-09-18 **Status:** Accepted
+**Date:** 2026-09-18 **Status:** Accepted **Rests on:** judgment
 
 ## Context
 

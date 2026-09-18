@@ -12,7 +12,9 @@ How this project avoids the two ways it will otherwise fail: building the intere
 
 **Findings become tickets, not inline fixes.** Anything surfaced mid-ticket — a defect, a wrong assumption, a better idea — gets its own ticket marked `needs-review` and is confirmed independently. The current ticket carries on.
 
-**ADRs record what was settled, and say when they are not settled.** Three of the four current ADRs are `Proposed`, which is the honest status for a design stance the pilot exists to test. Promoting one to `Accepted` requires evidence, not a week passing.
+**ADRs record decisions, not findings.** A **design stance** is a direction chosen, whose consequences the pilot tests; it is accepted on judgment, and its acceptance note says what it rests on and what would undo it. An ADR that **depends on** a falsifiable claim from [Phase 0 Requirements](02-requirements.md) §1 is a different object — it is wrong if the claim is false — and it is not `Accepted` until the run settles that claim.
+
+The obvious abuse is relabelling anything inconvenient as a stance, so the label is not the test. Every ADR declares `**Rests on:**` in its header — `judgment`, or the requirement ids it depends on — and `tools/check-docs.py` refuses an `Accepted` ADR resting on an unproven claim. Citing `R-001`–`R-005` as context is fine; depending on one is what the field records. Where only part of a decision stands on judgment, narrow the Decision section to that part and defer the rest explicitly, as ADR 0003 does.
 
 ## Against goalpost-moving
 

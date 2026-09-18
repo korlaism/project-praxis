@@ -34,7 +34,9 @@ Step 2 is the load-bearing one. Everything else is in service of having an hones
 | [0003](decisions/0003-bait-error-signatures.md) | Bait error signatures; do not reduce difficulty | Accepted |
 | [0004](decisions/0004-teacher-mediated-cohort.md) | Teacher-mediated cohort, not direct-to-learner | Accepted |
 
-All four accepted as of 2026-09-19 (`P-02`). `0002`–`0004` are **design stances**, accepted on judgment rather than evidence — what the pilot tests is their consequences, not their premises. Each carries an acceptance note saying what it rests on, and `0003` is accepted with a known unresolved conflict (`P-18`). Changing our minds later stays visible rather than quiet.
+All four accepted as of 2026-09-19 (`P-02`, narrowed by `P-19`). Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
+
+`0003` is the interesting one. It was accepted whole, then narrowed: only *difficulty is selected, not reduced* stands on judgment. Signature targeting, naming the signature back to the learner, and the 75–85% success band all depend on `R-002` and `R-003`, are still unproven, and are now explicitly deferred rather than decided. It also carries an unresolved conflict (`P-18`). `tools/check-docs.py` enforces this — an `Accepted` ADR resting on an unsettled claim fails the build.
 
 ## Reading path
 
