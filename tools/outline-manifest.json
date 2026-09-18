@@ -17,7 +17,7 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "ed9b0c8f46a936f5"
+      "hash": "e9d4c73847d3ffa5"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
@@ -53,7 +53,7 @@
       "id": "c92948cf-7677-43fb-a016-9c92505c751a",
       "url": "/doc/working-agreement-BACM7HFwcI",
       "title": "Working Agreement",
-      "hash": "4c5ed8c0fab15569"
+      "hash": "d4e5ce7dc31cdb41"
     },
     "research/00-domain-map.md": {
       "id": "b71451bb-e16d-430a-a09d-303793e90bdd",
@@ -89,31 +89,31 @@
       "id": "a235c4e8-cb18-422f-a8b3-c3a60c9e8124",
       "url": "/doc/adr-template-OXYIyWRN4J",
       "title": "ADR Template",
-      "hash": "92cf652121575ddb"
+      "hash": "2d34e728cb6224f3"
     },
     "decisions/0001-audience-and-first-slice.md": {
       "id": "2054c07f-a4bc-4397-bcd1-76eee226fe10",
       "url": "/doc/adr-0001-audience-and-first-slice-1IPweZhefd",
       "title": "ADR 0001 \u00b7 Audience and First Slice",
-      "hash": "d155ea2e3fba426f"
+      "hash": "a9c5b8af64165b82"
     },
     "decisions/0002-ai-never-writes-in-the-notebook.md": {
       "id": "3f9230e7-a3ac-4441-a19d-5727b6ec6901",
       "url": "/doc/adr-0002-ai-never-writes-in-the-notebook-fKPGzS3tDA",
       "title": "ADR 0002 \u00b7 AI Never Writes In The Notebook",
-      "hash": "4844f1e1c808ab8b"
+      "hash": "739e85311135d19c"
     },
     "decisions/0003-bait-error-signatures.md": {
       "id": "0237b5fd-41be-4834-a65c-16cbb77c07b8",
       "url": "/doc/adr-0003-bait-error-signatures-do-not-reduce-difficulty-p3zhr0U2EI",
       "title": "ADR 0003 \u00b7 Bait Error Signatures, Do Not Reduce Difficulty",
-      "hash": "1e25a57f4070840a"
+      "hash": "76589f52d9e9fc80"
     },
     "decisions/0004-teacher-mediated-cohort.md": {
       "id": "54804f5d-3223-4f7e-9850-f97067095f94",
       "url": "/doc/adr-0004-teacher-mediated-cohort-not-direct-to-learner-MCHNmUP0Vj",
       "title": "ADR 0004 \u00b7 Teacher-Mediated Cohort, Not Direct-to-Learner",
-      "hash": "20bd8946c0f62467"
+      "hash": "75143115e5d1cb09"
     }
   }
 }
