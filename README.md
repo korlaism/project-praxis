@@ -30,11 +30,11 @@ Step 2 is the load-bearing one. Everything else is in service of having an hones
 | ADR | Decision | Status |
 |-----|----------|--------|
 | [0001](decisions/0001-audience-and-first-slice.md) | Ages 11–15, force and motion, six weeks | Accepted |
-| [0002](decisions/0002-ai-never-writes-in-the-notebook.md) | AI never writes in the learner's notebook | Proposed |
-| [0003](decisions/0003-bait-error-signatures.md) | Bait error signatures; do not reduce difficulty | Proposed |
-| [0004](decisions/0004-teacher-mediated-cohort.md) | Teacher-mediated cohort, not direct-to-learner | Proposed |
+| [0002](decisions/0002-ai-never-writes-in-the-notebook.md) | AI never writes in the learner's notebook | Accepted |
+| [0003](decisions/0003-bait-error-signatures.md) | Bait error signatures; do not reduce difficulty | Accepted |
+| [0004](decisions/0004-teacher-mediated-cohort.md) | Teacher-mediated cohort, not direct-to-learner | Accepted |
 
-Three of four are **Proposed**, not Accepted. They are the design stances the pilot exists to test, written down so that changing our minds later is visible rather than quiet.
+All four accepted as of 2026-09-19 (`P-02`). `0002`–`0004` are **design stances**, accepted on judgment rather than evidence — what the pilot tests is their consequences, not their premises. Each carries an acceptance note saying what it rests on, and `0003` is accepted with a known unresolved conflict (`P-18`). Changing our minds later stays visible rather than quiet.
 
 ## Reading path
 

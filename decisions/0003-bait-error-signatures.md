@@ -1,6 +1,11 @@
 # ADR 0003 · Bait Error Signatures, Do Not Reduce Difficulty
 
-**Date:** 2026-09-18 **Status:** Proposed
+**Date:** 2026-09-18 (accepted 2026-09-19) **Status:** Accepted **Tickets:** P-02
+
+> Accepted with a **known unresolved conflict**: expertise reversal cuts against
+> signature baiting, and Phase 0 does not test it (`P-18`). Accepting now fixes the
+> direction of the adaptive mechanic — difficulty selection, not reduction — which is
+> what the item bank and the analysis plan need in order to be built at all.
 
 ## Context
 
