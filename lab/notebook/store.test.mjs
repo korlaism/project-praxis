@@ -240,3 +240,13 @@ test("subscribers hear when another tab changes the notebook, and only then", ()
   assert.equal(heard, 1, "unsubscribed means unsubscribed");
   assert.equal(listeners.size, 0, "no listener left behind");
 });
+
+// ---- P-42: the misconception behind a wrong answer is kept with the card ----
+
+test("a card keeps the error class behind a wrong answer", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  nb.record(card({ errorTag: "bigger-pushes-harder" }));
+  assert.equal(nb.cards("physics")[0].errorTag, "bigger-pushes-harder");
+  assert.equal(nb.export().subjects.physics[0].errorTag, "bigger-pushes-harder",
+    "the export is how this reaches R-002 analysis — it must carry the tag");
+});

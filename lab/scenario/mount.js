@@ -46,9 +46,33 @@ export function mountScenario(spec, { notebook = openNotebook() } = {}) {
     // Every reveal becomes a card in the scenario's subject notebook (ADR 0006).
     onReveal: (record) => {
       if (!spec.id || !spec.subject) return;          // a draft scenario has nowhere to file
-      const r = notebook.record({ ...record, scenario: spec.id, subject: spec.subject });
+      const r = notebook.record({
+        ...record,
+        scenario: spec.id,
+        subject: spec.subject,
+        errorTag: errorTagFor(spec, record),
+      });
       if (r.warning) console.warn(r.warning);
     },
   });
   return lab;
+}
+
+/**
+ * The misconception behind a wrong answer — the raw material for R-002 (P-42).
+ *
+ * Stored with the card rather than derived later, because a scenario's options
+ * and tags can be edited or retired; the card should keep what the answer
+ * meant when it was given.
+ *
+ * Deliberately conservative. No tag when the learner was right; none when the
+ * outcome was none of the options (nobody could have been right, so blaming a
+ * belief would pollute the signature); and none when the chosen option has no
+ * documented misconception — which includes the scenario's own "correct"
+ * option once a changed setup has made it wrong. Recorded, never shown: ADR
+ * 0003 defers naming a signature back to the learner until R-002 holds.
+ */
+export function errorTagFor(spec, record) {
+  if (record.correct !== false || record.unlisted) return null;
+  return spec.errorTags?.[record.choice] ?? null;
 }
