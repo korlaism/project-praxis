@@ -4,9 +4,11 @@ The simulated lab. Tools, not documentation — **not synced to Outline**, same 
 
 ```
 harness/gate.mjs        the commit-before-reveal state machine (pure, tested)
-harness/gate.test.mjs   node --test lab/harness/gate.test.mjs
 harness/lab.js          canvas loop, transport, sliders, layout
 harness/lab.css         screen-recordable styling
+harness/dom-stub.mjs    the smallest DOM the harness touches, for tests
+components/             reusable STEAM primitives — pure, exact, tested
+topics/                 one published topic per file
 reference.html          fixture exercising every harness feature
 ```
 
@@ -41,5 +43,17 @@ Any static server, because ES modules will not load over `file://`:
 
 ```bash
 python3 -m http.server -d lab 8000   # then open http://localhost:8000/reference.html
-node --test lab/harness/gate.test.mjs
+node --test lab/harness/*.test.mjs lab/components/*.test.mjs
 ```
+
+## Tests
+
+`gate.test.mjs` covers the state machine. `lab.smoke.test.mjs` mounts the whole
+harness against `dom-stub.mjs` and covers what the gate tests cannot: that
+mounting does not throw, that the canvas gets a real size, that nothing steps
+before a commit, and that a topic whose `draw()` throws does not take the
+transport and the gate down with it.
+
+That last set exists because the gate tests once passed while the harness was
+completely dead. Reintroduce the bug — `pause()` before `state` is assigned in
+`softReset()` — and all nine smoke tests go red.
