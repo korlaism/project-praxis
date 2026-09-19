@@ -128,6 +128,7 @@ export function mountLab(topic) {
   // ---- loop -------------------------------------------------------------
   let state, t, running = false, raf = null, last = 0;
   let dpr = 1, viewW = 0, viewH = 0, drawFailed = false;
+  let destroyed = false, observer = null;
 
   function softReset() {
     // State first. pause() renders, and rendering without state throws out of
@@ -138,7 +139,7 @@ export function mountLab(topic) {
   }
 
   function tick(dt) {
-    if (!gate.canRun) return;            // the whole point: locked until committed
+    if (destroyed || !gate.canRun) return;   // locked until committed, and gone once left
     t += dt;
     topic.step?.(state, dt, params);
   }
@@ -167,6 +168,7 @@ export function mountLab(topic) {
 
   // ---- render -----------------------------------------------------------
   function resize() {
+    if (destroyed) return;
     const r = stage.getBoundingClientRect();
     dpr = Math.min(devicePixelRatio || 1, 2);
     // A stage that has not laid out yet reports ~0. Falling back to the viewport
@@ -230,7 +232,7 @@ export function mountLab(topic) {
    * what it OBSERVED. Omitting it falls back to the configured answer.
    */
   function reveal(observed) {
-    if (gate.state !== "committed") return;       // only the first reveal counts
+    if (destroyed || gate.state !== "committed") return;   // first reveal only, never after leaving
     gate.reveal(observed);
     render();
     // Hand the record on (the notebook, P-40). A failure here is the notebook's
@@ -242,20 +244,38 @@ export function mountLab(topic) {
     }
   }
 
-  const api = { reveal, play, pause, get choice() { return gate.choice; },
+  /**
+   * Leave cleanly. A page that opens many scenarios in turn (the hub, and every
+   * generated scenario after it) cannot afford old ones that keep simulating,
+   * keep listening for keys, or write to the notebook after they have gone.
+   */
+  function destroy() {
+    if (destroyed) return;
+    running = false;
+    if (raf) cancelAnimationFrame(raf), (raf = null);
+    destroyed = true;
+    removeEventListener("resize", resize);
+    removeEventListener("keydown", onKey);
+    observer?.disconnect();
+    root.remove();
+  }
+
+  const api = { reveal, play, pause, destroy, get choice() { return gate.choice; },
                 get record() { return { ...gate.record, params: committedParams }; } };
+
+  function onKey(e) {
+    if (e.key === " ") { e.preventDefault(); gate.canRun && (running ? pause() : play()); }
+    if (e.key === "r") { softReset(); render(); }
+  }
 
   softReset();
   addEventListener("resize", resize);
   resize();
   // The first rect can be wrong before fonts and layout settle; a ResizeObserver
   // corrects it without a guessed timeout.
-  if (typeof ResizeObserver === "function") new ResizeObserver(resize).observe(stage);
+  if (typeof ResizeObserver === "function") (observer = new ResizeObserver(resize)).observe(stage);
   requestAnimationFrame(resize);
-  addEventListener("keydown", (e) => {
-    if (e.key === " ") { e.preventDefault(); gate.canRun && (running ? pause() : play()); }
-    if (e.key === "r") { softReset(); render(); }
-  });
+  addEventListener("keydown", onKey);
 
   return api;
 }

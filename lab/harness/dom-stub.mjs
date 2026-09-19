@@ -97,8 +97,14 @@ export function installDom({ dpr = 1 } = {}) {
   set("performance", { now: () => now });
   set("requestAnimationFrame", (fn) => (frames.push(fn), frames.length));
   set("cancelAnimationFrame", () => frames.splice(0, frames.length));
-  set("addEventListener", () => {});
+  const listeners = new Map();
+  set("addEventListener", (type, fn) => { (listeners.get(type) ?? listeners.set(type, new Set()).get(type)).add(fn); });
+  set("removeEventListener", (type, fn) => { listeners.get(type)?.delete(fn); });
   set("ResizeObserver", class { observe() {} disconnect() {} });
+  const loc = { hash: "" };
+  set("location", loc);
+  set("history", { pushState(_s, _t, url) { loc.hash = String(url); } });
+  set("scrollTo", () => {});
 
   return {
     body,
@@ -112,6 +118,7 @@ export function installDom({ dpr = 1 } = {}) {
       }
     },
     pendingFrames: () => frames.length,
+    listenerCount: (type) => listeners.get(type)?.size ?? 0,
     restore() { for (const k of Object.keys(saved)) g[k] = saved[k]; },
   };
 }
