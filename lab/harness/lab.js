@@ -230,7 +230,16 @@ export function mountLab(topic) {
    * what it OBSERVED. Omitting it falls back to the configured answer.
    */
   function reveal(observed) {
-    if (gate.state === "committed") { gate.reveal(observed); render(); }
+    if (gate.state !== "committed") return;       // only the first reveal counts
+    gate.reveal(observed);
+    render();
+    // Hand the record on (the notebook, P-40). A failure here is the notebook's
+    // problem, not the learner's: the verdict above has already rendered.
+    try {
+      topic.onReveal?.(api.record);
+    } catch (err) {
+      console.error("onReveal failed:", err);
+    }
   }
 
   const api = { reveal, play, pause, get choice() { return gate.choice; },

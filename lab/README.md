@@ -11,6 +11,7 @@ components/             pure physics — exact, tested, with analytic solutions
 primitives/             composable scenario types: setup/step/draw/classify
 scenario/               the spec schema, the headless runner, the mount
 scenarios/              scenario specifications — data, not code
+notebook/               the learner's record, kept on their own device
 topics/                 a page per scenario, three lines each
 reference.html          fixture exercising every harness feature
 ```

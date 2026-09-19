@@ -1,5 +1,7 @@
 export default {
   schema: 1,
+  id: "which-way-does-it-fly",
+  subject: "physics",
   primitive: "circular-release",
   params: { r: 1.2, omega: 2.4 },
   question: "A ball is whirling on a string. You cut the string. Which way does it fly?",

@@ -30,6 +30,13 @@ export function validateScenario(spec) {
   if (spec.note !== undefined && typeof spec.note !== "string")
     bad("note must be a string when present");
 
+  // Optional so a generator's first draft still validates. The notebook needs
+  // both to file a card, so shipped scenarios are held to having them.
+  for (const field of ["id", "subject"]) {
+    if (spec[field] !== undefined && (typeof spec[field] !== "string" || !spec[field].trim()))
+      bad(`${field} must be a non-empty string when present`);
+  }
+
   // params
   if (!spec.params || typeof spec.params !== "object") {
     bad("params must be an object");

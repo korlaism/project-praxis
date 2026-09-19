@@ -39,6 +39,11 @@ for (const [name, spec] of Object.entries(SHIPPED)) {
     assert.deepEqual(r.errors, []);
   });
 
+  test(`${name}: carries the id and subject a notebook card needs`, () => {
+    assert.ok(typeof spec.id === "string" && spec.id, "no id — the card could not say which scenario");
+    assert.ok(typeof spec.subject === "string" && spec.subject, "no subject — the card has no notebook");
+  });
+
   test(`${name}: names a real primitive, and only params it has`, () => {
     const p = getPrimitive(spec.primitive);
     const keys = p.controls.map((c) => c.key);
