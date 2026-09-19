@@ -29,7 +29,7 @@ Two adjustments neutralise the downsides. The pilot runs through a teacher or tu
 ## Requirements addressed
 
 * `R-020` — the item bank is drawn from existing force-and-motion instruments rather than authored.
-* `R-021` — outcomes are demonstrable with physical apparatus, so no simulator correctness risk in Phase 0.
+* `R-021` — outcomes are demonstrable with physical apparatus, so no simulator correctness risk in Phase 1.
 * `R-023` — items carry a documented intended misconception, which the FCI distractors supply directly.
 * `R-002` — a validated cross-learner taxonomy is the precondition for testing per-learner stability.
 
@@ -49,9 +49,9 @@ Rejected on measurement grounds. Six weeks supports one topic if the result is t
 
 ## Consequences
 
-**Costs accepted.** Minors, therefore guardian consent, data minimisation and a duty of care that shapes the data model (see privacy in [Data Model](../spec/04-data-model.md)) and creates kill criterion K-06. Recruitment depends on securing a teacher and a cohort, which is a real-world dependency with real-world latency — likely the critical path. The buyer is not the learner, so nothing about Phase 0 validates willingness to pay.
+**Costs accepted.** Minors, therefore guardian consent, data minimisation and a duty of care that shapes the data model (see privacy in [Data Model](../spec/04-data-model.md)) and creates kill criterion K-06. Recruitment depends on securing a teacher and a cohort, which is a real-world dependency with real-world latency — likely the critical path. The buyer is not the learner, so nothing about Phase 1 validates willingness to pay.
 
-**Foreclosed for now.** Any Phase 0 claim about engineering or professional learning. The India schooling context becomes load-bearing and is currently unexamined — `P-08`, and the largest unexamined risk in the project.
+**Foreclosed for now.** Any Phase 1 claim about engineering or professional learning. The India schooling context becomes load-bearing and is currently unexamined — `P-08`, and the largest unexamined risk in the project.
 
 **New work created.** Guardian consent process. Teacher recruitment. Verification of the instrument literature (`P-06`). A power calculation, because `R-031`'s cohort size of 24 per arm is currently a guess.
 

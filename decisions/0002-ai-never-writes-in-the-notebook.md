@@ -47,7 +47,7 @@ A real case: dyslexia, motor difficulty, a learner more fluent in speech than wr
 
 ## Consequences
 
-**Costs.** The product feels less impressive in a demo. Learner-written text will be short, misspelled and sometimes near-illegible, which makes marking and analysis more expensive — Phase 0 marks by hand partly for this reason. Some learners will write almost nothing and that will be a real data-quality problem, not a solved one.
+**Costs.** The product feels less impressive in a demo. Learner-written text will be short, misspelled and sometimes near-illegible, which makes marking and analysis more expensive — Phase 1 marks by hand partly for this reason. Some learners will write almost nothing and that will be a real data-quality problem, not a solved one.
 
 **Makes harder later.** Any feature that generates study material *from* the notebook has to be carefully scoped so the generated artefact is stored separately and never edits back. Two-way sync with anything is foreclosed.
 

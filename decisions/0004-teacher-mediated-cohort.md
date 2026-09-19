@@ -2,7 +2,7 @@
 
 **Date:** 2026-09-18 (accepted 2026-09-19) **Status:** Accepted **Tickets:** P-02 **Rests on:** judgment
 
-> Accepted because it is the **precondition for the rest of Phase 0**, not because the
+> Accepted because it is the **precondition for the rest of Phase 1**, not because the
 > evidence is in: `P-03` recruits the cohort, and no measurement is possible until it
 > lands. K-05 remains the check on whether teachers will actually carry it.
 
@@ -18,7 +18,7 @@ And the weekly mistake session — one learner presenting a mistake rather than 
 
 ## Decision
 
-Phase 0 runs through a named teacher with a real cohort, in a school or tuition setting. Both arms are taught by the same teacher. There is no direct-to-learner path in Phase 0.
+Phase 1 runs through a named teacher with a real cohort, in a school or tuition setting. Both arms are taught by the same teacher. There is no direct-to-learner path in Phase 1.
 
 The teacher does not see running results and is not told which claim is under test, because enthusiasm asymmetry between arms is the largest uncontrolled variable in the design.
 
@@ -45,7 +45,7 @@ Simpler to schedule. Rejected, with reservations, because contamination between 
 
 ## Consequences
 
-**Costs.** A real-world dependency on securing a teacher and a cohort, with real-world latency, and it is likely the critical path for the entire phase. The pilot inherits an institution's calendar. Nothing about Phase 0 validates whether a learner or a parent would pay, because neither is the customer here.
+**Costs.** A real-world dependency on securing a teacher and a cohort, with real-world latency, and it is likely the critical path for the entire phase. The pilot inherits an institution's calendar. Nothing about Phase 1 validates whether a learner or a parent would pay, because neither is the customer here.
 
 **Makes harder later.** If the product eventually goes direct-to-learner, none of the consequence mechanism transfers, and that problem returns unsolved and harder. We will also have six weeks of data collected under teacher supervision, which may not generalise to unsupervised use at all.
 
@@ -55,4 +55,4 @@ Simpler to schedule. Rejected, with reservations, because contamination between 
 
 * K-05 triggers — the weekly mistake session does not survive a real teacher's week, or is resented. The pivot is direct-to-learner with the consequence problem unsolved.
 * No cohort can be secured in a reasonable window, making this decision academic.
-* Phase 1 targets an audience where institutional mediation is not available.
+* Phase 2 targets an audience where institutional mediation is not available.

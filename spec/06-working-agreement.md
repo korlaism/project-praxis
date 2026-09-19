@@ -8,11 +8,13 @@ How this project avoids the two ways it will otherwise fail: building the intere
 
 **One ticket, one branch, one PR.** Nothing lands on the default branch directly. A ticket with no open PR is not finished.
 
-**Phase 0 builds no product.** Every requirement in [Phase 0 Requirements](02-requirements.md) §5 is a non-requirement on purpose. The knowledge graph, the simulators, the AI interrogator and the variant generator are all more fun than running a cohort, and all of them are gated on `R-001` and `R-002` holding. If a branch starts to look like an application, it is the wrong branch.
+**Phase 0 ships tools; Phase 1 ships evidence. Neither ships the notebook.** In [Phase 0 · Publish](00-publish-phase.md) the deliverable must be runnable and the tool *is* the content — a document that cannot be used is not an output. Two days per topic, hard. In Phase 1 the opposite holds: every item in [Phase 1 Requirements](02-requirements.md) §5 is a non-requirement on purpose, because running a cohort is less fun than building an application and the application is gated on `R-001` and `R-002`.
+
+What both phases refuse is the notebook — prediction cards, the confusion log, the error record. A topic tool takes no account and stores nothing about a person. If a Phase 0 branch starts to look like a product, it is the wrong branch.
 
 **Findings become tickets, not inline fixes.** Anything surfaced mid-ticket — a defect, a wrong assumption, a better idea — gets its own ticket marked `needs-review` and is confirmed independently. The current ticket carries on.
 
-**ADRs record decisions, not findings.** A **design stance** is a direction chosen, whose consequences the pilot tests; it is accepted on judgment, and its acceptance note says what it rests on and what would undo it. An ADR that **depends on** a falsifiable claim from [Phase 0 Requirements](02-requirements.md) §1 is a different object — it is wrong if the claim is false — and it is not `Accepted` until the run settles that claim.
+**ADRs record decisions, not findings.** A **design stance** is a direction chosen, whose consequences the pilot tests; it is accepted on judgment, and its acceptance note says what it rests on and what would undo it. An ADR that **depends on** a falsifiable claim from [Phase 1 Requirements](02-requirements.md) §1 is a different object — it is wrong if the claim is false — and it is not `Accepted` until the run settles that claim.
 
 The obvious abuse is relabelling anything inconvenient as a stance, so the label is not the test. Every ADR declares `**Rests on:**` in its header — `judgment`, or the requirement ids it depends on — and `tools/check-docs.py` refuses an `Accepted` ADR resting on an unproven claim. Citing `R-001`–`R-005` as context is fine; depending on one is what the field records. Where only part of a decision stands on judgment, narrow the Decision section to that part and defer the rest explicitly, as ADR 0003 does.
 
