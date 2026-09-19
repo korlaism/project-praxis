@@ -124,3 +124,17 @@ test("specifiers are found across multi-line imports and ignored in comments", (
   `;
   assert.deepEqual(specifiersIn(src).sort(), ["./multi.js", "./reexport.js", "./side-effect.js"]);
 });
+
+test("the hub bundles as one page carrying every scenario, the record and the notebook", async () => {
+  const out = fresh("hub");
+  const { files } = buildBundle(join(ROOT, "lab/index.html"), out);
+  assert.deepEqual(checkBundle(out), []);
+  for (const f of ["hub/app.js", "record/view.js", "notebook/store.mjs", "scenario/mount.js",
+                   "scenarios/which-way-does-it-fly.mjs", "scenarios/truck-and-fly.mjs",
+                   "scenarios/what-keeps-it-moving.mjs", "harness/lab.css", "record/record.css"])
+    assert.ok(files.includes(f), `hub bundle is missing ${f}`);
+  const html = readFileSync(join(out, "index.html"), "utf8");
+  const probe = join(out, "__entry-probe.mjs");
+  writeFileSync(probe, specifiersIn(html).map((s) => `import ${JSON.stringify(s)};`).join("\n") + "\n");
+  await import(pathToFileURL(probe).href);
+});

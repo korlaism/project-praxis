@@ -1,0 +1,26 @@
+/* The lab's front page, and the one control that floats over a scenario. */
+.hub{max-width:760px;margin:0 auto;padding-inline:20px;padding-block:36px 64px;display:grid;gap:22px}
+.hub-title{font-size:clamp(2rem,6vw,2.8rem);font-weight:600;letter-spacing:-.025em;margin:0}
+.hub-sub{margin:.5rem 0 0;color:var(--ink-2);max-width:52ch;line-height:1.5}
+.hub-warn{margin:0;padding:12px 14px;border:1px solid var(--accent);border-radius:3px;background:#241A13}
+.hub-record,.hub-card,.hub-back{font-family:var(--font);text-align:left;cursor:pointer;width:100%}
+.hub-back{width:auto}
+.hub-record{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:16px 18px;
+  border:1px solid var(--accent);border-radius:3px;text-decoration:none;color:var(--ink);background:var(--panel)}
+.hub-record:hover{background:#221D19}
+.hub-record-t{font-weight:600;font-size:1.05rem}
+.hub-record-n{color:var(--ink-2);font:500 .8rem var(--mono)}
+.hub-h2{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 10px}
+.hub-list{display:grid;gap:8px}
+.hub-card{display:grid;gap:6px;padding:15px 18px;background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  text-decoration:none;color:var(--ink)}
+.hub-card:hover{border-color:var(--accent)}
+.hub-card:focus-visible,.hub-record:focus-visible,.hub-back:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hub-card-q{font-size:1.02rem;line-height:1.35}
+.hub-card-n{color:var(--ink-3);font:.76rem var(--mono)}
+.hub-back{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:16px;z-index:20;
+  padding:7px 12px;border:1px solid var(--line);border-radius:2px;background:var(--panel);color:var(--ink);
+  text-decoration:none;font:500 .86rem var(--font)}
+.hub-back:hover{border-color:var(--accent)}
+/* keep a scenario's question clear of the floating back link */
+.hub-in-scenario .lab-head{padding-right:96px}

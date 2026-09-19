@@ -222,3 +222,46 @@ test("a failing onReveal does not break the verdict", async () => {
   assert.equal(el("lab-verdict").hidden, false, "the learner must still see the verdict");
   dom.restore();
 });
+
+// ---- P-54: one page, many scenarios — so a scenario must leave cleanly ----
+
+test("destroy removes the lab from the page", async () => {
+  const { dom, lab } = await mount();
+  assert.ok(dom.body.find((n) => n.className === "lab"));
+  lab.destroy();
+  assert.equal(dom.body.find((n) => n.className === "lab"), null);
+  dom.restore();
+});
+
+test("after destroy, nothing keeps stepping in the background", async () => {
+  const { dom, lab, seen } = await mount();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  dom.tick(3);
+  const before = seen.steps;
+  lab.destroy();
+  dom.tick(30);
+  assert.equal(seen.steps, before, "a destroyed scenario must not keep simulating");
+  dom.restore();
+});
+
+test("after destroy, it leaves no listeners behind", async () => {
+  // Every scenario the hub opens adds resize and keydown listeners. Without
+  // teardown they pile up, and the old scenarios keep reacting to keys.
+  const { dom, lab } = await mount();
+  assert.ok(dom.listenerCount("keydown") > 0);
+  lab.destroy();
+  assert.equal(dom.listenerCount("keydown"), 0);
+  assert.equal(dom.listenerCount("resize"), 0);
+  dom.restore();
+});
+
+test("destroy is safe to call twice, and a late reveal after it is ignored", async () => {
+  const seen = [];
+  const { dom, lab } = await mount({ onReveal: (r) => seen.push(r) });
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.destroy();
+  lab.destroy();
+  lab.reveal("yes");
+  assert.equal(seen.length, 0, "a scenario that has left must not write to the notebook");
+  dom.restore();
+});

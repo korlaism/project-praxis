@@ -12,6 +12,8 @@ primitives/             composable scenario types: setup/step/draw/classify
 scenario/               the spec schema, the headless runner, the mount
 scenarios/              scenario specifications — data, not code
 notebook/               the learner's record, kept on their own device
+record/                 the page a learner comes back for
+hub/                    every scenario and the record in one page — index.html
 topics/                 a page per scenario, three lines each
 reference.html          fixture exercising every harness feature
 ```
@@ -63,11 +65,15 @@ is still deterministic when run headlessly.
 
 ## Publishing
 
-Never flatten a page by hand — that once shipped a blank page. Build it:
+Publish the hub, not individual topics: one page means one origin, and one
+origin means one notebook (P-54). Never flatten a page by hand — build it:
 
 ```bash
-node tools/build-topic.mjs lab/topics/which-way-does-it-fly.html
+node tools/build-topic.mjs lab/index.html
 ```
+
+To check a published page, drive it with Tab and Enter: the browser
+extension's synthetic mouse clicks do not reach inside its cross-origin frame.
 
 It follows the whole import graph, writes an artifact-ready bundle to
 `dist/<slug>/`, checks it, and refuses to succeed if anything is bare, missing,
