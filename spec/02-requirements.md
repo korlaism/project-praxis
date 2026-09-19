@@ -1,7 +1,7 @@
-# Phase 0 Requirements
+# Phase 1 Requirements
 
 **Status:** Draft, 2026-09-18. Not yet agreed.
-**Scope:** Phase 0 = a six-week cohort run on the thinnest viable instrument, plus the analysis. No app, no accounts, no infrastructure. Requirement ids are stable and never reused. ADRs cite them.
+**Scope:** Phase 1 = a six-week cohort run on the thinnest viable instrument, plus the analysis. No app, no accounts, no infrastructure. Requirement ids are stable and never reused. ADRs cite them.
 
 A requirement whose **Source** column is blank is a guess and is marked as one.
 
@@ -25,7 +25,7 @@ These are the reason the phase exists. Each maps to a kill criterion.
 |---|-------------|-------|
 | `R-010` | A learner can be shown a phenomenon and **cannot see the outcome** until a prediction and a confidence value are submitted. | The single load-bearing constraint. If it can be bypassed, the phase measures nothing — see K-03. |
 | `R-011` | Confidence is captured on every prediction, on a scale a 12-year-old uses honestly. | Not a percentage. Candidate: 4-point "guessing / leaning / fairly sure / certain", mapped to probabilities server-side. |
-| `R-012` | After reveal, the learner writes the gap in their own words, free text, before moving on. | Minimum length enforced; quality not machine-graded in Phase 0. |
+| `R-012` | After reveal, the learner writes the gap in their own words, free text, before moving on. | Minimum length enforced; quality not machine-graded in Phase 1. |
 | `R-013` | One-tap confusion logging, available at every step, never blocking. | Must cost under two seconds or it will not be used. |
 | `R-014` | Every prediction, reveal, reconciliation and confusion entry is stored with a timestamp and the item id. | The dataset *is* the deliverable. |
 | `R-015` | No AI-generated text is ever written into a learner's own notebook fields. | See ADR 0002. |
@@ -50,12 +50,12 @@ These are the reason the phase exists. Each maps to a kill criterion.
 | `R-033` | Guardian consent obtained in writing before any data is collected; no learner data leaves the pilot dataset. | Non-negotiable. Minors. |
 | `R-034` | A weekly 30-minute session where a learner presents a **mistake**, not a success. | The culture-setting move and the cheapest source of social stake. |
 
-## 5. Explicit non-requirements for Phase 0
+## 5. Explicit non-requirements for Phase 1
 
 Named so they do not creep in:
 
 * No accounts, auth, or user management.
-* No AI in the loop at all. Phase 0 runs on human-authored items and a spreadsheet. The AI-generated variants, the interrogation step, the error-signature clustering — all Phase 1, all gated on `R-001` and `R-002` holding.
+* No AI in the loop at all. Phase 1 runs on human-authored items and a spreadsheet. The AI-generated variants, the interrogation step, the error-signature clustering — all Phase 2, all gated on `R-001` and `R-002` holding.
 * No knowledge graph. Not needed to test the loop, and building it first is the most likely way to waste a year.
 * No simulators. `R-021` is satisfiable with video and a physical demo.
-* No personalisation. It is the thesis, but it is tested by the *analysis* of Phase 0 data, not implemented in Phase 0.
+* No personalisation. It is the thesis, but it is tested by the *analysis* of Phase 1 data, not implemented in Phase 1.

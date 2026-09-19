@@ -1,7 +1,7 @@
 # Data Model — Prediction Card, Confusion Log, Error Signature
 
 **Status:** Draft, 2026-09-18. Not yet agreed.
-Satisfies `R-014`, `R-023`. Phase 0 implements this in a spreadsheet; the shape is specified now because the *dataset is the deliverable* and a badly shaped one cannot be re-collected.
+Satisfies `R-014`, `R-023`. Phase 1 implements this in a spreadsheet; the shape is specified now because the *dataset is the deliverable* and a badly shaped one cannot be re-collected.
 
 ## Prediction card
 
@@ -16,7 +16,7 @@ The atomic unit. One card is one pass through the loop.
 | `prediction` | text | **learner** | Free text. Never pre-filled, never suggested. |
 | `confidence` | enum(4) | **learner** | guessing / leaning / fairly sure / certain |
 | `committed_at` | timestamp | system | Reveal is impossible before this exists — `R-010` |
-| `outcome_correct` | bool | marker | Human-marked in Phase 0 |
+| `outcome_correct` | bool | marker | Human-marked in Phase 1 |
 | `reconciliation` | text | **learner** | The gap, in their words — `R-012` |
 | `error_tag` | enum | marker | From the taxonomy below. Blank if correct. |
 | `degenerate` | bool | auditor | Empty, copied, or reverse-engineered — feeds K-03 |
@@ -52,7 +52,7 @@ The optionality matters. The value of this object is not its content; it is that
 
 ## Error taxonomy
 
-Phase 0 uses a fixed starting taxonomy for force and motion, drawn from the published misconception catalogues. `R-002` is the claim that per-learner distributions over these tags are stable and clustered; the tags themselves are not our invention.
+Phase 1 uses a fixed starting taxonomy for force and motion, drawn from the published misconception catalogues. `R-002` is the claim that per-learner distributions over these tags are stable and clustered; the tags themselves are not our invention.
 
 | Tag | The wrong belief underneath |
 |-----|------------------------------|
@@ -70,9 +70,9 @@ The last three are structural rather than topical, which is the interesting part
 
 ## Error signature
 
-Not stored in Phase 0 — **computed in analysis.** Written down here because the shape of the analysis determines what the pilot must capture.
+Not stored in Phase 1 — **computed in analysis.** Written down here because the shape of the analysis determines what the pilot must capture.
 
-A learner's signature is their distribution over error tags, weighted by the confidence held at the time. A high-confidence wrong answer carries far more information than a low-confidence one, and plausibly corrects better once challenged. Phase 1 would name the top two or three tags back to the learner and bait them deliberately ([ADR 0003](../decisions/0003-bait-error-signatures.md)); Phase 0 only has to prove the signature exists.
+A learner's signature is their distribution over error tags, weighted by the confidence held at the time. A high-confidence wrong answer carries far more information than a low-confidence one, and plausibly corrects better once challenged. Phase 2 would name the top two or three tags back to the learner and bait them deliberately ([ADR 0003](../decisions/0003-bait-error-signatures.md)); Phase 1 only has to prove the signature exists.
 
 ## Privacy
 

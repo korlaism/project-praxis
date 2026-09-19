@@ -14,7 +14,7 @@ Our inversion ([ADR 0003](../decisions/0003-bait-error-signatures.md)): hold the
 
 **1 · Personal analogy base.** Explain the new thing in terms of what *this* person already knows deeply — cricket, cooking, Carnatic rhythm, their own code, chart geometry. This is the one thing a generic tutor structurally cannot do and an AI with your history can. It is currently squandered everywhere.
 
-**2 · Error-signature targeting.** As above. Requires `R-002` to hold, which is what Phase 0 tests.
+**2 · Error-signature targeting.** As above. Requires `R-002` to hold, which is what Phase 1 tests.
 
 **3 · Goal-conditioned depth.** The same concept at four resolutions depending on whether it is a passing curiosity, a tool you will use, something you will teach, or something you will extend. Crucially, the **learner declares the intent** — the system does not infer it. Inferring produces the familiar failure where a moment's curiosity gets you enrolled in a course.
 
@@ -54,10 +54,10 @@ If the machine can do the task, the instrumental case for learning it collapses.
 
 All three are real and none is self-executing. They have to be designed for, which argues hard for **a visible portfolio of things you made and mistakes you outgrew**, over a score. A learner who can see their own calibration curve improve has evidence of growth that a grade cannot give them and that an AI cannot hand them.
 
-## What Phase 0 tests, and what it does not
+## What Phase 1 tests, and what it does not
 
-Phase 0 implements **none** of this. Personalisation is the thesis, and the pilot tests its precondition — that error signatures exist and are stable (`R-002`) — through *analysis of the dataset*, not through a feature.
+Phase 1 implements **none** of this. Personalisation is the thesis, and the pilot tests its precondition — that error signatures exist and are stable (`R-002`) — through *analysis of the dataset*, not through a feature.
 
 This is worth restating because it is the most likely place to waste a year: the personalisation engine is the interesting thing to build and it is worthless if `R-002` is false. Build the measurement first.
 
-**Open question not addressed by Phase 0:** expertise reversal. If guidance that helps novices harms experts, error-signature baiting may be right for a struggling learner and counterproductive for a strong one. Named here so it is a known gap rather than a Phase 1 surprise.
+**Open question not addressed by Phase 1:** expertise reversal. If guidance that helps novices harms experts, error-signature baiting may be right for a struggling learner and counterproductive for a strong one. Named here so it is a known gap rather than a Phase 2 surprise.

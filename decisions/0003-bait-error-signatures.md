@@ -9,7 +9,7 @@
 > built at all. The mechanism below is deferred, not decided.
 >
 > A known conflict also stands unresolved: expertise reversal cuts against signature baiting,
-> and Phase 0 does not test it (`P-18`).
+> and Phase 1 does not test it (`P-18`).
 
 ## Context
 
@@ -31,7 +31,7 @@ If both hold, the right move is not to route a learner around their weakness. It
 * **Targeting a learner's named signature.** This presupposes `R-002`, the claim `K-02` exists to kill. It is a mechanism whose feasibility is under test, not a direction.
 * **Naming the signature back to the learner.** This ADR's own Alternatives section calls the opposite option "the alternative most likely to win if K-06 triggers". An open question is not settled by appearing in a Decision section.
 
-Phase 0 implements none of it, and tests only the precondition — that signatures exist and are stable — by analysis of the pilot dataset. If `R-002` holds, each deferred element returns as its own decision rather than arriving by implication.
+Phase 1 implements none of it, and tests only the precondition — that signatures exist and are stable — by analysis of the pilot dataset. If `R-002` holds, each deferred element returns as its own decision rather than arriving by implication.
 
 ## Requirements addressed
 
@@ -58,10 +58,10 @@ Keep the signature internal and use it only for selection. Rejected because nami
 
 **Makes harder later.** Any claim that the product is gentle or encouraging. The marketing surface of this decision is genuinely difficult and should not be solved by quietly softening the mechanic.
 
-**Unresolved conflict.** The **expertise reversal effect** — guidance that helps novices harms experts — cuts against this directly. Signature baiting may be right for a struggling learner and counterproductive for a strong one. Phase 0 does not test this, and it is recorded as a known gap rather than left to surface in Phase 1.
+**Unresolved conflict.** The **expertise reversal effect** — guidance that helps novices harms experts — cuts against this directly. Signature baiting may be right for a struggling learner and counterproductive for a strong one. Phase 1 does not test this, and it is recorded as a known gap rather than left to surface in Phase 2.
 
 ## Revisit when
 
-* `R-002` fails in Phase 0 (K-02) — the deferred mechanism is then dead and should be withdrawn rather than left waiting. The accepted direction survives: holding difficulty rather than lowering it does not require signatures to exist.
+* `R-002` fails in Phase 1 (K-02) — the deferred mechanism is then dead and should be withdrawn rather than left waiting. The accepted direction survives: holding difficulty rather than lowering it does not require signatures to exist.
 * K-06 triggers — the cohort experiences the loop as punishment. The mechanic is probably still right; the framing and the visibility of the error record are what change first.
 * Evidence on expertise reversal in this context suggests a success-band floor that should vary with learner strength.

@@ -61,7 +61,7 @@ Our position, to be defended or abandoned under `P-06`:
 * Kapur's productive failure addresses exactly this sequence and finds failure-then-instruction superior. Our loop is that sequence.
 * The consequence is a hard design constraint: **steps 3 and 4 — reveal and reconcile — are mandatory and must be good.** A loop that stops at "you were wrong" is precisely what Kirschner et al. correctly criticise.
 
-Also genuinely unresolved: **expertise reversal cuts against our own personalisation thesis.** If guidance that helps a novice harms an expert, then baiting error signatures (`R-003`) may be right for a struggling learner and actively counterproductive for a strong one. Phase 0 does not test this. It should be a named open question, not a surprise in Phase 1.
+Also genuinely unresolved: **expertise reversal cuts against our own personalisation thesis.** If guidance that helps a novice harms an expert, then baiting error signatures (`R-003`) may be right for a struggling learner and actively counterproductive for a strong one. Phase 1 does not test this. It should be a named open question, not a surprise in Phase 2.
 
 ## Things we are citing that we should be careful about
 

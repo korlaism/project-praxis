@@ -2,7 +2,7 @@
 
 **Date:** YYYY-MM-DD **Status:** Proposed | Accepted | Superseded by NNNN | Open **Rests on:** judgment | `R-0NN`, …
 
-`Rests on` is what makes the status honest, so fill it before anything else. `judgment` means this is a **design stance** — a direction chosen, whose consequences the pilot tests; it can be accepted whenever someone decides. Naming requirement ids from [Phase 0 Requirements](../spec/02-requirements.md) §1 means the decision is **wrong if that claim is false**, and it cannot be `Accepted` until the claim survives the run. Citing a §1 claim elsewhere in the ADR as context is fine; depending on one is what this field records.
+`Rests on` is what makes the status honest, so fill it before anything else. `judgment` means this is a **design stance** — a direction chosen, whose consequences the pilot tests; it can be accepted whenever someone decides. Naming requirement ids from [Phase 1 Requirements](../spec/02-requirements.md) §1 means the decision is **wrong if that claim is false**, and it cannot be `Accepted` until the claim survives the run. Citing a §1 claim elsewhere in the ADR as context is fine; depending on one is what this field records.
 
 ## Context
 

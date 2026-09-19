@@ -1,7 +1,7 @@
 # Pilot Design — Six Weeks, Force and Motion
 
 **Status:** Draft, 2026-09-18. Not yet agreed.
-Satisfies `R-030`–`R-034`. Read [Phase 0 Requirements](02-requirements.md) first.
+Satisfies `R-030`–`R-034`. Read [Phase 1 Requirements](02-requirements.md) first.
 
 ## Shape
 
