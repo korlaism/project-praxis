@@ -52,37 +52,71 @@ function defaultId() {
     `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-export function openNotebook({ backend, now = Date.now, newId = defaultId } = {}) {
+const isNotebook = (d) => d && d.version === VERSION && d.subjects && typeof d.subjects === "object";
+const blank = () => ({ version: VERSION, subjects: {} });
+
+/**
+ * Open the notebook.
+ *
+ * Every operation works against what is ACTUALLY in storage at that moment,
+ * never against a copy loaded when the notebook was opened. Holding a copy was
+ * the P-55 data loss: with two tabs open, whichever saved second wrote its
+ * stale copy over the other's cards. Reading, changing and writing within one
+ * synchronous step is as close to atomic as localStorage allows.
+ *
+ * @param events  where "storage" events arrive from — other tabs announcing
+ *                changes. Defaults to the page's global object.
+ */
+export function openNotebook({ backend, now = Date.now, newId = defaultId, events = globalThis } = {}) {
   let store = backend ?? browserBackend();
   let persistent = !!store;
-  let data = { version: VERSION, subjects: {} };
+  let memory = blank();          // the whole notebook, when there is no storage at all
+  let unsaved = [];              // cards this session could not write, kept visible and retried
 
-  // ---- load --------------------------------------------------------------
-  if (store) {
-    let raw = null;
+  /** Keep unreadable bytes recoverable — once, however often they are read. */
+  function setAside(raw) {
+    try {
+      const already = (store.keys?.() ?? []).some(
+        (k) => k.startsWith(`${STORAGE_KEY}.unreadable.`) && store.getItem(k) === raw);
+      if (!already) store.setItem(`${STORAGE_KEY}.unreadable.${now()}`, raw);
+    } catch { /* best effort: failing to copy is not a reason to lose the page */ }
+  }
+
+  function load() {
+    if (!store) return structuredClone(memory);
+    let raw;
     try {
       raw = store.getItem(STORAGE_KEY);
     } catch {
       store = null;
       persistent = false;
+      return structuredClone(memory);
     }
-    if (raw !== null && raw !== undefined) {
-      let parsed = null;
-      try { parsed = JSON.parse(raw); } catch { /* handled below */ }
-      if (parsed && parsed.version === VERSION && parsed.subjects && typeof parsed.subjects === "object") {
-        data = parsed;
-      } else {
-        // Unreadable, or written by a version we do not understand. Keep the
-        // original bytes where they can be recovered; never overwrite them.
-        try { store.setItem(`${STORAGE_KEY}.unreadable.${now()}`, raw); } catch { /* best effort */ }
-      }
-    }
+    if (raw === null || raw === undefined) return blank();
+    let parsed = null;
+    try { parsed = JSON.parse(raw); } catch { /* handled below */ }
+    if (isNotebook(parsed)) return parsed;
+    // Unreadable, or written by a version we do not understand. Its bytes are
+    // copied aside before anything can overwrite them.
+    setAside(raw);
+    return blank();
   }
 
-  function save() {
-    if (!store) return { persisted: false };
+  /** What is stored, plus anything this session could not store yet. */
+  function current() {
+    const data = load();
+    for (const c of unsaved) {
+      const list = (data.subjects[c.subject] ??= []);
+      if (!list.some((x) => x.id === c.id)) list.push(c);
+    }
+    return data;
+  }
+
+  function save(data) {
+    if (!store) { memory = data; return { persisted: false }; }
     try {
       store.setItem(STORAGE_KEY, JSON.stringify(data));
+      unsaved = [];
       return { persisted: true };
     } catch (e) {
       const full = e && (e.name === "QuotaExceededError" || /quota|full/i.test(String(e.message)));
@@ -94,6 +128,8 @@ export function openNotebook({ backend, now = Date.now, newId = defaultId } = {}
       };
     }
   }
+
+  load();   // probe once, so `persistent` is honest from the start
 
   return {
     get persistent() { return persistent; },
@@ -107,28 +143,45 @@ export function openNotebook({ backend, now = Date.now, newId = defaultId } = {}
 
       const card = { id: newId(), recordedAt: now() };
       for (const k of KEPT) if (input[k] !== undefined) card[k] = input[k];
-      (data.subjects[card.subject] ??= []).push(card);
 
-      return { ok: true, card, ...save() };
+      const data = current();
+      (data.subjects[card.subject] ??= []).push(card);
+      const result = save(data);
+      if (!result.persisted && store) unsaved.push(card);
+      return { ok: true, card, ...result };
     },
 
     cards(subject) {
-      return (data.subjects[subject] ?? []).slice();
+      return (current().subjects[subject] ?? []).slice();
     },
 
     subjects() {
+      const data = current();
       return Object.keys(data.subjects).filter((s) => data.subjects[s].length > 0);
     },
 
     /** Everything, so the learner can take it with them. */
     export() {
-      return { version: VERSION, exportedAt: now(), subjects: structuredClone(data.subjects) };
+      return { version: VERSION, exportedAt: now(), subjects: current().subjects };
     },
 
     /** The learner's call, one subject at a time. */
     forget(subject) {
+      const data = current();
       delete data.subjects[subject];
-      save();
+      unsaved = unsaved.filter((c) => c.subject !== subject);
+      save(data);
+    },
+
+    /**
+     * Hear about changes made in another tab. Returns an unsubscribe function.
+     * A null key means another tab cleared storage outright.
+     */
+    subscribe(fn) {
+      if (typeof events?.addEventListener !== "function") return () => {};
+      const onStorage = (e) => { if (e?.key === STORAGE_KEY || e?.key === null) fn(); };
+      events.addEventListener("storage", onStorage);
+      return () => events.removeEventListener("storage", onStorage);
     },
   };
 }
