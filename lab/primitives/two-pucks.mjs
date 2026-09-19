@@ -8,6 +8,13 @@ const G = 9.81, SPAN = 26, TICK = 0.25, MASS = 0.5;
 
 export const id = "two-pucks";
 export const outcomes = ["needs", "runaway", "same", "both", "outruns"];
+export const outcomeText = {
+  needs:   "The pushed puck held its speed while the other slowed — here the push exactly balanced friction.",
+  runaway: "The pushed puck kept gaining speed while the other held its speed, with nothing pushing it.",
+  same:    "Neither puck changed speed — nothing was acting on either of them.",
+  both:    "Both pucks lost speed — friction beat whatever push there was.",
+  outruns: "The pushed puck gained speed while friction slowed the other — the push was stronger than friction.",
+};
 export const controls = [
   { key: "push",     label: "push on B", min: 0, max: 2,   step: 0.1,  default: 0.6, unit: " N" },
   { key: "friction", label: "friction",  min: 0, max: 0.3, step: 0.01, default: 0,   unit: "" },

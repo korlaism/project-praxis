@@ -136,3 +136,66 @@ test("a param slider re-runs setup rather than corrupting live state", async () 
   assert.equal(seen.draws.at(-1).params.k, 7);
   dom.restore();
 });
+
+// ---- P-52: the verdict follows the simulation, and a changed setup is a new question ----
+
+test("moving a slider after committing puts the question back", async () => {
+  // A prediction is a claim about a specific setup. Change the setup and it is
+  // a different question, so the old commitment cannot carry over.
+  const { dom, el } = await mount();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  assert.equal(el("lab-gate").hidden, true);
+
+  const input = dom.body.find((n) => n.id === "param-k");
+  input.value = "8"; input.oninput();
+  assert.equal(el("lab-gate").hidden, false, "the gate must reopen for the new setup");
+  dom.restore();
+});
+
+test("moving a slider BEFORE committing leaves the question open", async () => {
+  const { dom, el } = await mount();
+  const input = dom.body.find((n) => n.id === "param-k");
+  input.value = "8"; input.oninput();
+  assert.equal(el("lab-gate").hidden, false);
+  dom.restore();
+});
+
+test("the record carries the parameters the prediction was made for", async () => {
+  const { dom, lab } = await mount();
+  const input = dom.body.find((n) => n.id === "param-k");
+  input.value = "6"; input.oninput();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  assert.equal(lab.record.params.k, 6, "the notebook needs to know which setup was answered");
+  dom.restore();
+});
+
+test("the verdict follows what was observed", async () => {
+  const { dom, lab, el } = await mount();                 // configured correct: "yes"
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("no");                                       // but the run produced "no"
+  assert.equal(lab.record.correct, true);
+  assert.match(el("lab-verdict").className, /is-right/);
+  dom.restore();
+});
+
+test("the verdict says so when what happened was none of the choices", async () => {
+  const { dom, lab, el } = await mount();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("neither");
+  assert.equal(lab.record.unlisted, true);
+  const text = el("lab-verdict").children.map((c) => c.textContent).join(" ");
+  assert.match(text, /none of the choices/i);
+  dom.restore();
+});
+
+test("the explanation can depend on what actually happened", async () => {
+  const { dom, lab, el } = await mount({
+    explain: (record) => `it was ${record.observed}`,
+  });
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("no");
+  const text = el("lab-verdict").children.map((c) => c.textContent).join(" ");
+  assert.match(text, /it was no/);
+  dom.restore();
+});

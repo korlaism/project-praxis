@@ -28,6 +28,7 @@ export function createGate({ options, correct }) {
   let confidence = null;
   let committedAt = null;
   let revealedAt = null;
+  let observed = null;
 
   return {
     get state() {
@@ -45,9 +46,17 @@ export function createGate({ options, correct }) {
       return state !== "awaiting";
     },
 
-    /** Null until revealed — committing must not disclose the verdict. */
+    /**
+     * Null until revealed — committing must not disclose the verdict.
+     *
+     * Scored against what was OBSERVED, not against the configured answer. The
+     * configured answer describes the default setup; if the learner changed the
+     * setup before running it, what happened can differ, and a product about
+     * honesty cannot tell someone they were right about something that did not
+     * occur (P-52).
+     */
     get isCorrect() {
-      return state === "revealed" ? choice === correct : null;
+      return state === "revealed" ? choice === observed : null;
     },
 
     get options() {
@@ -55,7 +64,12 @@ export function createGate({ options, correct }) {
     },
 
     get record() {
-      return { choice, confidence, committedAt, revealedAt, correct: this.isCorrect };
+      return {
+        choice, confidence, committedAt, revealedAt, observed,
+        correct: this.isCorrect,
+        // What happened was none of the choices offered — nobody could have been right.
+        unlisted: state === "revealed" ? !ids.includes(observed) : null,
+      };
     },
 
     commit(id, level = null) {
@@ -70,8 +84,10 @@ export function createGate({ options, correct }) {
       return this;
     },
 
-    reveal() {
+    /** @param {string} [outcome] what actually happened; defaults to the configured answer */
+    reveal(outcome = correct) {
       if (state === "awaiting") throw new Error("not committed — nothing to reveal");
+      observed = outcome;
       revealedAt = Date.now();
       state = "revealed";
       return this;
@@ -79,7 +95,7 @@ export function createGate({ options, correct }) {
 
     reset() {
       state = "awaiting";
-      choice = confidence = committedAt = revealedAt = null;
+      choice = confidence = committedAt = revealedAt = observed = null;
       return this;
     },
   };

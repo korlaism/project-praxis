@@ -10,6 +10,13 @@ const REVEAL_AFTER = 1.6;
 
 export const id = "circular-release";
 export const outcomes = ["outward", "tangent", "curve", "spiral"];
+/** What each outcome looks like, said plainly — for when the setup was changed. */
+export const outcomeText = {
+  outward: "It flew straight out along the line of the string.",
+  tangent: "It flew off in a straight line along the tangent — the way it was already going.",
+  curve:   "It kept following the circle, as if the string were still there.",
+  spiral:  "It spiralled outward, partly along the string and partly across it.",
+};
 export const controls = [
   { key: "r",     label: "string length", min: 0.5, max: 2.0, step: 0.05, default: 1.2, unit: " m" },
   { key: "omega", label: "spin",          min: 1.0, max: 4.0, step: 0.1,  default: 2.4, unit: " rad/s" },

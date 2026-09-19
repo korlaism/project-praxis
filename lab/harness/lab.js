@@ -48,6 +48,7 @@ export function mountLab(topic) {
   const optsEl = el("div", "lab-opts", gateEl);
 
   let pendingConfidence = null;
+  let committedParams = null;          // the setup the learner actually answered
   const confWrap = el("div", "lab-conf", gateEl);
   for (const level of CONFIDENCE) {
     const b = el("button", null, confWrap);
@@ -69,6 +70,7 @@ export function mountLab(topic) {
     b.textContent = opt.label;
     b.onclick = () => {
       gate.commit(opt.id, pendingConfidence);
+      committedParams = { ...params };
       gateEl.hidden = true;
       play();
       render();
@@ -108,7 +110,16 @@ export function mountLab(topic) {
     input.value = String(p.value);
     const out = document.createElement("output");
     const show = () => (out.textContent = `${(+input.value).toFixed(decimals(p.step))}${p.unit ?? ""}`);
-    input.oninput = () => { params[p.key] = +input.value; show(); softReset(); render(); };
+    input.oninput = () => {
+      params[p.key] = +input.value;
+      show();
+      // A prediction is a claim about a specific setup. Change the setup after
+      // committing and it is a different question, so the old answer cannot
+      // stand — otherwise the verdict scores a question nobody asked (P-52).
+      if (gate.state !== "awaiting") { gate.reset(); committedParams = null; }
+      softReset();
+      render();
+    };
     show();
     wrap.append(input, out);
   }
@@ -195,28 +206,35 @@ export function mountLab(topic) {
     clock.textContent = `t = ${t.toFixed(2)}s`;
 
     if (gate.state === "revealed") {
+      const rec = api.record;
       verdict.hidden = false;
       verdict.className = `lab-verdict ${gate.isCorrect ? "is-right" : "is-wrong"}`;
       const said = topic.options.find((o) => o.id === gate.choice)?.label ?? gate.choice;
       const conf = gate.confidence ? ` — ${CONF_LABEL[gate.confidence]}` : "";
       verdict.innerHTML = "";
       const b = document.createElement("b");
-      b.textContent = gate.isCorrect ? "You had it." : `You said: ${said}${conf}.`;
+      b.textContent = rec.unlisted
+        ? "What happened was none of the choices."
+        : gate.isCorrect ? "You had it." : `You said: ${said}${conf}.`;
       const s = document.createElement("span");
-      s.textContent = " " + (topic.explain ?? "");
+      const why = typeof topic.explain === "function" ? topic.explain(rec) : topic.explain;
+      s.textContent = " " + (why ?? "");
       verdict.append(b, s);
     } else {
       verdict.hidden = true;
     }
   }
 
-  /** A topic calls this when the outcome has become undeniable on screen. */
-  function reveal() {
-    if (gate.state === "committed") { gate.reveal(); render(); }
+  /**
+   * A topic calls this when the outcome has become undeniable on screen, with
+   * what it OBSERVED. Omitting it falls back to the configured answer.
+   */
+  function reveal(observed) {
+    if (gate.state === "committed") { gate.reveal(observed); render(); }
   }
 
   const api = { reveal, play, pause, get choice() { return gate.choice; },
-                get record() { return gate.record; } };
+                get record() { return { ...gate.record, params: committedParams }; } };
 
   softReset();
   addEventListener("resize", resize);

@@ -23,13 +23,19 @@ export function mountScenario(spec) {
     note: spec.note,
     options: spec.options,
     correct: spec.correct,
-    explain: spec.explain,
+    // The authored explanation describes the scenario's own setup. If the learner
+    // changed the setup and something else happened, describe THAT instead —
+    // explaining an event that did not occur is its own kind of lie (P-52).
+    explain: (record) => record.observed === spec.correct
+      ? spec.explain
+      : `With these settings: ${primitive.outcomeText?.[record.observed] ?? "the outcome could not be described."}`,
     params: primitive.controls.map((c) => ({ ...c, value: params[c.key] })),
     actions: primitive.actions,
     setup: (_, p) => primitive.setup(p),
     step: (s, dt, p) => {
       primitive.step(s, dt, p);
-      if (s.done) lab.reveal();
+      // Reveal with what the simulation OBSERVED, not with the stored answer.
+      if (s.done) lab.reveal(primitive.classify(s, p));
     },
     draw: (ctx, s, p, view, ui) => primitive.draw(ctx, s, p, view, ui),
   });

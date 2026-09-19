@@ -9,6 +9,11 @@ const FLY_START = 0.05, REVEAL_AT = 0.15, SQUASH_REF = 0.013;
 
 export const id = "contact-collision";
 export const outcomes = ["truck", "equal", "fly"];
+export const outcomeText = {
+  truck: "The heavy body pushed harder on the light one than it was pushed back.",
+  equal: "They pushed on each other with exactly the same force, in opposite directions.",
+  fly:   "The light body pushed harder on the heavy one than it was pushed back.",
+};
 export const controls = [
   { key: "mt", label: "truck", min: 1,  max: 5,   step: 0.5, default: 2,   unit: " t" },
   { key: "mf", label: "fly",   min: 10, max: 500, step: 10,  default: 200, unit: " mg" },
