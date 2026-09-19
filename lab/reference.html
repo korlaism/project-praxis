@@ -1,0 +1,97 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Harness Reference</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="harness/lab.css">
+<script type="module">
+import { mountLab } from "./harness/lab.js";
+
+/* A deliberately arbitrary fixture, not a real topic — it exists to exercise
+   every harness feature (gate, confidence, transport, sliders, reveal) without
+   spending one of the three planned topics. */
+
+const H0 = 3.0;      // drop height, metres
+const LINE = 0.9;    // the line to clear, metres
+const G = 9.81;
+
+let lab;
+lab = mountLab({
+  question: "After three bounces, does the ball still clear the line?",
+  note: "Reference fixture for the lab harness — not a published topic.",
+  options: [
+    { id: "yes", label: "Yes, it still gets above the line" },
+    { id: "no", label: "No, it stays below from then on" },
+  ],
+  correct: "no",
+  explain:
+    "With this bounciness each bounce keeps e² of the height, so three bounces leave " +
+    "e⁶ of it — a fraction that falls away far faster than most people expect.",
+  params: [
+    { key: "e", label: "bounciness", min: 0.3, max: 0.95, step: 0.01, value: 0.7 },
+  ],
+
+  setup() {
+    return { y: H0, v: 0, bounces: 0, apex: null, done: false };
+  },
+
+  step(s, dt, p) {
+    if (s.done) return;
+    for (let i = 0; i < 4; i++) {          // substeps keep the bounce crisp
+      const h = dt / 4;
+      s.v -= G * h;
+      s.y += s.v * h;
+      if (s.y <= 0 && s.v < 0) {
+        s.y = 0;
+        s.v = -s.v * p.e;
+        s.bounces++;
+        if (s.bounces >= 3) s.apex = 0;
+      }
+    }
+    if (s.bounces >= 3) {
+      s.apex = Math.max(s.apex ?? 0, s.y);
+      if (s.v < 0 && s.apex > 0) { s.done = true; lab.reveal(); }
+    }
+  },
+
+  draw(ctx, s, p, view) {
+    const pad = 44;
+    const ground = view.h - pad;
+    const scale = (view.h - pad * 2) / (H0 * 1.1);
+    const cx = view.w / 2;
+
+    ctx.fillStyle = "#1B1815";
+    ctx.fillRect(0, 0, view.w, view.h);
+
+    // ground — bright enough that the ball visibly rests on something
+    ctx.strokeStyle = "#5C5248"; ctx.lineWidth = 2;
+    line(ctx, 0, ground, view.w, ground);
+
+    // the line to clear
+    const ly = ground - LINE * scale;
+    ctx.strokeStyle = "#E8703A"; ctx.lineWidth = 1.5;
+    ctx.setLineDash([7, 6]); line(ctx, 0, ly, view.w, ly); ctx.setLineDash([]);
+    label(ctx, `the line — ${LINE.toFixed(2)} m`, 14, ly - 9, "#E8703A");
+
+    // ball
+    const by = ground - s.y * scale;
+    ctx.fillStyle = "#F2EEE8";
+    ctx.beginPath(); ctx.arc(cx, by - 11, 11, 0, Math.PI * 2); ctx.fill();
+
+    label(ctx, `bounces  ${s.bounces}`, 14, 26, "#A79E92");
+    label(ctx, `height  ${s.y.toFixed(2)} m`, 14, 46, "#A79E92");
+    if (s.apex !== null)
+      label(ctx, `apex after 3  ${s.apex.toFixed(2)} m`, 14, 66,
+            s.apex > LINE ? "#4FB286" : "#D65442");
+  },
+});
+
+function line(ctx, x1, y1, x2, y2) {
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+}
+function label(ctx, text, x, y, colour) {
+  ctx.fillStyle = colour;
+  ctx.font = '12px "Spline Sans Mono", ui-monospace, monospace';
+  ctx.fillText(text, x, y);
+}
+</script>
