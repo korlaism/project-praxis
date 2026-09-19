@@ -64,3 +64,18 @@ Whether that is sufficient to accept ADR 0007 is a judgement for the owner, and 
 2. **Every primitive owes a determinate `done`.** `P-48`.
 3. **The pass rate should be reported per-primitive**, because parameter-independent scenarios flatter the total.
 4. **The real number is still unknown.** `P-50` runs this with a model that has not seen the primitives.
+
+
+---
+
+## Revision after `P-48` (2026-09-19)
+
+Fixing the termination defect changed a number in this document, so the change is recorded rather than quietly applied.
+
+**The repaired batch moved from 19/20 to 18/20.** That is not a regression — it is the old classifier having been wrong.
+
+Candidate 14 (`push 0.5, friction 0.1`) previously passed as `needs`. Kinetic friction there is `μmg = 0.4905 N` against a push of `0.5 N`, so the pushed puck gains speed very slowly while the other stops. The old classifier lumped that into `needs` because it only asked whether B had *slowed*; the new one measures both fates and correctly reports `outruns`.
+
+So one of the original passes was false, and the corrected figure is **18/20 after repair, 0/20 escape rate**. The escape rate — the number the architecture actually turns on — is unchanged.
+
+Both remaining failures are now the same honest case: parameters that produce `outruns`, an outcome the scenario's option list does not offer. That is the scenario being unaskable with those options, not the simulation being wrong.

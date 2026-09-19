@@ -7,7 +7,7 @@ import { stepWithFriction } from "../components/motion.mjs";
 const G = 9.81, SPAN = 26, TICK = 0.25, MASS = 0.5;
 
 export const id = "two-pucks";
-export const outcomes = ["needs", "runaway", "same", "both"];
+export const outcomes = ["needs", "runaway", "same", "both", "outruns"];
 export const controls = [
   { key: "push",     label: "push on B", min: 0, max: 2,   step: 0.1,  default: 0.6, unit: " N" },
   { key: "friction", label: "friction",  min: 0, max: 0.3, step: 0.01, default: 0,   unit: "" },
@@ -15,33 +15,46 @@ export const controls = [
 ];
 
 export function setup(p) {
-  const lane = () => ({ x: 1, v: p.u, tape: [1] });
+  const lane = () => ({ x: 1, v: p.u, tape: [1], settled: false });
   return { a: lane(), b: lane(), t: 0, nextTick: TICK, u0: p.u, done: false };
 }
 
 export function step(s, dt, p) {
   if (s.done) return;
-  for (const [lane, appliedForce] of [[s.a, 0], [s.b, p.push]])
+  // Each lane settles on its own terms — stopped, or off the end of the track.
+  // Stopping the whole run when the FIRST one settles was the P-48 defect: the
+  // other puck was still mid-decay, so its fate, and the outcome, were undecided.
+  for (const [lane, appliedForce] of [[s.a, 0], [s.b, p.push]]) {
+    if (lane.settled) continue;
     stepWithFriction(lane, { appliedForce, mass: MASS, mu: p.friction, g: G }, dt);
+    if (lane.v === 0 || lane.x > SPAN - 1.5) lane.settled = true;
+  }
   s.t += dt;
   if (s.t >= s.nextTick) { s.nextTick += TICK; s.a.tape.push(s.a.x); s.b.tape.push(s.b.x); }
-  const settled = s.a.v === 0 && s.b.v === 0 && s.t > 1;
-  if (s.b.x > SPAN - 1.5 || s.a.x > SPAN - 1.5 || settled) s.done = true;
+  if (s.a.settled && s.b.settled) s.done = true;
 }
 
-/** Measured from the two lanes, so the params and the stated answer must agree. */
-export function classify(s, p) {
-  if (s.t < 0.5) return null;
+/**
+ * Measured from the settled state, so the parameters and the stated answer
+ * must agree. Total over every reachable pair of fates — an outcome the
+ * mapping cannot name is a gap in the primitive, not an unanswerable scenario.
+ *
+ * The unpushed puck can only hold, slow or stop; nothing ever speeds it up.
+ */
+function fate(lane, u0) {
   const eps = 1e-6;
-  const aHeld = Math.abs(s.a.v - s.u0) < eps;
-  const aStopped = s.a.v === 0;
-  const bGained = s.b.v > s.u0 + eps;
-  const bSlowed = s.b.v < s.u0 - eps;
-  if (aHeld && bGained) return "runaway";
-  if (aStopped && !bSlowed && s.b.v > eps) return "needs";
-  if (aHeld && !bGained && !bSlowed) return "same";
-  if (aStopped && (bSlowed || s.b.v === 0)) return "both";
-  return null;
+  if (lane.v === 0) return "stopped";
+  if (lane.v > u0 + eps) return "gained";
+  if (lane.v < u0 - eps) return "slowed";
+  return "held";
+}
+
+export function classify(s, p) {
+  if (!s.done) return null;                       // an unfinished run decides nothing
+  const a = fate(s.a, s.u0), b = fate(s.b, s.u0);
+  if (b === "gained") return a === "held" ? "runaway" : "outruns";
+  if (b === "held")   return a === "held" ? "same" : "needs";
+  return "both";                                  // b slowed or stopped, so friction is on
 }
 
 export function draw(ctx, s, p, view) {
