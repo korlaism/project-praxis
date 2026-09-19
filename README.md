@@ -6,7 +6,7 @@ Interactive learning built on prediction, mistakes and calibration.
 
 | Phase | What it is | State |
 |-------|-----------|-------|
-| **0 · Publish** | Build the simulated lab topic by topic and put it in front of people | **Active** |
+| **0 · Publish** | Build the lab, put it in front of people, and make what a learner does **persist** | **Active** |
 | **1 · Validate** | The six-week controlled cohort run, measuring delayed transfer and calibration | Parked — written, unchanged, blocked on a cohort |
 | **2 · Build** | The notebook, the error signatures, the personalisation engine | Gated on `R-001` and `R-002` |
 
@@ -42,8 +42,10 @@ Step 2 is the load-bearing one. Everything else is in service of having an hones
 | [0003](decisions/0003-bait-error-signatures.md) | Bait error signatures; do not reduce difficulty | Accepted |
 | [0004](decisions/0004-teacher-mediated-cohort.md) | Teacher-mediated cohort, not direct-to-learner | Accepted |
 | [0005](decisions/0005-channel-first.md) | Build the lab in public, topic by topic | Accepted |
+| [0006](decisions/0006-the-notebook-is-the-product.md) | The notebook is the product, the tools are the surface | Accepted |
+| [0007](decisions/0007-generated-scenarios.md) | Scenarios are generated from verified primitives | Proposed |
 
-All five accepted. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
+Six accepted, one proposed. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
 
 `0003` is the interesting one. It was accepted whole, then narrowed: only *difficulty is selected, not reduced* stands on judgment. Signature targeting, naming the signature back to the learner, and the 75–85% success band all depend on `R-002` and `R-003`, are still unproven, and are now explicitly deferred rather than decided. It also carries an unresolved conflict (`P-18`). `tools/check-docs.py` enforces this — an `Accepted` ADR resting on an unsettled claim fails the build.
 
@@ -55,6 +57,8 @@ All five accepted. Each declares `Rests on:` in its header: `0001`, `0002` and `
 
 **If you are shipping a topic:** [Phase 0 · Publish](spec/00-publish-phase.md) → [02 · Misconceptions & Diagnostic Instruments](research/02-misconceptions-and-diagnostics.md).
 
+**If you want where this is going:** [ADR 0006](decisions/0006-the-notebook-is-the-product.md) → [Generated Scenarios](spec/07-generated-scenarios.md) → [ADR 0007](decisions/0007-generated-scenarios.md).
+
 **If you are building the pilot (parked):** [Phase 1 Requirements](spec/02-requirements.md) → [Pilot Design](spec/03-pilot-design.md) → [Data Model](spec/04-data-model.md).
 
 **If you want the evidence base:** [Domain Map & Reading Path](research/00-domain-map.md).
@@ -64,6 +68,7 @@ All five accepted. Each declares `Rests on:` in its header: `0001`, `0002` and `
 ```
 spec/        What we are building and why it would count as working
              00-publish-phase.md is the active phase; 01-06 are Phase 1, parked
+             07-generated-scenarios.md is where this is heading
 research/    Evidence, prior art, and the arguments against us
 decisions/   ADRs — one per settled question
 tools/       sync-outline.py and its manifest. Not documentation.
