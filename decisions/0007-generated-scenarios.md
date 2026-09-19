@@ -6,6 +6,13 @@
 > demonstrated. What would accept it is a number, not an argument: generate twenty scenarios,
 > run every one through the four checks in [Generated Scenarios](../spec/07-generated-scenarios.md),
 > and count how many pass unaided. Above roughly 90% and this is the shape of the product.
+>
+> **The spike ran on 2026-09-19 and returned 65% unaided — below the bar, so this ADR stays
+> `Proposed`.** See [05 · Generation Spike](../research/05-generation-spike.md). Recorded alongside
+> rather than replacing the criterion above, because criteria written before a run do not get
+> edited after it: the escape rate was **0/20** — no incorrect scenario passed all the checks —
+> and one mechanical repair pass reached 95%. Whether that is sufficient to accept is the owner's
+> call, not a redefinition this document may make for itself.
 
 ## Context
 
