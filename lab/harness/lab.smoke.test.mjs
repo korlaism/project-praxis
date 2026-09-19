@@ -199,3 +199,26 @@ test("the explanation can depend on what actually happened", async () => {
   assert.match(text, /it was no/);
   dom.restore();
 });
+
+// ---- P-40: the notebook hears about every reveal, exactly once ----
+
+test("onReveal hears about the reveal once, with the full record", async () => {
+  const seen = [];
+  const { dom, lab } = await mount({ onReveal: (rec) => seen.push(rec) });
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("no");
+  lab.reveal("no");                                  // a second reveal must not double-record
+  assert.equal(seen.length, 1);
+  assert.equal(seen[0].choice, "no");
+  assert.equal(seen[0].observed, "no");
+  assert.ok(seen[0].params, "the card needs the setup it was answered for");
+  dom.restore();
+});
+
+test("a failing onReveal does not break the verdict", async () => {
+  const { dom, lab, el } = await mount({ onReveal: () => { throw new Error("storage exploded"); } });
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  assert.equal(el("lab-verdict").hidden, false, "the learner must still see the verdict");
+  dom.restore();
+});

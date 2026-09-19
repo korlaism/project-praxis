@@ -9,8 +9,13 @@
 import { mountLab } from "../harness/lab.js";
 import { validateScenario } from "./schema.mjs";
 import { getPrimitive, resolveParams } from "../primitives/index.mjs";
+import { openNotebook } from "../notebook/store.mjs";
 
-export function mountScenario(spec) {
+/**
+ * @param spec      a scenario specification
+ * @param notebook  where cards go; defaults to this device's notebook
+ */
+export function mountScenario(spec, { notebook = openNotebook() } = {}) {
   const v = validateScenario(spec);
   if (!v.ok) throw new Error("invalid scenario:\n  " + v.errors.join("\n  "));
 
@@ -38,6 +43,12 @@ export function mountScenario(spec) {
       if (s.done) lab.reveal(primitive.classify(s, p));
     },
     draw: (ctx, s, p, view, ui) => primitive.draw(ctx, s, p, view, ui),
+    // Every reveal becomes a card in the scenario's subject notebook (ADR 0006).
+    onReveal: (record) => {
+      if (!spec.id || !spec.subject) return;          // a draft scenario has nowhere to file
+      const r = notebook.record({ ...record, scenario: spec.id, subject: spec.subject });
+      if (r.warning) console.warn(r.warning);
+    },
   });
   return lab;
 }

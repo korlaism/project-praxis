@@ -67,3 +67,11 @@ test("errors accumulate — it reports everything wrong at once", () => {
   const r = validateScenario({ schema: 1, primitive: "x", params: {}, options: [] });
   assert.ok(r.errors.length >= 3, `expected several errors, got ${r.errors.length}`);
 });
+
+test("id and subject are optional, but must be real strings when given", () => {
+  // Optional so a generator's first draft still validates; the notebook needs
+  // them, so every SHIPPED scenario is held to having both (scenarios.test).
+  assert.equal(validateScenario({ ...ok(), id: "which-way", subject: "physics" }).ok, true);
+  fails({ ...ok(), id: "" }, /id/);
+  fails({ ...ok(), subject: 7 }, /subject/);
+});

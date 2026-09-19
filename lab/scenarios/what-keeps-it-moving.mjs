@@ -1,5 +1,7 @@
 export default {
   schema: 1,
+  id: "what-keeps-it-moving",
+  subject: "physics",
   primitive: "two-pucks",
   params: { push: 0.6, friction: 0, u: 4 },
   question: "Two identical pucks, same speed. One has a steady forward push, one has nothing. What happens?",

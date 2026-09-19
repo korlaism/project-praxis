@@ -1,5 +1,7 @@
 export default {
   schema: 1,
+  id: "truck-and-fly",
+  subject: "physics",
   primitive: "contact-collision",
   params: { mt: 2, mf: 200, u: 20 },
   question: "A truck hits a fly. Which one pushes harder on the other?",
