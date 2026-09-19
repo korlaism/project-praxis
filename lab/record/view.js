@@ -180,5 +180,10 @@ export function renderRecord(container, { notebook, scenarios, subject: initial 
   }
 
   render();
-  return { destroy: () => root.remove(), refresh: render };
+  // Another tab may add or forget predictions while this page is open (P-55).
+  const unsubscribe = notebook.subscribe?.(render) ?? (() => {});
+  return {
+    destroy: () => { unsubscribe(); root.remove(); },
+    refresh: render,
+  };
 }

@@ -89,3 +89,26 @@ test("destroy removes the page cleanly", async () => {
   assert.equal(dom.body.children.length, 0);
   dom.restore();
 });
+
+// ---- P-55: an open record notices predictions made in another tab ----
+
+test("a prediction made in another tab appears in an open record", async () => {
+  const dom = installDom();
+  const { renderRecord } = await import("./view.js");
+  const listeners = new Set();
+  const events = { addEventListener: (_t, f) => listeners.add(f), removeEventListener: (_t, f) => listeners.delete(f) };
+  const shared = memoryBackend();
+  const here = openNotebook({ backend: shared, events });
+  const otherTab = openNotebook({ backend: shared });
+  const view = renderRecord(dom.body, { notebook: here, scenarios: SCENARIOS });
+  const rows = () => dom.body.findAll((n) => n.className?.split?.(" ").includes("rec-row")).length;
+  assert.equal(rows(), 0);
+
+  otherTab.record(card());
+  for (const f of listeners) f({ key: "praxis.notebook.v1" });   // the browser's storage event
+  assert.equal(rows(), 1, "the open record must show the other tab's prediction");
+
+  view.destroy();
+  assert.equal(listeners.size, 0, "a closed record must stop listening");
+  dom.restore();
+});
