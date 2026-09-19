@@ -60,13 +60,26 @@ is still deterministic when run headlessly.
 
 **Nothing is stored about anybody.** No account, no persistence, no network. Per-person records are a Phase 1 concern.
 
+## Publishing
+
+Never flatten a page by hand — that once shipped a blank page. Build it:
+
+```bash
+node tools/build-topic.mjs lab/topics/which-way-does-it-fly.html
+```
+
+It follows the whole import graph, writes an artifact-ready bundle to
+`dist/<slug>/`, checks it, and refuses to succeed if anything is bare, missing,
+or reaches outside the bundle. On success it prints the `files` map the
+Artifact tool takes. `dist/` is build output and is never committed.
+
 ## Running
 
 Any static server, because ES modules will not load over `file://`:
 
 ```bash
 python3 -m http.server -d lab 8000   # then open http://localhost:8000/reference.html
-node --test lab/harness/*.test.mjs lab/components/*.test.mjs
+node --test lab/harness/*.test.mjs lab/components/*.test.mjs lab/scenario/*.test.mjs lab/primitives/*.test.mjs tools/*.test.mjs
 ```
 
 ## Tests
