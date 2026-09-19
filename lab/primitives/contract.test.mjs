@@ -46,3 +46,16 @@ for (const [id, primitive] of Object.entries(PRIMITIVES)) {
     if (!run.finished) assert.equal(primitive.classify(run.state, p), null);
   });
 }
+
+for (const [id, primitive] of Object.entries(PRIMITIVES)) {
+  test(`${id}: can describe every outcome it can produce`, () => {
+    // The authored explanation is written for the scenario's own setup. When a
+    // learner changes the setup and something else happens, the primitive has
+    // to be able to say what did — or the verdict explains the wrong event.
+    for (const o of primitive.outcomes) {
+      const text = primitive.outcomeText?.[o];
+      assert.ok(typeof text === "string" && text.trim().length > 10,
+        `${id}: no outcomeText for "${o}"`);
+    }
+  });
+}

@@ -112,3 +112,39 @@ test("a gate needs at least two options", () => {
     /two/i,
   );
 });
+
+// ---- P-52: score against what happened, not against a stored answer ----
+
+test("reveal scores against the observed outcome, not the configured answer", () => {
+  // The configured answer describes the default setup. If the learner changed
+  // the setup, what happened may differ — and the verdict must follow reality.
+  const g = createGate(opts());           // configured correct: "tan"
+  g.commit("out");
+  g.reveal("out");                        // the simulation actually produced "out"
+  assert.equal(g.isCorrect, true);
+  assert.equal(g.record.observed, "out");
+});
+
+test("reveal with no observation falls back to the configured answer", () => {
+  const g = createGate(opts());
+  g.commit("tan");
+  g.reveal();
+  assert.equal(g.isCorrect, true);
+  assert.equal(g.record.observed, "tan");
+});
+
+test("an outcome that is none of the options is flagged, and nobody was right", () => {
+  const g = createGate(opts());
+  g.commit("tan");
+  g.reveal("somewhere-else");
+  assert.equal(g.isCorrect, false);
+  assert.equal(g.record.unlisted, true);
+});
+
+test("a listed outcome is not flagged as unlisted", () => {
+  const g = createGate(opts());
+  g.commit("tan");
+  g.reveal("curve");
+  assert.equal(g.record.unlisted, false);
+  assert.equal(g.isCorrect, false);
+});
