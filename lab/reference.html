@@ -63,8 +63,8 @@ lab = mountLab({
     ctx.fillStyle = "#1B1815";
     ctx.fillRect(0, 0, view.w, view.h);
 
-    // ground
-    ctx.strokeStyle = "#332E28"; ctx.lineWidth = 2;
+    // ground — bright enough that the ball visibly rests on something
+    ctx.strokeStyle = "#5C5248"; ctx.lineWidth = 2;
     line(ctx, 0, ground, view.w, ground);
 
     // the line to clear

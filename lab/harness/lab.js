@@ -104,11 +104,14 @@ export function mountLab(topic) {
 
   // ---- loop -------------------------------------------------------------
   let state, t, running = false, raf = null, last = 0;
+  let dpr = 1, viewW = 0, viewH = 0, drawFailed = false;
 
   function softReset() {
-    pause();
+    // State first. pause() renders, and rendering without state throws out of
+    // mountLab, which kills resize() and leaves the canvas black forever.
     t = 0;
     state = topic.setup?.({}, params) ?? {};
+    pause();
   }
 
   function tick(dt) {
@@ -142,21 +145,34 @@ export function mountLab(topic) {
   // ---- render -----------------------------------------------------------
   function resize() {
     const r = stage.getBoundingClientRect();
-    const dpr = Math.min(devicePixelRatio || 1, 2);
-    const w = Math.max(320, Math.floor(r.width - 32));
-    const h = Math.max(240, Math.floor(r.height - 32));
-    canvas.width = w * dpr;
-    canvas.height = h * dpr;
-    canvas.style.width = `${w}px`;
-    canvas.style.height = `${h}px`;
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    // A stage that has not laid out yet reports ~0. Falling back to the viewport
+    // keeps the canvas real rather than collapsing it to the minimum.
+    const availW = r.width > 40 ? r.width - 32 : innerWidth - 32;
+    const availH = r.height > 40 ? r.height - 32 : innerHeight * 0.6;
+    viewW = Math.max(320, Math.floor(availW));
+    viewH = Math.max(240, Math.floor(availH));
+    canvas.width = Math.round(viewW * dpr);
+    canvas.height = Math.round(viewH * dpr);
+    canvas.style.width = `${viewW}px`;
+    canvas.style.height = `${viewH}px`;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     render();
   }
 
   function render() {
-    const view = { w: canvas.width / (devicePixelRatio || 1), h: canvas.height / (devicePixelRatio || 1), t };
+    const view = { w: viewW, h: viewH, t };
     ctx.clearRect(0, 0, view.w, view.h);
-    topic.draw?.(ctx, state, params, view);
+    try {
+      topic.draw?.(ctx, state, params, view);
+    } catch (err) {
+      // Report it and keep the harness alive — a broken topic should not also
+      // break the transport, the gate and every future resize.
+      if (!drawFailed) { drawFailed = true; console.error("topic draw() failed:", err); }
+      ctx.fillStyle = "#D65442";
+      ctx.font = '13px "Spline Sans Mono", ui-monospace, monospace';
+      ctx.fillText("topic draw() failed — see console", 16, 24);
+    }
 
     gateEl.hidden = gate.canRun;
     playBtn.textContent = running ? "Pause" : "Play";
@@ -188,6 +204,10 @@ export function mountLab(topic) {
   softReset();
   addEventListener("resize", resize);
   resize();
+  // The first rect can be wrong before fonts and layout settle; a ResizeObserver
+  // corrects it without a guessed timeout.
+  if (typeof ResizeObserver === "function") new ResizeObserver(resize).observe(stage);
+  requestAnimationFrame(resize);
   addEventListener("keydown", (e) => {
     if (e.key === " ") { e.preventDefault(); gate.canRun && (running ? pause() : play()); }
     if (e.key === "r") { softReset(); render(); }
