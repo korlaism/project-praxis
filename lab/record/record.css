@@ -1,0 +1,62 @@
+/* Your record — a document to read, so it scrolls, unlike the lab stage.
+   Same palette as the lab: single-theme dark on purpose, painted explicitly. */
+:root{
+  --bg:#12100E; --panel:#1B1815; --line:#332E28;
+  --ink:#F2EEE8; --ink-2:#A79E92; --ink-3:#6E665C;
+  --accent:#E8703A; --right:#4FB286; --wrong:#D65442; --neutral:#8C8378;
+  --font:"Familjen Grotesk",system-ui,-apple-system,sans-serif;
+  --mono:"Spline Sans Mono",ui-monospace,Menlo,monospace;
+}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+.rec{max-width:760px;margin:0 auto;padding-inline:20px;padding-block:32px 64px;display:grid;gap:28px}
+.rec-title{font-size:clamp(1.6rem,4vw,2.2rem);font-weight:600;letter-spacing:-.02em;margin:0}
+.rec-sub{margin:.5rem 0 0;color:var(--ink-2);max-width:56ch;line-height:1.5}
+.rec-h2{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);margin:0 0 12px}
+.rec-warn{margin:0;padding:12px 14px;border:1px solid var(--accent);border-radius:3px;color:var(--ink);background:#241A13}
+.rec-empty{margin:0;padding:28px;border:1px dashed var(--line);border-radius:3px;color:var(--ink-2);text-align:center}
+
+.rec-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.rec-tab{font:500 .88rem var(--font);padding:7px 14px;border:1px solid var(--line);border-radius:2px;
+  background:transparent;color:var(--ink-2);cursor:pointer;text-transform:capitalize}
+.rec-tab.is-on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.rec-cal{padding:20px;background:var(--panel);border:1px solid var(--line);border-radius:3px}
+.rec-chart-wrap{overflow-x:auto}
+.rec-chart{width:100%;max-width:520px;height:auto;display:block}
+.rec-grid{stroke:var(--line);stroke-width:1}
+.rec-axis{fill:var(--ink-3);font:11px var(--mono)}
+.rec-diag{stroke:var(--ink-3);stroke-width:1.5;stroke-dasharray:4 5}
+.rec-diag-label{fill:var(--ink-3);font:11px var(--mono)}
+.rec-dot{fill:var(--accent);stroke:var(--accent);stroke-width:2}
+.rec-dot.is-thin{fill:none;stroke-dasharray:3 3}
+.rec-cal-lines{margin:14px 0 0;padding-left:18px;display:grid;gap:6px;color:var(--ink);line-height:1.45}
+.rec-cal-lines .is-thin{color:var(--ink-2)}
+.rec-trend{margin:14px 0 0;color:var(--ink-2);line-height:1.5}
+
+.rec-list{display:grid;gap:10px}
+.rec-row{position:relative;padding:14px 16px 14px 18px;background:var(--panel);border:1px solid var(--line);
+  border-left:3px solid var(--neutral);border-radius:3px;display:grid;gap:4px}
+.rec-row.is-right{border-left-color:var(--right)}
+.rec-row.is-wrong{border-left-color:var(--wrong)}
+.rec-q{margin:0 0 4px;color:var(--ink-3);font-size:.86rem;padding-right:130px}
+.rec-said,.rec-happened{margin:0;line-height:1.45}
+.rec-k{display:inline-block;min-width:7.5em;color:var(--ink-3);font-size:.78rem;letter-spacing:.04em}
+.rec-sure{color:var(--ink-2);font-size:.88rem}
+.rec-chip{position:absolute;top:12px;right:14px;font:500 .72rem var(--mono);padding:3px 8px;border-radius:2px;
+  background:var(--bg);color:var(--ink-2);border:1px solid var(--line)}
+.rec-row.is-right .rec-chip{color:var(--right);border-color:var(--right)}
+.rec-row.is-wrong .rec-chip{color:var(--wrong);border-color:var(--wrong)}
+
+.rec-tools{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;padding-top:8px;border-top:1px solid var(--line)}
+.rec-btn{font:500 .88rem var(--font);padding:8px 14px;border:1px solid var(--line);border-radius:2px;
+  background:transparent;color:var(--ink);cursor:pointer}
+.rec-btn:hover{border-color:var(--accent)}
+.rec-btn:focus-visible,.rec-tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.rec-danger{border-color:var(--wrong);color:var(--wrong)}
+.rec-confirm{display:flex;flex-wrap:wrap;gap:8px;align-items:center;width:100%}
+.rec-confirm p{margin:0;width:100%;color:var(--ink-2)}
+.rec-export-wrap{width:100%;display:grid;gap:6px}
+.rec-hint{margin:0;color:var(--ink-3);font-size:.84rem}
+.rec-export-text{width:100%;min-height:180px;background:var(--bg);color:var(--ink-2);border:1px solid var(--line);
+  border-radius:3px;font:12px var(--mono);padding:10px;resize:vertical}
+@media (max-width:520px){ .rec-q{padding-right:0;padding-top:22px} .rec-k{min-width:0;display:block} }
