@@ -59,7 +59,7 @@
       "id": "b71451bb-e16d-430a-a09d-303793e90bdd",
       "url": "/doc/domain-map-reading-path-YVUg5m2a3B",
       "title": "Domain Map & Reading Path",
-      "hash": "77bc6583efc39362"
+      "hash": "7d8687d565ece502"
     },
     "research/01-the-economics-flip.md": {
       "id": "8a1b723b-fd81-44b6-8bca-59cbcfec75c1",
@@ -126,6 +126,12 @@
       "url": "/doc/adr-0005-build-the-lab-in-public-topic-by-topic-GbhT08U7ps",
       "title": "ADR 0005 \u00b7 Build the Lab in Public, Topic by Topic",
       "hash": "baa30dc1823cc7b2"
+    },
+    "research/04-open-source-landscape.md": {
+      "id": "db680b68-d576-4d49-9815-96b871fc51aa",
+      "url": "/doc/04-open-source-steam-landscape-RI0v3cm0xm",
+      "title": "04 \u00b7 Open Source STEAM Landscape",
+      "hash": "33f6ff0a2867e0fd"
     }
   }
 }
