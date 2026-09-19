@@ -26,6 +26,12 @@ class StubCtx {
   stroke       = this.#rec("stroke");
   fillText     = this.#rec("fillText");
   setLineDash  = this.#rec("setLineDash");
+  save         = this.#rec("save");
+  restore      = this.#rec("restore");
+  translate    = this.#rec("translate");
+  scale        = this.#rec("scale");
+  rotate       = this.#rec("rotate");
+  ellipse      = this.#rec("ellipse");
 }
 
 class StubEl {

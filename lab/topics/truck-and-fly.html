@@ -17,6 +17,7 @@ const K = 500;                 // contact stiffness, N/m
 const LEFT = -0.12, RIGHT = 0.28;
 const FLY_START = 0.05;
 const REVEAL_AT = 0.15;
+const SQUASH_REF = 0.013;      // overlap, in metres, at which the fly is fully flattened
 
 let lab;
 lab = mountLab({
@@ -78,10 +79,24 @@ lab = mountLab({
     ctx.fillRect(X(s.xt) - 7, road - truckH, 7, truckH);
     label(ctx, `truck  ${p.mt} t`, 16, road - truckH + 22, "#C8C0B6");
 
-    // fly
-    ctx.fillStyle = "#F2EEE8";
-    ctx.beginPath(); ctx.arc(X(s.xf), road - 26, 7, 0, Math.PI * 2); ctx.fill();
-    label(ctx, `fly  ${p.mf} mg`, X(s.xf) - 24, road - 44, "#A79E92");
+    // Fly. The spring overlap is DEFORMATION, not penetration — so during
+    // contact the fly stays glued to the truck's face and squashes, instead of
+    // sliding inside a solid object. Peak overlap is v/omega, about 46px here,
+    // which is exactly what made it look like it passed through.
+    const R = 7;
+    const overlap = Math.max(0, s.xt - s.xf);
+    const squash = Math.min(1, overlap / SQUASH_REF);
+    const rx = R * (1 - 0.72 * squash);
+    const ry = R * (1 + 0.85 * squash);
+    const flyX = overlap > 0 ? X(s.xt) + rx : X(s.xf);
+    const flyY = road - truckH * 0.72;             // windscreen height, not the kerb
+    ctx.fillStyle = squash > 0 ? "#FFD9C8" : "#F2EEE8";
+    ctx.save();
+    ctx.translate(flyX, flyY);
+    ctx.scale(rx / R, ry / R);
+    ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    label(ctx, `fly  ${p.mf} mg`, flyX + 14, flyY - 10, "#A79E92");
 
     // the moment itself: two arrows, equal length, opposite directions
     if (s.F > 0) {
@@ -91,8 +106,8 @@ lab = mountLab({
       const yT = road - truckH * 0.66, yF = yT + 42;
       arrow(ctx, X(s.xt), yT, X(s.xt) - len, yT, "#E8703A");
       label(ctx, "force on the TRUCK", X(s.xt) - len, yT - 11, "#E8703A");
-      arrow(ctx, X(s.xf), yF, X(s.xf) + len, yF, "#E8703A");
-      label(ctx, "force on the FLY", X(s.xf) + 8, yF - 11, "#E8703A");
+      arrow(ctx, flyX, yF, flyX + len, yF, "#E8703A");
+      label(ctx, "force on the FLY", flyX + 8, yF - 11, "#E8703A");
       label(ctx, "same length, every frame", 16, view.h - 34, "#E8703A");
     }
 
