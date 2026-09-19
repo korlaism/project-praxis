@@ -18,6 +18,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
    painting — "question and answers, no ball". */
 .lab{position:fixed;inset:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.lab{grid-template-rows:auto minmax(0,1fr) auto auto auto}
 
 .lab-head{padding:20px 24px 14px;border-bottom:1px solid var(--line)}
 .lab-q{font-size:clamp(1.25rem,3.2vw,1.9rem);font-weight:600;letter-spacing:-.015em;
@@ -28,32 +29,30 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
   padding:16px;overflow:hidden}
 .lab-stage canvas{display:block;border-radius:3px}
 
-/* the gate — covers the stage until a commit exists */
-.lab-gate{position:absolute;inset:0;display:grid;place-content:center;gap:14px;
-  padding:24px;background:linear-gradient(to bottom,
-    color-mix(in srgb,var(--bg) 42%,transparent),
-    color-mix(in srgb,var(--bg) 78%,transparent));z-index:2}
+/* The gate is a panel BENEATH the stage, never an overlay. You cannot predict
+   about apparatus you cannot see, and covering the canvas was exactly that. */
+.lab-gate{display:grid;gap:12px;padding:16px 24px 18px;
+  border-top:1px solid var(--line);background:var(--panel)}
 .lab-gate[hidden]{display:none!important}
-.lab-gate-label{text-shadow:0 1px 6px rgba(0,0,0,.7);font-size:.7rem;font-weight:600;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--accent);text-align:center}
-.lab-opts{display:grid;gap:8px;min-width:min(420px,80vw)}
+.lab-gate-label{font-size:.7rem;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--accent)}
+.lab-opts{display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
 .lab-opt{font-family:var(--font);font-size:1.02rem;text-align:left;padding:13px 16px;
-  background:color-mix(in srgb,var(--panel) 94%,transparent);color:var(--ink);
-  box-shadow:0 2px 14px rgba(0,0,0,.45);border:1px solid var(--line);
+  background:var(--bg);color:var(--ink);border:1px solid var(--line);
   border-radius:3px;cursor:pointer;transition:border-color .12s,background .12s}
 .lab-opt:hover{border-color:var(--accent);background:#221D19}
 .lab-opt:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.lab-conf{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:2px}
+.lab-conf{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:2px}
 .lab-conf button{font-family:var(--mono);font-size:.76rem;padding:6px 10px;
   background:transparent;color:var(--ink-3);border:1px solid var(--line);
   border-radius:2px;cursor:pointer}
 .lab-conf button[aria-pressed="true"]{color:var(--bg);background:var(--accent);
   border-color:var(--accent)}
-.lab-conf-label{text-align:center;font-size:.76rem;color:var(--ink-3);margin-top:6px}
+.lab-conf-label{font-size:.76rem;color:var(--ink-3)}
 
-/* verdict */
-.lab-verdict{position:absolute;left:0;right:0;bottom:0;padding:12px 24px;
-  border-top:1px solid var(--line);background:var(--panel);font-size:.95rem}
+/* verdict — takes the gate's place once the answer is out */
+.lab-verdict{padding:14px 24px;border-top:1px solid var(--line);
+  background:var(--panel);font-size:.95rem}
 .lab-verdict[hidden]{display:none!important}
 .lab-verdict b{font-weight:600}
 .lab-verdict.is-right b{color:var(--right)}

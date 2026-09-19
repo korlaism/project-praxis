@@ -43,7 +43,7 @@ export function mountLab(topic) {
   stage.appendChild(canvas);
   const ctx = canvas.getContext("2d");
 
-  const gateEl = el("div", "lab-gate", stage);
+  const gateEl = el("div", "lab-gate", root);
   el("div", "lab-gate-label", gateEl).textContent = "Commit before you watch";
   const optsEl = el("div", "lab-opts", gateEl);
 
@@ -75,7 +75,7 @@ export function mountLab(topic) {
     };
   }
 
-  const verdict = el("div", "lab-verdict", stage);
+  const verdict = el("div", "lab-verdict", root);
   verdict.hidden = true;
 
   // ---- foot -------------------------------------------------------------
@@ -85,6 +85,18 @@ export function mountLab(topic) {
   const stepBtn = button(transport, "Step", () => { tick(1 / 60); render(); });
   const resetBtn = button(transport, "Reset", () => { softReset(); render(); });
   const againBtn = button(transport, "Ask again", () => { gate.reset(); softReset(); render(); });
+
+  // Topic-supplied actions — "Cut the string", "Release", "Collide". The
+  // moment a learner chooses to act is often the interesting one, so it
+  // belongs to the topic rather than the transport.
+  const actionBtns = [];
+  for (const a of topic.actions ?? []) {
+    const b = button(transport, a.label, () => {
+      a.onClick(state, params, api);
+      render();
+    }, a.primary ? "primary" : null);
+    actionBtns.push({ b, a });
+  }
 
   const paramsEl = el("div", "lab-params", foot);
   for (const p of topic.params ?? []) {
@@ -178,6 +190,8 @@ export function mountLab(topic) {
     playBtn.textContent = running ? "Pause" : "Play";
     for (const b of [playBtn, stepBtn, resetBtn]) b.disabled = !gate.canRun;
     againBtn.disabled = !gate.canRun;
+    for (const { b, a } of actionBtns)
+      b.disabled = !gate.canRun || (a.enabled ? !a.enabled(state, params) : false);
     clock.textContent = `t = ${t.toFixed(2)}s`;
 
     if (gate.state === "revealed") {
@@ -201,6 +215,9 @@ export function mountLab(topic) {
     if (gate.state === "committed") { gate.reveal(); render(); }
   }
 
+  const api = { reveal, play, pause, get choice() { return gate.choice; },
+                get record() { return gate.record; } };
+
   softReset();
   addEventListener("resize", resize);
   resize();
@@ -213,7 +230,7 @@ export function mountLab(topic) {
     if (e.key === "r") { softReset(); render(); }
   });
 
-  return { reveal, get record() { return gate.record; }, play, pause };
+  return api;
 }
 
 // ---- tiny helpers --------------------------------------------------------
