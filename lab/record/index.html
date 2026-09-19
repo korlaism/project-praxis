@@ -1,0 +1,12 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Your Record</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="./record.css">
+<script type="module">
+import { renderRecord } from "./view.js";
+import { openNotebook } from "../notebook/store.mjs";
+import { SCENARIOS } from "../scenarios/index.mjs";
+renderRecord(document.body, { notebook: openNotebook(), scenarios: SCENARIOS });
+</script>

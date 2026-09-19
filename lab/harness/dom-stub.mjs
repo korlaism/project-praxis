@@ -50,6 +50,12 @@ class StubEl {
     }
   }
   appendChild(n) { this.children.push(n); n.parent = this; return n; }
+  remove() {
+    if (!this.parent) return;
+    this.parent.children = this.parent.children.filter((c) => c !== this);
+    this.parent = null;
+  }
+  replaceChildren(...xs) { this.children = []; this.textContent = ""; this.append(...xs); }
   append(...xs) {
     for (const x of xs) typeof x === "string" ? (this.textContent += x) : this.appendChild(x);
   }
@@ -84,7 +90,7 @@ export function installDom({ dpr = 1 } = {}) {
   const saved = {};
   const set = (k, v) => { saved[k] = g[k]; g[k] = v; };
 
-  set("document", { body, createElement: (t) => new StubEl(t) });
+  set("document", { body, createElement: (t) => new StubEl(t), createElementNS: (_ns, t) => new StubEl(t) });
   set("devicePixelRatio", dpr);
   set("innerWidth", 1000);
   set("innerHeight", 800);
