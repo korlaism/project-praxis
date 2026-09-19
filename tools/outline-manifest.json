@@ -17,7 +17,7 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "7118c4ad2b2ed9b4"
+      "hash": "e74863fc59c1a6e8"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
@@ -132,6 +132,24 @@
       "url": "/doc/04-open-source-steam-landscape-RI0v3cm0xm",
       "title": "04 \u00b7 Open Source STEAM Landscape",
       "hash": "33f6ff0a2867e0fd"
+    },
+    "spec/07-generated-scenarios.md": {
+      "id": "65f6a779-bcf4-43f4-aacc-c78cffed2c2f",
+      "url": "/doc/generated-scenarios-architecture-and-feasibility-nYMWWBsPP7",
+      "title": "Generated Scenarios \u2014 Architecture and Feasibility",
+      "hash": "ed31e26141ef85e0"
+    },
+    "decisions/0006-the-notebook-is-the-product.md": {
+      "id": "22ac73fe-9dc2-4c59-8425-5083827bb4ab",
+      "url": "/doc/adr-0006-the-notebook-is-the-product-EiEo5onpmt",
+      "title": "ADR 0006 \u00b7 The Notebook Is the Product",
+      "hash": "1e6b64fd90eb6be2"
+    },
+    "decisions/0007-generated-scenarios.md": {
+      "id": "6ad16ff6-6ac9-4ebe-acba-8e8273336d61",
+      "url": "/doc/adr-0007-scenarios-are-generated-from-verified-primitives-U6u55gCXo2",
+      "title": "ADR 0007 \u00b7 Scenarios Are Generated From Verified Primitives",
+      "hash": "4d9dcd397b5d2310"
     }
   }
 }
