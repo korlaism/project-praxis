@@ -7,27 +7,50 @@ harness/gate.mjs        the commit-before-reveal state machine (pure, tested)
 harness/lab.js          canvas loop, transport, sliders, layout
 harness/lab.css         screen-recordable styling
 harness/dom-stub.mjs    the smallest DOM the harness touches, for tests
-components/             reusable STEAM primitives — pure, exact, tested
-topics/                 one published topic per file
+components/             pure physics — exact, tested, with analytic solutions
+primitives/             composable scenario types: setup/step/draw/classify
+scenario/               the spec schema, the headless runner, the mount
+scenarios/              scenario specifications — data, not code
+topics/                 a page per scenario, three lines each
 reference.html          fixture exercising every harness feature
 ```
 
-## Writing a topic
+## Writing a scenario
+
+A scenario is **data**, not code (ADR 0007). It names a primitive, sets its
+parameters, and supplies the question:
 
 ```js
-import { mountLab } from "./harness/lab.js";
-let lab;
-lab = mountLab({
+export default {
+  schema: 1,
+  primitive: "circular-release",
+  params: { r: 1.2, omega: 2.4 },
   question: "…",                       // the provocation, not the subject
   options: [{ id, label }, …],         // what a confident person would say
-  correct: "id",
+  correct: "tangent",
+  errorTags: { outward: "outward-in-circles" },   // why each wrong answer is chosen
   explain: "…",                        // shown only after the reveal
-  params: [{ key, label, min, max, step, value, unit }],
-  setup()               { return state },
-  step(state, dt, p)    { /* …; lab.reveal() when the outcome is undeniable */ },
-  draw(ctx, state, p, view) { },
-});
+};
 ```
+
+The page is then three lines: `mountScenario(spec)`.
+
+## Writing a primitive
+
+```js
+export const id, outcomes, controls, actions?
+export function setup(params)
+export function step(state, dt, params)        // set state.done when settled
+export function draw(ctx, state, params, view, ui)
+export function classify(state, params)        // what ACTUALLY happened
+```
+
+`classify` is the important one. It measures the outcome from the finished run
+rather than asserting it, which is what lets a scenario's stated answer be
+checked by machine — see the answer check below.
+
+An action may carry `autoAt` in seconds, so a scenario needing an interaction
+is still deterministic when run headlessly.
 
 ## Rules the harness enforces
 
@@ -57,3 +80,10 @@ transport and the gate down with it.
 That last set exists because the gate tests once passed while the harness was
 completely dead. Reintroduce the bug — `pause()` before `state` is assigned in
 `softReset()` — and all nine smoke tests go red.
+
+**The answer check.** `scenario/scenarios.test.mjs` runs every shipped scenario
+to completion with no DOM and asserts that `classify()` returns the option the
+scenario claims is correct — and that a scenario claiming the wrong thing, or
+carrying parameters that contradict its answer, is caught. It is the check that
+makes generated scenarios trustworthy, and the one no amount of model quality
+substitutes for.

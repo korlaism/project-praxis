@@ -176,7 +176,7 @@ export function mountLab(topic) {
     const view = { w: viewW, h: viewH, t };
     ctx.clearRect(0, 0, view.w, view.h);
     try {
-      topic.draw?.(ctx, state, params, view);
+      topic.draw?.(ctx, state, params, view, { revealed: gate.state === "revealed" });
     } catch (err) {
       // Report it and keep the harness alive — a broken topic should not also
       // break the transport, the gate and every future resize.
