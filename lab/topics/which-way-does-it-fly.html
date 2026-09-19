@@ -1,0 +1,153 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Which way does it fly?</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../harness/lab.css">
+<script type="module">
+import { mountLab } from "../harness/lab.js";
+import { positionOnCircle, tangentVelocity, radialDirection, advance, speed }
+  from "../components/circular.mjs";
+
+/* Topic 1 · outward-in-circles.
+   Looking down on a frictionless table. No gravity in the plane, so the only
+   force is the string pulling *inward*. Cut it and nothing pushes the ball
+   anywhere — it keeps the velocity it already had. */
+
+const CENTRE = { cx: 0, cy: 0 };
+const REVEAL_AFTER = 1.6;     // radii travelled before the answer is undeniable
+
+let lab;
+lab = mountLab({
+  question: "A ball is whirling on a string. You cut the string. Which way does it fly?",
+  note: "Looking down on a frictionless table — no gravity in this plane. Cut the string whenever you like.",
+  options: [
+    { id: "outward", label: "Straight outward, away from the centre" },
+    { id: "tangent", label: "Straight, in the direction it was already moving" },
+    { id: "curve",   label: "It carries on curving along the same circle" },
+    { id: "spiral",  label: "It spirals outwards, widening as it goes" },
+  ],
+  correct: "tangent",
+  explain:
+    "The string was pulling the ball INWARD the whole time — that is the only force there was. " +
+    "Remove it and nothing pushes the ball anywhere, so it simply keeps the velocity it already had: " +
+    "along the tangent. Nothing ever pushed it outward, so it cannot fly outward.",
+  params: [
+    { key: "r",     label: "string length", min: 0.5, max: 2.0, step: 0.05, value: 1.2, unit: " m" },
+    { key: "omega", label: "spin",          min: 1.0, max: 4.0, step: 0.1,  value: 2.4, unit: " rad/s" },
+  ],
+  actions: [
+    {
+      label: "Cut the string",
+      primary: true,
+      enabled: (s) => !s.cut,
+      onClick(s, p, api) {
+        s.cut = true;
+        s.cutTheta = s.theta;
+        s.cutAt = positionOnCircle(CENTRE, p.r, s.theta);
+        s.vel = tangentVelocity(p.r, p.omega, s.theta);
+        s.pos = s.cutAt;
+        s.trail = [s.cutAt];
+        api.play();
+      },
+    },
+  ],
+
+  setup(_, p) {
+    return {
+      theta: -Math.PI / 2, cut: false, cutTheta: null, cutAt: null,
+      pos: positionOnCircle(CENTRE, p.r, -Math.PI / 2), vel: null, trail: [], flown: 0,
+      done: false,
+    };
+  },
+
+  step(s, dt, p) {
+    if (s.done) return;              // the point is made; let it sit there
+    if (!s.cut) {
+      s.theta += p.omega * dt;
+      s.pos = positionOnCircle(CENTRE, p.r, s.theta);
+      return;
+    }
+    s.pos = advance(s.pos, s.vel, dt);
+    s.trail.push(s.pos);
+    s.flown = Math.hypot(s.pos.x - s.cutAt.x, s.pos.y - s.cutAt.y) / p.r;
+    if (s.flown > REVEAL_AFTER) { s.done = true; lab.reveal(); }
+  },
+
+  draw(ctx, s, p, view) {
+    const cx = view.w / 2, cy = view.h / 2;
+    // Fit the circle plus the whole flight, whatever the string length is set to.
+    const scale = (Math.min(view.w, view.h) / 2) / (p.r * (1 + REVEAL_AFTER) * 1.15);
+    const X = (x) => cx + x * scale;
+    const Y = (y) => cy - y * scale;                        // flip: canvas y grows downward
+
+    ctx.fillStyle = "#1B1815";
+    ctx.fillRect(0, 0, view.w, view.h);
+
+    // the circle it has been travelling
+    ctx.strokeStyle = "#4A4239"; ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 6]);
+    ctx.beginPath(); ctx.arc(cx, cy, p.r * scale, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // the peg at the centre
+    ctx.fillStyle = "#5C5248";
+    ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2); ctx.fill();
+
+    if (!s.cut) {
+      // the string, and the force it applies — inward, always
+      ctx.strokeStyle = "#A79E92"; ctx.lineWidth = 1.5;
+      seg(ctx, cx, cy, X(s.pos.x), Y(s.pos.y));
+      const rd = radialDirection(s.theta);
+      arrow(ctx, X(s.pos.x), Y(s.pos.y),
+            X(s.pos.x - rd.x * 0.42), Y(s.pos.y - rd.y * 0.42), "#E8703A");
+      label(ctx, "the string pulls INWARD", 14, 26, "#E8703A");
+    } else {
+      // where it actually went
+      ctx.strokeStyle = "#F2EEE8"; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      s.trail.forEach((q, i) => (i ? ctx.lineTo(X(q.x), Y(q.y)) : ctx.moveTo(X(q.x), Y(q.y))));
+      ctx.stroke();
+
+      // the answer most people give, drawn for comparison once it is settled
+      if (lab?.record?.correct !== null) {
+        const rd = radialDirection(s.cutTheta);
+        ctx.strokeStyle = "#D65442"; ctx.lineWidth = 1.5; ctx.setLineDash([6, 6]);
+        seg(ctx, X(s.cutAt.x), Y(s.cutAt.y),
+                 X(s.cutAt.x + rd.x * p.r * 2.4), Y(s.cutAt.y + rd.y * p.r * 2.4));
+        ctx.setLineDash([]);
+        label(ctx, "straight outward — what most people expect",
+              X(s.cutAt.x) + 14, Y(s.cutAt.y) - 14, "#D65442");
+      }
+      ctx.fillStyle = "#6E665C";
+      ctx.beginPath(); ctx.arc(X(s.cutAt.x), Y(s.cutAt.y), 4, 0, Math.PI * 2); ctx.fill();
+      label(ctx, "cut here", X(s.cutAt.x) + 8, Y(s.cutAt.y) + 18, "#6E665C");
+    }
+
+    ctx.fillStyle = "#F2EEE8";
+    ctx.beginPath(); ctx.arc(X(s.pos.x), Y(s.pos.y), 10, 0, Math.PI * 2); ctx.fill();
+
+    const v = s.cut ? speed(s.vel) : p.omega * p.r;
+    label(ctx, `speed  ${v.toFixed(2)} m/s`, 14, view.h - 16, "#A79E92");
+  },
+});
+
+function seg(ctx, x1, y1, x2, y2) {
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+}
+function arrow(ctx, x1, y1, x2, y2, colour) {
+  ctx.strokeStyle = colour; ctx.fillStyle = colour; ctx.lineWidth = 2;
+  seg(ctx, x1, y1, x2, y2);
+  const a = Math.atan2(y2 - y1, x2 - x1);
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - 8 * Math.cos(a - 0.4), y2 - 8 * Math.sin(a - 0.4));
+  ctx.lineTo(x2 - 8 * Math.cos(a + 0.4), y2 - 8 * Math.sin(a + 0.4));
+  ctx.fill();
+}
+function label(ctx, text, x, y, colour) {
+  ctx.fillStyle = colour;
+  ctx.font = '12px "Spline Sans Mono", ui-monospace, monospace';
+  ctx.fillText(text, x, y);
+}
+</script>
