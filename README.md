@@ -57,7 +57,7 @@ Six accepted, one proposed. Each declares `Rests on:` in its header: `0001`, `00
 
 **If you are shipping a topic:** [Phase 0 · Publish](spec/00-publish-phase.md) → [02 · Misconceptions & Diagnostic Instruments](research/02-misconceptions-and-diagnostics.md).
 
-**If you want where this is going:** [ADR 0006](decisions/0006-the-notebook-is-the-product.md) → [Generated Scenarios](spec/07-generated-scenarios.md) → [ADR 0007](decisions/0007-generated-scenarios.md).
+**If you want where this is going:** [ADR 0006](decisions/0006-the-notebook-is-the-product.md) → [Generated Scenarios](spec/07-generated-scenarios.md) → [ADR 0007](decisions/0007-generated-scenarios.md) → [Open Source, With a Paid Hosted Version](spec/08-open-source-and-hosted.md).
 
 **If you are building the pilot (parked):** [Phase 1 Requirements](spec/02-requirements.md) → [Pilot Design](spec/03-pilot-design.md) → [Data Model](spec/04-data-model.md).
 
@@ -69,6 +69,7 @@ Six accepted, one proposed. Each declares `Rests on:` in its header: `0001`, `00
 spec/        What we are building and why it would count as working
              00-publish-phase.md is the active phase; 01-06 are Phase 1, parked
              07-generated-scenarios.md is where this is heading
+             08-open-source-and-hosted.md is how it will be shipped
 research/    Evidence, prior art, and the arguments against us
 decisions/   ADRs — one per settled question
 tools/       sync-outline.py and its manifest. Not documentation.
