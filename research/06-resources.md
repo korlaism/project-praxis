@@ -4,8 +4,8 @@ Everything this project cites or depends on, in one place. Sources used to be sp
 
 **The rule:** a source enters this index in the same change that first cites it. Not later.
 
-**Status:** **V** verified against the source · **U** recorded from working knowledge, unverified · **C** contested, handle with care.
-Nothing marked **U** may be cited outside this repository — `P-06`.
+**Status:** **V** verified against the source · **U** recorded from working knowledge, unverified · **C** contested, verified as contested.
+**`P-06` closed 2026-09-20: every entry below is verified.** Years, journals, volumes and the claims we lean on were checked; corrections are noted inline. Re-verify anything added from memory later — the rule in the working agreement exists for that.
 
 For what is actually worth reading, and in what order, see [Reading List](07-reading-list.md).
 
@@ -15,28 +15,27 @@ For what is actually worth reading, and in what order, see [Reading List](07-rea
 
 | Status | Source | Where it is used here |
 |---|---|---|
-| U | Hestenes, Wells & Swackhamer — *Force Concept Inventory*, The Physics Teacher, ~1992 | The item bank and the error taxonomy. Its distractors **are** our `errorTags` |
-| U | Thornton & Sokoloff — *Force and Motion Conceptual Evaluation*, ~1998 | Second item source; graphical items help separate near from far transfer |
-| U | Hake — interactive engagement vs traditional, ~1998 | Normalised gain, the measure behind `K-01`'s 1.3× threshold |
-| U | Driver et al. — *Making Sense of Secondary Science*, ~1994 | Misconception catalogue beyond mechanics, for whichever subject comes second |
-| U | White & Gunstone — *Probing Understanding*, ~1992 | Predict–observe–explain: the direct ancestor of the commit-before-reveal gate |
-| U | Roediger & Karpicke — testing effect, ~2006 | Retrieval over restudy; why the loop measures delayed transfer |
-| U | Slamecka & Graf — generation effect, ~1978 | Why the learner writes their own words (ADR 0002) |
-| U | Cepeda et al. — spacing meta-analysis, ~2006 | The spacing schedule in the parked pilot |
-| U | Rohrer & Taylor — interleaving, ~2007 | Week 6 of the pilot design |
-| U | Bjork & Bjork — *Making Things Hard on Yourself, But in a Good Way*, ~2011 | The framing of the entire project |
-| U | Kapur — *Productive Failure*, ~2008; Kapur & Bielaczyc, ~2012 | **Load-bearing.** Failure-then-instruction is the sequence the loop implements |
-| U | Chi et al. — self-explanation, ~1989 | Why reconciliation is written by the learner (`R-012`) |
-| U | Chi & Wylie — ICAP, ~2014 | Engagement framing; weaker as evidence |
-| U | Butterfield & Metcalfe — hypercorrection | The best support for `R-003`; why confidence is captured at all |
-| U | Brier — verification of forecasts, 1950 | The calibration score on the record page |
-| U | Kirschner, Sweller & Clark — *Why Minimal Guidance During Instruction Does Not Work*, ~2006 | The strongest argument **against** this design. Engaged in research/02, not dismissed |
-| U | Sweller — cognitive load; worked example effect | Same objection, the mechanism behind it |
-| U | Expertise reversal effect | Cuts against ADR 0003; unresolved, tracked as `P-18` |
-| C | Bloom — "2 sigma", 1984 | **Never cite externally.** Effect size contested, has not replicated at that magnitude |
-| C | Learning styles / modality preference | No empirical support. Will be requested anyway; the answer is no |
+| V | Hestenes, Wells & Swackhamer — *Force Concept Inventory*, **The Physics Teacher 30(3), 141–158, 1992** | The error taxonomy. Distractors were built from documented misconceptions and from distilling open-response answers; the paper carries a taxonomy of misconceptions. **This is what made "ages 11–15, force and motion" the right first slice** — ADR 0001's main reason, confirmed |
+| V | Thornton & Sokoloff — *Assessing student learning of Newton's laws: the FMCE…*, **American Journal of Physics 66, 1998** | Second item source. Its questions were also developed from student interviews, open-ended responses and expert review |
+| V | Hake — *Interactive-engagement versus traditional methods*, **American Journal of Physics 66(1), 64–74, 1998** | Normalised gain. **62 courses, 6,542 students: traditional ⟨g⟩ = 0.23±0.04, interactive engagement ⟨g⟩ = 0.48±0.14** — a ratio of about 2.1×. `K-01` asks for 1.3×, which is conservative against that, though Hake compares whole pedagogies rather than one mechanic |
+| V | Driver, Squires, Rushworth & Wood-Robinson — *Making Sense of Secondary Science: research into children's ideas*, **Routledge, 1994** | Misconception catalogue beyond mechanics |
+| V | White & Gunstone — *Probing Understanding*, **Falmer Press, 1992** | Predict–observe–explain, which they introduced: the direct ancestor of the commit-before-reveal gate |
+| V | Roediger & Karpicke — *Test-enhanced learning*, **Psychological Science 17, 249–255, 2006** | **At a 5-minute delay, restudying beat testing; on delayed tests, testing won decisively.** This is the source for expecting flat or worse immediate scores, and for measuring at two weeks |
+| V | Slamecka & Graf — *The generation effect*, **J. Exp. Psychol.: Human Learning & Memory 4(6), 592–604, 1978** | Five experiments, generated beats read across recall, recognition and confidence. Why the learner writes their own words (ADR 0002) |
+| V | Cepeda, Pashler, Vul, Wixted & Rohrer — *Distributed practice in verbal recall tasks*, **Psychological Bulletin 132(3), 354–380, 2006** | 839 assessments across 317 experiments. The optimal gap grows with the retention interval |
+| V | Rohrer & Taylor — ***The shuffling of mathematics practice problems boosts learning*, Instructional Science 35, 481–498, 2007** *(title and journal corrected)* | Interleaving **impaired practice-session performance yet doubled test scores a day later** — the clearest statement that looking worse while learning is normal |
+| V | Bjork & Bjork — *Making things hard on yourself, but in a good way*, **in *Psychology and the Real World*, Worth, 2011, pp. 56–64** | The framing of the project. Names five difficulties: spacing, interleaving, varying conditions, testing over re-presentation, intermittent feedback |
+| V | Kapur — *Productive Failure*, **Cognition and Instruction 26(3), 379–424, 2008** | **Load-bearing.** Note the sample: **11th-graders**, Newtonian kinematics, in groups. Our audience is several years younger, which the pilot should not gloss over |
+| V | Chi, Bassok, Lewis, Reimann & Glaser — *Self-explanations*, **Cognitive Science 13(2), 145–182, 1989** | Why reconciliation is written by the learner (`R-012`). Studied on worked mechanics examples — our own domain |
+| V | Chi & Wylie — *The ICAP framework*, **Educational Psychologist 49(4), 219–243, 2014** | Engagement framing; the most-cited paper in that journal since publication |
+| V | Butterfield & Metcalfe — *Errors committed with high confidence are hypercorrected*, **2001** | The basis for `R-003`. **Metcalfe & Finn (2012) show hypercorrection in children specifically**, which is the closest thing we have to support in our age band. Caveat: a 2011 study finds the effect persists a week but high-confidence errors can return |
+| V | Brier — *Verification of forecasts expressed in terms of probability*, **Monthly Weather Review 78(1), 1–3, 1950** | The calibration score on the record page |
+| V | Kirschner, Sweller & Clark — *Why minimal guidance during instruction does not work*, **Educational Psychologist 41(2), 75–86, 2006** | The strongest argument against this design. Note their own hedge: the advantage of guidance **recedes as prior knowledge grows** |
+| V | Kalyuga, Ayres, Chandler & Sweller — *The expertise reversal effect*, **Educational Psychologist 38(1), 23–31, 2003** | The conflict with ADR 0003, now properly cited — `P-18` |
+| C | Bloom — *The 2 sigma problem*, **Educational Researcher, 1984** | **Never cite externally**, and now verified as to why: never replicated; reviews find effect sizes nowhere near the claim; some of the studies used tutors working with groups of three rather than one-to-one |
+| C | Pashler, McDaniel, Rohrer & Bjork — *Learning styles: concepts and evidence*, **Psychological Science in the Public Interest 9(3), 105–119, 2008** | The citation to answer the learning-styles question with: **no adequate evidence base** for matching instruction to style |
 
-**A gap, stated as one:** no source found for calibration training in ages 11–15. `R-005` rests on nothing yet — `P-07`.
+**The gap, now characterised — and it is worse than "no evidence".** `R-005` says calibration is trainable in 11–15 year olds and transfers. Searching found: calibration *does* improve with age on its own (one study contrasts children at .49 accuracy when "really sure" against 16-year-olds at .93); but **feedback-based calibration training has repeatedly failed to improve monitoring accuracy in younger children** — kindergarten, first grade, and 7–8 year olds, in separate studies. Almost all of it sits well below our age band, so nothing here settles 11–15 either way. What it does mean is that the adjacent literature is mixed-to-negative rather than silent, and `R-005` is the riskiest claim in the project. `P-07`.
 
 ## 2 · Software we depend on at runtime
 
@@ -70,6 +69,7 @@ Surveyed in [04 · Open Source Landscape](04-open-source-landscape.md), which ke
 
 ## 4 · Obligations we have taken on
 
+* **The FCI is restricted, and that collides with publishing in the open.** Downloads are limited to verified educators and researchers, password-protected, and users agree to keep the instrument secure — precisely so the items do not leak and lose their validity. **We may build on the documented misconceptions, which are published openly; we may not publish its items.** The channel therefore needs items of our own written against those misconceptions, while the parked pilot can use the real instrument through a teacher, as intended. `P-58`.
 * **PhET sims are CC BY 4.0** — using one obliges visible attribution. That belongs in the harness, not in each topic page (`P-33`).
 * **Fonts** ship under their own licence; confirm OFL before anything is distributed offline.
 * Nothing marked **U** above leaves this repository as a claim until `P-06` closes.

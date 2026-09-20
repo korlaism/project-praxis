@@ -58,5 +58,5 @@ Rejected on measurement grounds. Six weeks supports one topic if the result is t
 ## Revisit when
 
 * No teacher or cohort can be secured within a reasonable window — the pivot is then direct-to-learner, with K-05's problems arriving unsolved.
-* `P-06` finds the FCI/FMCE distractor sets unusable as an error taxonomy, which removes the main reason school beat engineering.
+* ~~`P-06` finds the FCI/FMCE distractor sets unusable as an error taxonomy, which removes the main reason school beat engineering.~~ **Tested 2026-09-20 and it did not trigger:** both instruments' distractors were built from documented misconceptions, and the FCI publishes a taxonomy of them. One qualification came with it — the instruments themselves are restricted and must not be published, so we build on the misconceptions and write our own items (`P-58`). The reason this decision rests on is intact.
 * Verification shows force and motion misconceptions are already well displaced by current teaching in the target cohort, leaving nothing to bait.

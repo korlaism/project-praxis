@@ -17,7 +17,7 @@ These are the reason the phase exists. Each maps to a kill criterion.
 | `R-002` | Per-learner errors cluster into ≤6 stable, nameable signatures with internal consistency above chance reassignment. | *Guess.* Misconception catalogues establish that errors are systematic **across** learners; per-learner stability is our extrapolation. | K-02 |
 | `R-003` | Deliberately baiting a learner's named signature beats routing around it. | *Guess.* Hypercorrection effect is suggestive, not sufficient. | — |
 | `R-004` | Logged confusion is resolved more often than unlogged confusion. | Self-explanation and metacognitive monitoring literature | — |
-| `R-005` | Calibration (Brier) improves measurably in six weeks in ages 11–15, and transfers beyond force and motion. | *Guess.* Adult calibration training has some support; this age band is unevidenced as far as we have looked. | K-04 |
+| `R-005` | Calibration (Brier) improves measurably in six weeks in ages 11–15, and transfers beyond force and motion. | *Guess, and the riskiest one.* `P-06` found calibration improves with **age** unaided, but that **feedback-based calibration training repeatedly failed** in younger children (kindergarten, first grade, 7–8). Nothing found in the 11–15 band. Adjacent evidence is mixed-to-negative, not silent. | K-04 |
 
 ## 2. The instrument
 
