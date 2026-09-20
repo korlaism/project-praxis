@@ -17,7 +17,7 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "e3435bd8d99b6abc"
+      "hash": "83fb209470b2e46f"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
@@ -29,7 +29,7 @@
       "id": "80a66b80-2e08-4f47-9bb2-a20d2690fe40",
       "url": "/doc/phase-0-requirements-PBSyxXMsdz",
       "title": "Phase 1 Requirements",
-      "hash": "87a379085693b47a"
+      "hash": "c719eb6eacb147d1"
     },
     "spec/03-pilot-design.md": {
       "id": "d07d1370-66b9-4895-bea5-631b904197a0",
@@ -198,6 +198,12 @@
       "url": "/doc/adr-0010-youtube-shorts-one-topic-a-fortnight-5JXmuTpmGt",
       "title": "ADR 0010 \u00b7 YouTube Shorts, One Topic a Fortnight",
       "hash": "3fdc6e58e04abc42"
+    },
+    "decisions/0011-author-our-own-items.md": {
+      "id": "6435c69b-d4a3-4c8d-946d-6714a6d82d2c",
+      "url": "/doc/adr-0011-author-our-own-items-doadqwtqQx",
+      "title": "ADR 0011 \u00b7 Author Our Own Items",
+      "hash": "bb97d9c3943397cd"
     }
   }
 }
