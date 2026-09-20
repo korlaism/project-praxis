@@ -9,6 +9,7 @@ import { installDom } from "../harness/dom-stub.mjs";
 import { openNotebook, memoryBackend } from "../notebook/store.mjs";
 import truckFly from "../scenarios/truck-and-fly.mjs";
 import pucks from "../scenarios/what-keeps-it-moving.mjs";
+import { errorTagFor } from "./mount.js";
 
 test("playing a scenario to its reveal writes one card to the right notebook", async () => {
   const dom = installDom();
@@ -102,4 +103,35 @@ test("a wrapped scenario records that its answer was only asserted", async () =>
   assert.equal(c.correct, false);
   assert.equal(c.errorTag, "outward-in-circles", "a wrong answer still names its misconception");
   dom.restore();
+});
+
+/* ── Cues reach the harness keyed by misconception, not by option (ADR 0014) ── */
+
+test("the cue for a wrong choice is the one its misconception carries", () => {
+  const spec = {
+    schema: 1, primitive: "circular-release",
+    params: { radius: 1.2, omega: 2.4 },
+    question: "Which way?", explain: "Straight.",
+    options: [
+      { id: "out", label: "Outward" },
+      { id: "tan", label: "Tangent" },
+      { id: "curve", label: "Keeps curving" },
+    ],
+    correct: "tan",
+    errorTags: { out: "outward-in-circles", curve: "force-is-stored" },
+    cues: {
+      "outward-in-circles": "Watch the string at the moment it is cut.",
+      "force-is-stored": "What is touching the ball after the cut?",
+    },
+  };
+  const cue = (record) => spec.cues?.[errorTagFor(spec, record)] ?? null;
+
+  const wrong = (choice) => ({ choice, observed: "tan", correct: false, unlisted: false });
+
+  assert.equal(cue(wrong("out")), "Watch the string at the moment it is cut.");
+  assert.equal(cue(wrong("curve")), "What is touching the ball after the cut?");
+  assert.equal(cue({ choice: "tan", observed: "tan", correct: true, unlisted: false }), null,
+    "a right answer is never cued");
+  assert.equal(cue({ choice: "out", observed: "nowhere", correct: false, unlisted: true }), null,
+    "an outcome nobody predicted means nobody held a misconception about it");
 });

@@ -320,3 +320,90 @@ test("credit is shown, because the licence obliges it", async () => {
   assert.match(t, /CC BY 4\.0/);
   dom.restore();
 });
+
+/* ── Cue, then an optional retry (ADR 0014) ───────────────────────────────
+ *
+ * The order is outcome, cue, optional retry, explanation. The explanation is
+ * WITHHELD on a first wrong attempt that has a cue: handing it over
+ * immediately is the losing arm of the study this came from. A learner who
+ * wants it anyway can ask, and nobody is ever forced to try again.
+ */
+
+/** Everything the verdict panel is currently saying. */
+function verdictText(el) {
+  const out = [];
+  const walk = (n) => { if (n.textContent) out.push(n.textContent); n.children?.forEach(walk); };
+  walk(el("lab-verdict"));
+  return out.join(" ");
+}
+
+const CUE = "Watch what happens the instant it starts.";
+const withCue = (over = {}) => ({
+  cue: (rec) => (rec.choice === "no" ? CUE : null),
+  ...over,
+});
+
+test("a wrong first answer with a cue shows the cue and withholds the explanation", async () => {
+  const { lab, dom, el } = await mount(withCue());
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+
+  const shown = verdictText(el);
+  assert.match(shown, /Watch what happens/);
+  assert.ok(!shown.includes("Because."), "the explanation is the losing arm — it waits");
+  dom.restore();
+});
+
+test("the learner can ask for the explanation without trying again", async () => {
+  const { lab, dom, el, button } = await mount(withCue());
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  button("Show why").onclick();
+  assert.match(verdictText(el), /Because\./);
+  dom.restore();
+});
+
+test("a right answer is never cued", async () => {
+  const { lab, dom, el } = await mount(withCue());
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  const shown = verdictText(el);
+  assert.match(shown, /Because\./);
+  assert.ok(!shown.includes(CUE));
+  dom.restore();
+});
+
+test("a wrong answer with no cue for it explains immediately", async () => {
+  const { lab, dom, el } = await mount(withCue({ cue: () => null }));
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  assert.match(verdictText(el), /Because\./);
+  dom.restore();
+});
+
+test("predicting again locks the simulation and keeps the first attempt", async () => {
+  const { lab, dom, button } = await mount(withCue());
+  // Confidence is what a Brier score is made of — the attempt is worth keeping
+  // only if this survives the retry too.
+  button("certain").onclick();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  button("Predict again").onclick();
+
+  assert.equal(lab.record.choice, null, "a fresh attempt, not an editable old one");
+  assert.equal(lab.record.retryOf, 0);
+  assert.equal(lab.attempts[0].choice, "no");
+  assert.equal(lab.attempts[0].confidence, "certain");
+  dom.restore();
+});
+
+test("the second attempt explains rather than cueing again", async () => {
+  const { lab, dom, el, button } = await mount(withCue());
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  button("Predict again").onclick();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  assert.match(verdictText(el), /Because\./, "cueing twice is nagging, not scaffolding");
+  dom.restore();
+});

@@ -16,8 +16,12 @@
 export const STORAGE_KEY = "praxis.notebook.v1";
 const VERSION = 1;
 const REQUIRED = ["subject", "scenario", "choice"];
+// attempt/retryOf carry ADR 0014's retries: a second try is its own card that
+// points at the first, never an edit of it (R-014). Without them a retry would
+// file as an indistinguishable second card and the link would be lost.
 const KEPT = ["subject", "scenario", "choice", "confidence", "observed", "correct",
-              "unlisted", "errorTag", "outcomeSource", "params", "committedAt", "revealedAt"];
+              "unlisted", "errorTag", "outcomeSource", "params", "committedAt", "revealedAt",
+              "attempt", "retryOf"];
 
 /** An in-memory stand-in for localStorage, for tests and as a last resort. */
 export function memoryBackend() {

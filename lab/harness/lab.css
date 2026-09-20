@@ -65,6 +65,9 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
 .lab-verdict b{font-weight:600}
 .lab-verdict.is-right b{color:var(--right)}
 .lab-verdict.is-wrong b{color:var(--wrong)}
+/* ADR 0014: the cue's two ways out. Neither is compulsory — "Predict again"
+   leads, "Show why" is always there for someone who would rather just be told. */
+.lab-verdict-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .lab-verdict span{color:var(--ink-2)}
 
 .lab-foot{display:flex;flex-wrap:wrap;gap:18px;align-items:center;

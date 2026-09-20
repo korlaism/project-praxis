@@ -49,6 +49,9 @@ export function mountScenario(spec, { notebook = openNotebook() } = {}) {
       if (s.done) lab.reveal(primitive.classify(s, p));
     },
     draw: (ctx, s, p, view, ui) => primitive.draw(ctx, s, p, view, ui),
+    // ADR 0014. Keyed by the misconception the learner acted on, not by the
+    // option they clicked: the same wrong belief recurs across scenarios.
+    cue: (record) => spec.cues?.[errorTagFor(spec, record)] ?? null,
     // Every reveal becomes a card in the scenario's subject notebook (ADR 0006).
     onReveal: (record) => file(spec, record, notebook, "observed"),
   });
@@ -63,6 +66,7 @@ function mountWrapped(spec, notebook) {
     correct: spec.correct,
     explain: spec.explain,
     embed: spec.embed,
+    cue: (record) => spec.cues?.[errorTagFor(spec, record)] ?? null,
     // No observation is possible, so reveal() carries nothing and the gate
     // falls back to the authored answer — the seam P-52 already left open.
     onReveal: (record) => file(spec, record, notebook, "asserted"),

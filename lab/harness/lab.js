@@ -8,7 +8,7 @@
  *
  *   import { mountLab } from "./harness/lab.js";
  *   mountLab({
- *     question, note, options, correct, explain,
+ *     question, note, options, correct, explain, cue,
  *     params: [{ key, label, min, max, step, value, unit }],
  *     setup(state, p), step(state, dt, p), draw(ctx, state, p, view),
  *   });
@@ -91,6 +91,8 @@ export function mountLab(topic) {
   }
 
   const verdict = el("div", "lab-verdict", root);
+  // Set when the learner asks for the explanation instead of trying again.
+  let explained = false;
   verdict.hidden = true;
 
   // ---- foot -------------------------------------------------------------
@@ -162,6 +164,7 @@ export function mountLab(topic) {
   let destroyed = false, observer = null;
 
   function softReset() {
+    explained = false;
     // State first. pause() renders, and rendering without state throws out of
     // mountLab, which kills resize() and leaves the canvas black forever.
     t = 0;
@@ -269,10 +272,33 @@ export function mountLab(topic) {
       b.textContent = rec.unlisted
         ? "What happened was none of the choices."
         : gate.isCorrect ? "You had it." : `You said: ${said}${conf}.`;
+
+      // ADR 0014: outcome, cue, optional retry, explanation. Handing over the
+      // explanation the instant someone is wrong is the arm the evidence says
+      // lost. Cue only the FIRST attempt — cueing twice is nagging, not
+      // scaffolding — and never when they were right.
+      const cue = !gate.isCorrect && rec.attempt === 0 && !explained
+        ? (typeof topic.cue === "function" ? topic.cue(rec) : null)
+        : null;
+
       const s = document.createElement("span");
-      const why = typeof topic.explain === "function" ? topic.explain(rec) : topic.explain;
-      s.textContent = " " + (why ?? "");
-      verdict.append(b, s);
+      if (cue) {
+        s.textContent = " " + cue;
+        verdict.append(b, s);
+        const acts = el("div", "lab-verdict-acts", verdict);
+        // Neither is compulsory. Forcing a second attempt on someone just told
+        // they are wrong is the shortest path to K-06.
+        button(acts, "Predict again", () => {
+          gate.retry();
+          softReset();
+          render();
+        }, "primary");
+        button(acts, "Show why", () => { explained = true; render(); });
+      } else {
+        const why = typeof topic.explain === "function" ? topic.explain(rec) : topic.explain;
+        s.textContent = " " + (why ?? "");
+        verdict.append(b, s);
+      }
     } else {
       verdict.hidden = true;
     }
@@ -312,6 +338,7 @@ export function mountLab(topic) {
   }
 
   const api = { reveal, play, pause, destroy, get choice() { return gate.choice; },
+                get attempts() { return gate.attempts; },
                 get record() { return { ...gate.record, params: committedParams }; } };
 
   function onKey(e) {
