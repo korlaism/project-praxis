@@ -19,6 +19,16 @@ export default {
     same: "motion-implies-force",
     both: "things-naturally-stop",
   },
+  // ADR 0014. The tape is the instrument here: even gaps mean steady speed,
+  // growing gaps mean speeding up. Both cues send the learner to the gaps.
+  cues: {
+    "motion-implies-force":
+      "Set friction to zero and watch the tape dots on lane A, the puck with nothing pushing " +
+      "it. Are its gaps growing, shrinking, or staying the same? Then compare B's gaps.",
+    "things-naturally-stop":
+      "Take friction to zero, then raise it again, watching only lane A. Decide whether " +
+      "stopping is something the puck does by itself, or something the floor does to it.",
+  },
   explain:
     "A force does not maintain speed, it CHANGES it — so a steady push means steady " +
     "acceleration, not steady motion. The unpushed puck needs nothing at all to keep going. " +
