@@ -80,6 +80,19 @@ It follows the whole import graph, writes an artifact-ready bundle to
 or reaches outside the bundle. On success it prints the `files` map the
 Artifact tool takes. `dist/` is build output and is never committed.
 
+## Deployed
+
+Live on the dev server over Tailscale: **http://100.82.243.108:8086/**
+
+```bash
+./deploy/deploy-lab.sh          # build, ship, serve, and check it answers
+```
+
+Static files only — the lab is a folder and the notebook lives in the
+browser, so nothing runs server-side and nothing is stored there. The
+previous build stays as `site.prev` on the server, so a bad deploy rolls back
+with one `mv`.
+
 ## Running
 
 Any static server, because ES modules will not load over `file://`:
