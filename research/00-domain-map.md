@@ -8,7 +8,8 @@ Where the evidence for this project lives, and in what order to read it.
 2. [02 · Misconceptions and Diagnostic Instruments](02-misconceptions-and-diagnostics.md) — the evidence base, the existing instruments we should not rebuild, and the strongest argument against our design.
 3. [03 · Personalisation Axes](03-personalisation-axes.md) — what personalisation should mean when everyone has AI, and the three tensions it creates.
 4. [04 · Open Source STEAM Landscape](04-open-source-landscape.md) — what already exists, what we may legally ship, and why PhET is an asset rather than a competitor.
-5. [Bibliography](99-bibliography.md) — sources, with verification status.
+5. [Resources Index](06-resources.md) — everything cited or depended on, with verification status and licences.
+6. [Reading List](07-reading-list.md) — the short, ordered cut worth reading, and two things to skip.
 
 Then the spec: [Problem Statement](../spec/01-problem-statement.md) → [Phase 1 Requirements](../spec/02-requirements.md) → [Pilot Design](../spec/03-pilot-design.md).
 

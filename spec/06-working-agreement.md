@@ -12,6 +12,8 @@ How this project avoids the two ways it will otherwise fail: building the intere
 
 What both phases refuse is the notebook — prediction cards, the confusion log, the error record. A topic tool takes no account and stores nothing about a person. If a Phase 0 branch starts to look like a product, it is the wrong branch.
 
+**A source is registered in the change that first cites it.** Papers, books, articles and libraries go into [Resources Index](../research/06-resources.md) as they are used, never in a later tidy-up — that is how they ended up scattered across three documents the first time. Anything recorded from memory rather than a retrieved source is marked unverified and may not be cited outside this repository.
+
 **Findings become tickets, not inline fixes.** Anything surfaced mid-ticket — a defect, a wrong assumption, a better idea — gets its own ticket marked `needs-review` and is confirmed independently. The current ticket carries on.
 
 **ADRs record decisions, not findings.** A **design stance** is a direction chosen, whose consequences the pilot tests; it is accepted on judgment, and its acceptance note says what it rests on and what would undo it. An ADR that **depends on** a falsifiable claim from [Phase 1 Requirements](02-requirements.md) §1 is a different object — it is wrong if the claim is false — and it is not `Accepted` until the run settles that claim.

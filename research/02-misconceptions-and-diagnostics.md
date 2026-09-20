@@ -19,6 +19,8 @@ The fourth point is why this beats the engineering-undergraduate alternative tha
 
 ## Instruments that already exist
 
+*Every source named below is registered in [Resources Index](06-resources.md) with its verification status; this section keeps the argument for using them.*
+
 To confirm under `P-06`. Each is a candidate source for the item bank (`R-020`) and the held-back transfer set (`R-022`).
 
 | Instrument | What it is | Why it matters to us |
