@@ -72,3 +72,34 @@ test("a wrong answer that is the scenario's own 'correct' option is left untagge
   assert.equal(c.correct, false);
   assert.equal(c.errorTag ?? null, null);
 });
+
+// ---- P-63: what the card says about how the answer was established ----
+
+test("our own scenarios record that the outcome was observed", async () => {
+  const c = await play(truckFly, "truck");
+  assert.equal(c.outcomeSource, "observed");
+});
+
+test("a wrapped scenario records that its answer was only asserted", async () => {
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const notebook = openNotebook({ backend: memoryBackend() });
+  const spec = {
+    schema: 1, id: "wrapped-example", subject: "physics",
+    embed: { src: "embeds/example/index.html", title: "Example simulation",
+             attribution: { work: "Example Sim", author: "PhET Interactive Simulations",
+                            licence: "CC BY 4.0", url: "https://phet.colorado.edu/" } },
+    question: "What happens?", options: [{ id: "a", label: "A" }, { id: "b", label: "B" }],
+    correct: "b", errorTags: { a: "outward-in-circles" }, explain: "Because.",
+  };
+  mountScenario(spec, { notebook });
+  dom.body.find((n) => n.id === "opt-a").onclick();
+  dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "Show the answer").onclick();
+
+  const [c] = notebook.cards("physics");
+  assert.equal(c.outcomeSource, "asserted", "nothing watched this happen");
+  assert.equal(c.observed, "b", "falls back to the authored answer");
+  assert.equal(c.correct, false);
+  assert.equal(c.errorTag, "outward-in-circles", "a wrong answer still names its misconception");
+  dom.restore();
+});

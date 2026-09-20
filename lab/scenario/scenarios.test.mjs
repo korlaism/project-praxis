@@ -34,6 +34,17 @@ test("every primitive satisfies the contract", () => {
   }
 });
 
+test("a wrapped scenario is excluded from the answer check, and says whose work it is", () => {
+  // ADR 0009: nothing can watch someone else's simulation, so the check that
+  // makes our own scenarios trustworthy cannot run. The compensating rule is
+  // that a wrapped one must credit its source and carry no parameters.
+  for (const spec of Object.values(SHIPPED)) {
+    if (!spec.embed) continue;
+    assert.ok(spec.embed.attribution?.licence, `${spec.id}: wrapped scenarios must credit their source`);
+    assert.equal(spec.params, undefined, `${spec.id}: a wrapped scenario cannot carry params`);
+  }
+});
+
 for (const [name, spec] of Object.entries(SHIPPED)) {
   test(`${name}: validates against the schema`, () => {
     const r = validateScenario(spec);
@@ -45,7 +56,7 @@ for (const [name, spec] of Object.entries(SHIPPED)) {
     assert.ok(typeof spec.subject === "string" && spec.subject, "no subject — the card has no notebook");
   });
 
-  test(`${name}: names a real primitive, and only params it has`, () => {
+  test(`${name}: names a real primitive, and only params it has`, { skip: !!spec.embed }, () => {
     const p = getPrimitive(spec.primitive);
     const keys = p.controls.map((c) => c.key);
     for (const k of Object.keys(spec.params))
@@ -61,13 +72,13 @@ for (const [name, spec] of Object.entries(SHIPPED)) {
     }
   });
 
-  test(`${name}: finishes within the step budget`, () => {
+  test(`${name}: finishes within the step budget`, { skip: !!spec.embed }, () => {
     const p = getPrimitive(spec.primitive);
     const run = runHeadless(p, resolveParams(p, spec.params));
     assert.ok(run.finished, `did not settle within ${run.seconds.toFixed(1)}s`);
   });
 
-  test(`${name}: THE ANSWER CHECK — the claimed answer is what actually happens`, () => {
+  test(`${name}: THE ANSWER CHECK — the claimed answer is what actually happens`, { skip: !!spec.embed }, () => {
     const p = getPrimitive(spec.primitive);
     const r = checkAnswer(spec, p, resolveParams(p, spec.params));
     assert.equal(r.observed, r.claimed,

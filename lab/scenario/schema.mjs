@@ -21,8 +21,36 @@ export function validateScenario(spec) {
   if (spec.schema !== SCHEMA_VERSION)
     bad(`unknown schema version ${JSON.stringify(spec.schema)} — this build understands ${SCHEMA_VERSION}`);
 
-  if (typeof spec.primitive !== "string" || !spec.primitive)
-    bad("primitive must name a primitive in the registry");
+  // A scenario is either ours or wrapped. Ours runs a primitive we own and its
+  // answer is checked against the simulation; a wrapped one embeds someone
+  // else's simulation and its answer is only asserted (ADR 0009). A spec
+  // claiming both would leave that difference ambiguous.
+  const wrapped = spec.embed !== undefined;
+  const mine = spec.primitive !== undefined;
+  if (wrapped && mine) bad("a scenario is either ours (primitive) or wrapped (embed), never both");
+  if (!wrapped && (typeof spec.primitive !== "string" || !spec.primitive))
+    bad("primitive must name a primitive in the registry, or use embed for a wrapped simulation");
+
+  if (wrapped) {
+    const e = spec.embed;
+    if (!e || typeof e !== "object") {
+      bad("embed must be an object");
+    } else {
+      if (typeof e.src !== "string" || !e.src) bad("embed.src is required");
+      else if (/^(https?:)?\/\//i.test(e.src))
+        bad(`embed.src "${e.src}" is remote — self-host the simulation and use a relative path (ADR 0009)`);
+      if (typeof e.title !== "string" || !e.title) bad("embed.title is required");
+      const a = e.attribution;
+      if (!a || typeof a !== "object") {
+        bad("embed.attribution is required — the licence obliges visible credit");
+      } else {
+        for (const field of ["work", "author", "licence"])
+          if (typeof a[field] !== "string" || !a[field]) bad(`embed.attribution.${field} is required`);
+      }
+    }
+    if (spec.params !== undefined)
+      bad("a wrapped scenario cannot carry params — the verdict cannot score a setup we do not own");
+  }
 
   for (const field of ["question", "explain"]) {
     if (typeof spec[field] !== "string" || !spec[field].trim())
@@ -39,7 +67,9 @@ export function validateScenario(spec) {
   }
 
   // params
-  if (!spec.params || typeof spec.params !== "object") {
+  if (spec.params === undefined && wrapped) {
+    // a wrapped scenario has none, and is refused above if it tries
+  } else if (!spec.params || typeof spec.params !== "object") {
     bad("params must be an object");
   } else {
     for (const [k, v] of Object.entries(spec.params)) {

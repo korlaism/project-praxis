@@ -15,6 +15,7 @@ notebook/               the learner's record, kept on their own device
 record/                 the page a learner comes back for
 hub/                    every scenario and the record in one page — index.html
 topics/                 a page per scenario, three lines each
+embeds/                 self-hosted third-party sims, and a preview fixture
 reference.html          fixture exercising every harness feature
 ```
 
@@ -37,6 +38,32 @@ export default {
 ```
 
 The page is then three lines: `mountScenario(spec)`.
+
+## Wrapping someone else's simulation
+
+A scenario is either **ours** or **wrapped** (ADR 0009), never both:
+
+```js
+export default {
+  schema: 1, id, subject,
+  embed: {
+    src: "embeds/<name>/index.html",        // self-hosted, never a remote URL
+    title: "…",
+    attribution: { work, author, licence, url },
+  },
+  question, options, correct, errorTags, explain,   // no params
+};
+```
+
+Nothing can watch what happens inside an embedded simulation, so **the answer
+check cannot run on it**. Its answer is asserted by whoever wrote the scenario,
+the learner reveals it themselves, and the card records
+`outcomeSource: "asserted"` so analysis never mixes asserted evidence with
+observed. A wrapped scenario carries no parameters, because the verdict cannot
+score a setup we do not own.
+
+`embeds/preview.html` is the reference implementation, the way
+`reference.html` is for the harness.
 
 ## Writing a primitive
 

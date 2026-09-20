@@ -1,0 +1,32 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Wrapped Scenario Preview</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="../harness/lab.css">
+<script type="module">
+import { mountScenario } from "../scenario/mount.js";
+
+/* Reference implementation for the wrapped-scenario kind (ADR 0009), the way
+   reference.html is for the harness. Deliberately not registered in
+   scenarios/index.mjs, so it never appears in the lab as a real topic. */
+mountScenario({
+  schema: 1,
+  id: "wrapped-preview",
+  subject: "physics",
+  embed: {
+    src: "./example/index.html",
+    title: "Example fixture simulation",
+    attribution: { work: "Example fixture", author: "Project Praxis", licence: "MIT" },
+  },
+  question: "A wrapped scenario: someone else's simulation, our gate in front of it.",
+  note: "Nothing can watch what happens inside an embedded simulation, so you reveal it yourself.",
+  options: [
+    { id: "watched", label: "The lab watched it and scored me" },
+    { id: "asserted", label: "Someone wrote down the answer in advance" },
+  ],
+  correct: "asserted",
+  errorTags: { watched: "special-case-reasoning" },
+  explain: "Right — and the card records it as asserted rather than observed, so the two kinds of evidence never get mixed.",
+});
+</script>
