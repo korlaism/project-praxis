@@ -109,6 +109,10 @@ Artifact tool takes. `dist/` is build output and is never committed.
 
 ## Deployed
 
+**Public:** <https://korlaism.github.io/project-praxis/> — built and deployed from
+`main` by `.github/workflows/pages.yml`, tests first. This is the URL the channel
+links to.
+
 Deployed to the dev server with `./deploy/deploy-lab.sh`, which prints the URL it
 verified. The host comes from `PRAXIS_HOST` (an ssh alias, default `ai`); the address
 to check over is resolved from your ssh config, or set `PRAXIS_WEB_HOST` directly.
