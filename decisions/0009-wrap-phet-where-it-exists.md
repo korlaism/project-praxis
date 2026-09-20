@@ -1,6 +1,19 @@
 # ADR 0009 · Wrap PhET Where It Exists, Build Where It Does Not
 
-**Date:** 2026-09-20 **Status:** Accepted **Tickets:** P-33 **Rests on:** judgment
+**Date:** 2026-09-20 **Status:** Accepted **Tickets:** P-33, P-66 **Rests on:** judgment
+
+**Its premise was invalidated the same day. Nothing wraps a PhET simulation until `P-66` is decided.**
+
+> **Its premise is false.** This ADR was accepted on the belief that PhET's simulations are
+> CC BY 4.0, which came from a wrong entry in the resources index. They moved to **CC BY-NC 4.0**
+> for anything published after **29 March 2026**, and commercial use now requires an agreement
+> with the University of Colorado Boulder. A paid hosted version ([ADR 0008](0008-licence-split.md))
+> is exactly the excluded case.
+>
+> Left standing rather than rewritten, because a decision taken on bad information is worth
+> seeing. `P-66` decides what replaces it. **Nothing wraps a PhET simulation until then**, and
+> the surrounding work — the embedded scenario kind from `P-63` — is unaffected and still
+> useful for any openly licensed simulation.
 
 > Accepted for coverage, with one consequence that must not be quietly absorbed: **the answer
 > check cannot run inside someone else's simulation.** The rest of this ADR is mostly about

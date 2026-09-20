@@ -53,7 +53,7 @@ Surveyed in [04 · Open Source Landscape](04-open-source-landscape.md), which ke
 
 | Status | Project | Licence | Standing |
 |---|---|---|---|
-| V | **PhET Interactive Simulations** | sims **CC BY 4.0**; source GPL-3.0; libraries MIT | The most consequential open question — wrap or build, `P-33` |
+| V | **PhET Interactive Simulations** | **sims CC BY-NC 4.0 since 29 March 2026** (historical sims CC BY 4.0); source GPL-3.0; libraries MIT | **Re-verified 2026-09-20 and the earlier entry was wrong.** See the correction below |
 | V | Matter.js | MIT | Reach for it only where contact and stacking complexity is real |
 | V | Rapier | Apache-2.0 | Faster, heavier; Rust→WASM |
 | V | myPhysicsLab | Apache-2.0 | Worth studying: the one permissive project treating the equations as the artefact |
@@ -67,8 +67,23 @@ Surveyed in [04 · Open Source Landscape](04-open-source-landscape.md), which ke
 | V | EJSS (Open Source Physics) | GPL | Simulation authoring |
 | V | **GeoGebra** | GPL-3.0 source, but **commercial use needs a paid licence**; assets CC BY-NC-SA | **Excluded.** The most obvious tool in school maths, and we cannot build on it |
 
+## 3a · Correction: PhET is NonCommercial now
+
+`P-06` recorded PhET's HTML simulation files as **CC BY 4.0**, taken from a search summary of a licensing page that speaks of CC BY in the **past tense**, for its *"historical"* collection. That was wrong for anything published today, and [ADR 0009](../decisions/0009-wrap-phet-where-it-exists.md) was accepted on it.
+
+Downloading a current simulation settles it. `projectile-motion` 1.0.34 states, in the file:
+
+> This file is licensed under Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0). … **COMMERCIAL USE REQUIRES A COMMERCIAL LICENSE AGREEMENT FROM THE UNIVERSITY OF COLORADO BOULDER.**
+
+PhET's own announcement confirms the change: simulations released **before 29 March 2026** remain under the historical CC BY 4.0 agreement; those published after are not covered by it. Educators, schools and researchers are explicitly unaffected. Any use providing "commercial advantage or monetary compensation" — including by a non-profit — now needs a commercial licence and partnership agreement.
+
+**What that means here.** The open, self-hosted build could use them. **A paid hosted version is precisely the case the NonCommercial clause excludes**, and that is the business ADR 0008 was written for. The separate fact that PhET's *source* is GPL-3.0 — which does permit commercial use — is a different and heavier route, and its assets may not follow the source.
+
+`P-66` holds the decision. Nothing wraps a PhET simulation until it is taken.
+
 ## 4 · Obligations we have taken on
 
+* **PhET simulations are NonCommercial as of 29 March 2026.** Using one in anything that earns money needs a commercial agreement with the University of Colorado Boulder — see the correction above. This obligation did not exist when ADR 0009 was accepted.
 * **The FCI is restricted, and that collides with publishing in the open.** Downloads are limited to verified educators and researchers, password-protected, and users agree to keep the instrument secure — precisely so the items do not leak and lose their validity. **We may build on the documented misconceptions, which are published openly; we may not publish its items.** The channel therefore needs items of our own written against those misconceptions, while the parked pilot can use the real instrument through a teacher, as intended. `P-58`.
 * **PhET sims are CC BY 4.0** — using one obliges visible attribution. That belongs in the harness, not in each topic page (`P-33`).
 * **Fonts** ship under their own licence; confirm OFL before anything is distributed offline.
