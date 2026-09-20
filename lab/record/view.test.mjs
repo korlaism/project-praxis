@@ -112,3 +112,14 @@ test("a prediction made in another tab appears in an open record", async () => {
   assert.equal(listeners.size, 0, "a closed record must stop listening");
   dom.restore();
 });
+
+// ---- P-42 × ADR 0003: recorded, never shown ----
+
+test("the record never names a learner's misconception back to them", async () => {
+  // ADR 0003 defers naming the signature back to the learner until R-002 holds.
+  // The tag is kept for analysis; it must not appear on the page.
+  const { dom, text } = await setup([card({ errorTag: "bigger-pushes-harder" })]);
+  assert.doesNotMatch(text(), /bigger-pushes-harder/);
+  assert.doesNotMatch(text(), /misconception/i);
+  dom.restore();
+});

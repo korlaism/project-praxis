@@ -16,7 +16,7 @@ export const STORAGE_KEY = "praxis.notebook.v1";
 const VERSION = 1;
 const REQUIRED = ["subject", "scenario", "choice"];
 const KEPT = ["subject", "scenario", "choice", "confidence", "observed", "correct",
-              "unlisted", "params", "committedAt", "revealedAt"];
+              "unlisted", "errorTag", "params", "committedAt", "revealedAt"];
 
 /** An in-memory stand-in for localStorage, for tests and as a last resort. */
 export function memoryBackend() {
