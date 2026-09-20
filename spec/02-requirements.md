@@ -28,9 +28,9 @@ These are the reason the phase exists. Each maps to a kill criterion.
 |---|-------------|-------|
 | `R-010` | A learner can be shown a phenomenon and **cannot see the outcome** until a prediction and a confidence value are submitted. | The single load-bearing constraint. If it can be bypassed, the phase measures nothing — see K-03. |
 | `R-011` | Confidence is captured on every prediction, on a scale a 12-year-old uses honestly. | Not a percentage. Candidate: 4-point "guessing / leaning / fairly sure / certain", mapped to probabilities server-side. |
-| `R-012` | After reveal, the learner writes the gap in their own words, free text, before moving on. | Minimum length enforced; quality not machine-graded in Phase 1. |
+| `R-012` | After reveal, the learner writes the gap in their own words, free text, before moving on. | Minimum length enforced; quality not machine-graded in Phase 1. Placed **after the cue and the retry** by [ADR 0014](../decisions/0014-the-reveal-cues-before-it-explains.md) — this is the part of the design closest to the scaffolded correction that the evidence supports, and we reached it before the evidence rather than from it. |
 | `R-013` | One-tap confusion logging, available at every step, never blocking. | Must cost under two seconds or it will not be used. |
-| `R-014` | Every prediction, reveal, reconciliation and confusion entry is stored with a timestamp and the item id. | The dataset *is* the deliverable. |
+| `R-014` | Every prediction, reveal, reconciliation and confusion entry is stored with a timestamp and the item id. | The dataset *is* the deliverable. A **retry** under ADR 0014 is stored as its own record linked to the original — never as an edit of it. |
 | `R-015` | No AI-generated text is ever written into a learner's own notebook fields. | See ADR 0002. |
 | `R-016` | The instrument works on a low-end shared Android phone over intermittent 3G. | *Guess* at the constraint — must be confirmed against the actual pilot cohort's devices before build. |
 
