@@ -35,7 +35,7 @@ These are the reason the phase exists. Each maps to a kill criterion.
 
 | # | Requirement | Notes |
 |---|-------------|-------|
-| `R-020` | 30 prediction items covering force and motion, each with a documented misconception as its intended bait. | Drawn from published diagnostic instruments, not authored fresh. |
+| `R-020` | 30 prediction items covering force and motion, each with a documented misconception as its intended bait. | ~~Drawn from published diagnostic instruments, not authored fresh.~~ **Amended by [ADR 0011](../decisions/0011-author-our-own-items.md):** authored by us *against* the documented misconceptions. The instruments are restricted and cannot be published (`P-06`); the misconceptions are open. |
 | `R-021` | Each item's outcome is demonstrable — physical demo, video, or simulation — and unambiguous to a naive viewer. | An item whose result is arguable is a broken item. |
 | `R-022` | A held-back transfer set of 10 items, same concepts, different surface, never seen during the six weeks. | This is the actual measurement. Kept out of the treatment content entirely. |
 | `R-023` | Items are tagged with concept, intended misconception, and difficulty. | Enables the clustering that `R-002` is tested on. |
