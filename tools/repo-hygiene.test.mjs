@@ -13,13 +13,25 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 
 const REPO = new URL("..", import.meta.url).pathname;
+
+/** This file. It states the rule, so it is the one file allowed to spell it out. */
+const SELF = "tools/repo-hygiene.test.mjs";
+
 const tracked = () =>
   execFileSync("git", ["ls-files", "-z"], { cwd: REPO, encoding: "utf8" })
     .split("\0")
     .filter(Boolean)
-    .filter((f) => !f.startsWith("dist/"));
+    .filter((f) => !f.startsWith("dist/") && f !== SELF);
 
-/** 100.64.0.0/10 — the CGNAT range Tailscale assigns from. */
+/**
+ * The CGNAT range Tailscale assigns from: 100.64.x.x through 100.127.x.x.
+ *
+ * CI found this test matching its own comment, which it could do because the
+ * range is written as an address. It passed locally for a worse reason: the
+ * file was not yet tracked when it ran, so `git ls-files` did not return it.
+ * A test that scans tracked files has to be committed before it has been
+ * honestly run.
+ */
 const TAILNET = /\b100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.\d{1,3}\.\d{1,3}\b/;
 
 test("no tracked file hardcodes a tailnet address", () => {
