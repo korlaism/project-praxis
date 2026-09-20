@@ -24,7 +24,11 @@ def fail(msg):
 # Falsifiable claims from spec/02-requirements.md section 1. An ADR that rests on
 # one of these is wrong if the claim is false, so it cannot be Accepted until the
 # run settles it. Nothing is settled while Phase 0 is still ahead of us.
-UNSETTLED = ("R-001", "R-002", "R-003", "R-004", "R-005")
+#
+# R-035 is Exploratory: not merely unsettled but untestable by this phase, so it
+# never leaves this tuple. tools/claims.test.mjs keeps this list and the spec in
+# step — they are written by hand in two files and nothing else connects them.
+UNSETTLED = ("R-001", "R-002", "R-003", "R-004", "R-005", "R-035")
 
 
 def adr_statuses():

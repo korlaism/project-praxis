@@ -49,6 +49,7 @@ Step 2 is the load-bearing one. Everything else is in service of having an hones
 | [0010](decisions/0010-channel-youtube-shorts.md) | YouTube Shorts, one topic a fortnight | Accepted |
 | [0011](decisions/0011-author-our-own-items.md) | Author our own items against the documented misconceptions | Accepted |
 | [0012](decisions/0012-no-phet-author-our-own-simulations.md) | Author our own simulations — PhET is NonCommercial now | Accepted |
+| [0013](decisions/0013-split-r005-transfer-is-exploratory.md) | Split R-005 — calibration improvement is a claim, transfer is exploratory | Accepted |
 
 Ten accepted, one proposed. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
 

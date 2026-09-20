@@ -73,4 +73,13 @@ Also genuinely unresolved: **expertise reversal cuts against our own personalisa
 * **Learning styles** — no support. Will be suggested by anyone we talk to about "personalisation". Personalisation axes in this project are analogy base, error targeting, goal-conditioned depth and register — never modality preference. See [03 · Personalisation Axes](03-personalisation-axes.md).
 * **Our own `R-002` and `R-005`.** Per-learner stability of error signatures remains our extrapolation — the literature establishes that misconceptions are systematic *across* learners, not within one.
 
-  `R-005` is now the riskier of the two. Verification found that calibration improves with **age** on its own, but that **feedback-based calibration training has repeatedly failed** to improve monitoring accuracy in younger children — kindergarten, first grade, 7–8 year olds, in separate studies. Nothing found sits in the 11–15 band, so it is not settled; but the adjacent evidence is mixed-to-negative rather than silent, which is worse than the "unevidenced" we had recorded. `K-04` is the pivot this most likely triggers.
+  `R-005` was recorded as the riskier of the two on a search that `P-07` has since found incomplete. The corrected picture:
+
+  * **In band, positive, thin.** DiGiacomo & Chen (2016), grades 6–7, *n*=30, randomised against a delayed-treatment control: calibration accuracy improved. Kleider-Tesler, Prior & Katzir (2019), ninety 10th-graders, three online sessions: calibration improved in the best condition.
+  * **Meta-analytic, supportive, with the moderator against us.** Gutierrez de Blume (2022): 56 effect sizes, 7,667 participants, *g* = −.565 [−.639, −.491] for learning-strategy instruction on monitoring accuracy — **larger for adult-only samples**.
+  * **The earlier negative results stand**, and they sit in much younger children than ours.
+  * **Transfer has nothing behind it at any age.** None of the above tested transfer to another topic. Split out as `R-035`, exploratory, by ADR 0013.
+
+  **The finding that matters most is not about age.** Kleider-Tesler et al. compared performance feedback, performance *plus calibration* feedback, and performance feedback with scaffolding — a cue to correct the wrong answer. **Scaffolded correction won, especially for weaker comprehenders.** Telling a learner their confidence was miscalibrated was not what worked. `R-012` — write the gap in your own words — is the part of our design closest to that, which we did not arrive at from this evidence. `P-70`.
+
+  `K-04` remains the pivot most likely to trigger, and now fires on `R-005` alone.

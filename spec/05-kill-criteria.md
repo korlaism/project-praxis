@@ -18,7 +18,9 @@ If more than ~30% of commits are visibly degenerate — empty, copy-pasted, obvi
 ## Pivot triggers
 
 **K-04 · Calibration does not move.**
-`R-005` is ours and unproven. If Brier scores do not improve, the calibration story goes in the bin but the retention story may survive. Pivot: drop confidence capture from the product narrative, keep it as internal telemetry only.
+`R-005` is ours and weakly evidenced. If Brier scores do not improve, the calibration story goes in the bin but the retention story may survive. Pivot: drop confidence capture from the product narrative, keep it as internal telemetry only.
+
+**K-04 fires on `R-005` only.** `R-035` — that improvement transfers beyond force and motion — was split out as exploratory by [ADR 0013](../decisions/0013-split-r005-transfer-is-exploratory.md) and **nothing kills on it**. A six-week cohort in one topic cannot settle transfer, and a kill criterion that cannot fire honestly is worse than none.
 
 **K-05 · Teachers will not carry it.**
 If the weekly mistake session does not survive contact with a real teacher's week — if it is skipped, rushed or resented — then [ADR 0004](../decisions/0004-teacher-mediated-cohort.md) is wrong. Pivot to direct-to-learner, and accept that the consequence and social-stake problems return unsolved and much harder.
