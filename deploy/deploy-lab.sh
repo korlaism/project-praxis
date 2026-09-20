@@ -65,7 +65,16 @@ echo "    $(du -h "$WORK/bundle.b64" | cut -f1) to ship"
   echo 'mkdir -p "$HOME/.docker-nocreds"'
   echo '[ -s "$HOME/.docker-nocreds/config.json" ] || echo "{}" > "$HOME/.docker-nocreds/config.json"'
   echo 'export DOCKER_CONFIG="$HOME/.docker-nocreds"'
-  echo 'docker compose up -d 2>&1 | tail -3 || docker-compose up -d 2>&1 | tail -3'
+  # --force-recreate is not optional here, and this is the reason (P-75).
+  #
+  # The swap above replaces the DIRECTORY that the container bind-mounts, so
+  # the container keeps pointing at the old inode. Two deploys later the
+  # rm -rf above deletes that inode and the container is mounted to nothing:
+  # first it serves 403 / "directory index is forbidden", then it will not
+  # start at all. A plain `up -d` is a no-op when the container already
+  # exists, and `restart` reuses the same stale mount — only recreating it
+  # re-resolves the path.
+  echo 'docker compose up -d --force-recreate 2>&1 | tail -3 || docker-compose up -d --force-recreate 2>&1 | tail -3'
   echo 'sleep 2'
   echo 'docker ps --filter name=dev-praxis --format "    {{.Names}}  {{.Status}}  {{.Ports}}" || true'
 } > "$WORK/remote.sh"
@@ -73,7 +82,43 @@ echo "    $(du -h "$WORK/bundle.b64" | cut -f1) to ship"
 echo "==> deploying to $HOST:~/$REMOTE"
 ssh "$HOST" wsl bash -s < "$WORK/remote.sh"
 
-echo "==> checking it answers"
-curl -fsS -o /dev/null -w "    index.html  %{http_code}\n" "http://$WEB_HOST:$PORT/"
-curl -fsS -o /dev/null -w "    a module    %{http_code}  %{content_type}\n" "http://$WEB_HOST:$PORT/scenario/mount.js"
+# A 200 is not evidence. When the bind mount goes stale (P-75) nginx falls
+# back to /index.html for everything, so a JavaScript module answers 200 with
+# Content-Type text/html and the old check called that a success. It reported
+# a healthy deploy three times while the site was broken.
+#
+# So: assert what came back, not that something came back.
+fail=0
+base="http://$WEB_HOST:$PORT"
+
+check_type() {                      # path  expected-content-type
+  local path="$1" want="$2" got
+  if ! got="$(curl -fsS -o /dev/null -w '%{content_type}' "$base/$path" 2>/dev/null)"; then
+    printf '    FAIL  /%-38s did not answer\n' "$path"; fail=1; return
+  fi
+  case "$got" in
+    *"$want"*) printf '    ok    /%-38s %s\n' "$path" "$got" ;;
+    *)         printf '    FAIL  /%-38s got %s, wanted %s\n' "$path" "$got" "$want"; fail=1 ;;
+  esac
+}
+
+check_contains() {                  # path  substring the body must contain
+  local path="$1" want="$2"
+  if curl -fsS "$base/$path" 2>/dev/null | grep -qF -- "$want"; then
+    printf '    ok    /%-38s contains %s\n' "${path:-(root)}" "$want"
+  else
+    printf '    FAIL  /%-38s missing %s\n' "${path:-(root)}" "$want"; fail=1
+  fi
+}
+
+echo "==> checking what it actually served"
+check_contains "" "<title>Praxis Lab"
+check_type "scenario/mount.js" "application/javascript"
+check_type "harness/lab.css" "text/css"
+check_type "harness/fonts/familjen-grotesk-latin.woff2" "font/woff2"
+
+if [ "$fail" -ne 0 ]; then
+  echo "==> DEPLOY FAILED VERIFICATION — the previous build is in $REMOTE/site.prev"
+  exit 1
+fi
 echo "==> live at http://$WEB_HOST:$PORT/"

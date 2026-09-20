@@ -113,7 +113,13 @@ Artifact tool takes. `dist/` is build output and is never committed.
 `main` by `.github/workflows/pages.yml`, tests first. This is the URL the channel
 links to.
 
-Deployed to the dev server with `./deploy/deploy-lab.sh`, which prints the URL it
+Deployed to the dev server with `./deploy/deploy-lab.sh`, which **asserts what it got
+back** — a title in the page, and the Content-Type of a module, a stylesheet and a font —
+rather than just a 200. A 200 is not evidence: when the container's bind mount goes stale
+nginx answers every path with `index.html`, so a JavaScript module returns 200 and the old
+check called it success. It did that three times while the site was broken (`P-75`).
+
+It prints the URL it
 verified. The host comes from `PRAXIS_HOST` (an ssh alias, default `ai`); the address
 to check over is resolved from your ssh config, or set `PRAXIS_WEB_HOST` directly.
 No address is hardcoded here — `tools/repo-hygiene.test.mjs` keeps it that way.
