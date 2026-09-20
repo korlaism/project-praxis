@@ -4,7 +4,7 @@ For you, not for the project. Seven things worth your time, in the order to read
 
 The full register of everything cited is [Resources Index](06-resources.md). This is the short, opinionated cut.
 
-**One caveat up front:** none of these has been verified against its source yet (`P-06`). Read them and that ticket closes itself — check the year, the claim, and whether the effect is as large as we have assumed.
+**All verified** as of 2026-09-20 — citations, years and the claims we lean on were checked (`P-06`). What follows is what to take from each, not homework.
 
 ---
 
@@ -33,7 +33,7 @@ The full register of everything cited is [Resources Index](06-resources.md). Thi
 ### 5 · Hake — *Interactive engagement versus traditional methods* (~1998)
 **An hour.** Six thousand students, one measure — normalised gain. It is where our 1.3× threshold in `K-01` comes from.
 
-**Take:** a calibrated sense of what a real intervention achieves, so you are neither impressed by noise nor disappointed by a genuine effect.
+**Take:** a calibrated sense of what a real intervention achieves. The numbers: traditional courses gained 0.23, interactive-engagement courses 0.48 — about 2.1×. Our `K-01` bar of 1.3× is conservative against that, though Hake was comparing whole pedagogies and we are testing one mechanic.
 
 ### 6 · Roediger & Karpicke — the testing effect (~2006)
 **An hour.** Retrieving something beats re-reading it, for durable memory. Among the most replicated findings in the field, and the reason the pilot measures delayed transfer rather than an immediate quiz.
@@ -43,7 +43,7 @@ The full register of everything cited is [Resources Index](06-resources.md). Thi
 ### 7 · Butterfield & Metcalfe — the hypercorrection effect
 **An hour.** Errors made with **high** confidence are corrected best once revealed. If it holds, confidence is not just a measurement — it identifies which mistakes are the most valuable teaching moments available.
 
-**Take:** the strongest argument that capturing confidence earns its one extra tap. Also the most interesting unproven lead in the project.
+**Take:** the strongest argument that capturing confidence earns its one extra tap. Better than we thought — Metcalfe & Finn (2012) show hypercorrection **in children**. The caveat worth knowing: high-confidence errors can return after a week.
 
 ---
 
@@ -59,4 +59,4 @@ The full register of everything cited is [Resources Index](06-resources.md). Thi
 
 ## The gap worth knowing about
 
-There is nothing here on **calibration training in 11–15 year olds**, because we have not found any. `R-005` — that calibration is trainable in this age band and transfers — currently rests on nothing. If you read one thing off this list, make it a search for that (`P-07`); it is the claim most likely to be wrong and most expensive to discover late.
+**Calibration training in 11–15 year olds.** Verification did not find it, and found something less comfortable than silence: calibration improves with **age** by itself, while **feedback-based training has repeatedly failed to improve monitoring accuracy in younger children** — kindergarten, first grade, 7–8 year olds, separate studies. None of that sits in our band, so nothing is settled. But `R-005` is now clearly the riskiest claim in the project, and `K-04` is the pivot most likely to fire. `P-07`.

@@ -2,7 +2,7 @@
 
 Why the first slice is force and motion, and what already exists that we should not rebuild.
 
-**Verification status: unverified.** The items below are recorded from working knowledge and have **not** been checked against sources in this repository yet. Every entry needs confirmation of its claim, and several need confirmation that the effect size is what we think. Ticket `P-06` covers this. Treat nothing here as established until that ticket closes.
+**Verification status: verified 2026-09-20 (`P-06`).** Every source here was checked; full citations and corrections live in [Resources Index](06-resources.md). Three things verification changed, and they are set out below: the FCI's items cannot be published, Kapur's sample is older than our audience, and the calibration claim is riskier than "unevidenced" suggested.
 
 ---
 
@@ -30,7 +30,9 @@ To confirm under `P-06`. Each is a candidate source for the item bank (`R-020`) 
 | **Hake (1998)** | Large multi-institution comparison of interactive-engagement vs traditional instruction using normalised gain. | Gives us the normalised-gain metric and a rough sense of the effect size a real intervention produces. Our 1.3× threshold in K-01 should be sanity-checked against it. |
 | **Driver et al., _Making Sense of Secondary Science_** (~1994) | Catalogue of children's ideas across science topics. | Breadth beyond mechanics, for whichever topic comes second. |
 
-**The strategic point: we are not authoring content.** The misconception corpus for school physics is better than anything we would write, it is free, and it comes with validated distractors. Our contribution is the *loop*, not the items. Any plan that starts with content authoring has misunderstood the project.
+**The strategic point stands, with one correction.** The misconception corpus is better than anything we would write, and our contribution is the *loop*. But the corpus and the instrument are not the same thing: **the FCI is password-protected and restricted to verified educators**, who agree to keep it secure so the items do not leak and lose their validity.
+
+So the division is: **build on the documented misconceptions, which are published openly; do not publish the instruments' items.** The channel needs items of our own written against those misconceptions — which is authoring, and `R-020` currently says the opposite. The parked pilot can use the real instrument through a teacher, which is exactly how it is meant to be used. `P-58`.
 
 ## Mechanisms the loop is betting on
 
@@ -44,10 +46,10 @@ Each needs a source confirmed under `P-06`. The confidence column is our assessm
 | **Spacing** (Cepeda et al. meta-analysis, ~2006) | Distributed practice beats massed | High |
 | **Interleaving** (Rohrer & Taylor, ~2007) | Mixed practice beats blocked, despite feeling worse | High, and relevant to week 6 |
 | **Desirable difficulties** (Bjork & Bjork, ~2011) | Encoding costs buy retention; ease is a false signal | High — the framing of the whole project |
-| **Productive failure** (Kapur, ~2008) | Failure *followed by* instruction beats instruction then practice | Medium-high, and load-bearing — see the tension below |
+| **Productive failure** (Kapur, 2008) | Failure *followed by* instruction beats instruction then practice | Verified, and load-bearing. **His sample was 11th-graders** — several years older than our audience, which the pilot should not gloss over |
 | **Self-explanation** (Chi et al., ~1989) | Explaining to oneself produces gains over passive study | High — justifies `R-012` |
 | **ICAP** (Chi & Wylie, ~2014) | Interactive > Constructive > Active > Passive engagement | Medium — useful framing, weaker as evidence |
-| **Hypercorrection effect** (Butterfield & Metcalfe) | High-confidence errors are corrected *better* once revealed | Medium, and the best support we have for `R-003` |
+| **Hypercorrection effect** (Butterfield & Metcalfe, 2001) | High-confidence errors are corrected *better* once revealed | Verified, and better than we thought: **Metcalfe & Finn (2012) show it in children specifically.** Caveat: high-confidence errors can return after a week |
 
 The hypercorrection effect is worth flagging as the most interesting one for us. If high-confidence errors correct best, then capturing confidence is not merely measurement — it identifies which mistakes are the highest-value teaching moments. That is a genuine product mechanic and it falls out of one extra tap.
 
@@ -69,4 +71,6 @@ Also genuinely unresolved: **expertise reversal cuts against our own personalisa
 
 * **Bloom's "2 sigma" (1984)** — the claim that one-to-one tutoring produces a two-standard-deviation gain. Enormously cited in edtech pitch decks, and the effect size is contested; the original studies were small and the result has not replicated at that magnitude. **Do not use this number in any external material.**
 * **Learning styles** — no support. Will be suggested by anyone we talk to about "personalisation". Personalisation axes in this project are analogy base, error targeting, goal-conditioned depth and register — never modality preference. See [03 · Personalisation Axes](03-personalisation-axes.md).
-* **Our own `R-002` and `R-005`** — that per-learner error signatures are stable, and that calibration is trainable in this age band. The literature establishes that misconceptions are systematic *across* learners. Per-learner stability is our extrapolation, and calibration training in 11–15 year olds is, as far as we have looked, unevidenced. These are the two claims the pilot exists to settle, and the two that must not be stated as established anywhere outside this repository.
+* **Our own `R-002` and `R-005`.** Per-learner stability of error signatures remains our extrapolation — the literature establishes that misconceptions are systematic *across* learners, not within one.
+
+  `R-005` is now the riskier of the two. Verification found that calibration improves with **age** on its own, but that **feedback-based calibration training has repeatedly failed** to improve monitoring accuracy in younger children — kindergarten, first grade, 7–8 year olds, in separate studies. Nothing found sits in the 11–15 band, so it is not settled; but the adjacent evidence is mixed-to-negative rather than silent, which is worse than the "unevidenced" we had recorded. `K-04` is the pivot this most likely triggers.

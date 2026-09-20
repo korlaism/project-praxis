@@ -29,7 +29,7 @@
       "id": "80a66b80-2e08-4f47-9bb2-a20d2690fe40",
       "url": "/doc/phase-0-requirements-PBSyxXMsdz",
       "title": "Phase 1 Requirements",
-      "hash": "cf7c4830db2542bd"
+      "hash": "87a379085693b47a"
     },
     "spec/03-pilot-design.md": {
       "id": "d07d1370-66b9-4895-bea5-631b904197a0",
@@ -71,7 +71,7 @@
       "id": "1320b0e1-e5b9-4b67-9af0-09f69d3623cc",
       "url": "/doc/02-misconceptions-diagnostic-instruments-nGtCaObfF4",
       "title": "02 \u00b7 Misconceptions & Diagnostic Instruments",
-      "hash": "5be551dfa670ced3"
+      "hash": "ca4f16268413fcf2"
     },
     "research/03-personalisation-axes.md": {
       "id": "ff1c0a8d-c54e-4389-ba3c-53b60bcb1a80",
@@ -95,7 +95,7 @@
       "id": "2054c07f-a4bc-4397-bcd1-76eee226fe10",
       "url": "/doc/adr-0001-audience-and-first-slice-1IPweZhefd",
       "title": "ADR 0001 \u00b7 Audience and First Slice",
-      "hash": "0edafcb996d48d6e"
+      "hash": "05c8d4fa538c14fc"
     },
     "decisions/0002-ai-never-writes-in-the-notebook.md": {
       "id": "3f9230e7-a3ac-4441-a19d-5727b6ec6901",
@@ -161,13 +161,13 @@
       "id": "e4dfa100-57f8-4e47-acc5-18dd90056482",
       "url": "/doc/resources-index-kfJcZXwJWn",
       "title": "Resources Index",
-      "hash": "0914aa99a9ec5412"
+      "hash": "24340379e2db5c64"
     },
     "research/07-reading-list.md": {
       "id": "12c50507-7678-4e95-9728-7f82b6617a90",
       "url": "/doc/reading-list-for-you-NmgCZZvYyx",
       "title": "Reading List \u2b50 For You",
-      "hash": "412f70133f85a1f0"
+      "hash": "a7b4a14eb09d21c8"
     }
   }
 }
