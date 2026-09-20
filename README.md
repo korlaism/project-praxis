@@ -45,8 +45,9 @@ Step 2 is the load-bearing one. Everything else is in service of having an hones
 | [0006](decisions/0006-the-notebook-is-the-product.md) | The notebook is the product, the tools are the surface | Accepted |
 | [0007](decisions/0007-generated-scenarios.md) | Scenarios are generated from verified primitives | Proposed |
 | [0008](decisions/0008-licence-split.md) | MIT for the lab kit, AGPL-3.0 for the application | Accepted |
+| [0009](decisions/0009-wrap-phet-where-it-exists.md) | Wrap PhET where it exists, build where it does not | Accepted |
 
-Seven accepted, one proposed. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
+Eight accepted, one proposed. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
 
 `0003` is the interesting one. It was accepted whole, then narrowed: only *difficulty is selected, not reduced* stands on judgment. Signature targeting, naming the signature back to the learner, and the 75–85% success band all depend on `R-002` and `R-003`, are still unproven, and are now explicitly deferred rather than decided. It also carries an unresolved conflict (`P-18`). `tools/check-docs.py` enforces this — an `Accepted` ADR resting on an unsettled claim fails the build.
 
