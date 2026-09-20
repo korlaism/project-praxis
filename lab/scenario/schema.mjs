@@ -112,5 +112,28 @@ export function validateScenario(spec) {
     }
   }
 
+  // cues (ADR 0014)
+  //
+  // Keyed by misconception tag, not by option id: a cue answers "what should
+  // someone who believes THIS be told to watch?", and the same wrong belief
+  // turns up in more than one scenario. A cue must not contain the answer —
+  // that is the explanation moved earlier, which is the arm the evidence says
+  // lost — but no validator can check that, so it is an authoring rule.
+  if (spec.cues !== undefined) {
+    if (typeof spec.cues !== "object" || spec.cues === null || Array.isArray(spec.cues)) {
+      bad("cues must be an object mapping a misconception tag to a cue");
+    } else {
+      const tags = new Set(Object.values(spec.errorTags ?? {}).filter((x) => typeof x === "string"));
+      for (const [tag, cue] of Object.entries(spec.cues)) {
+        if (tag === spec.correct)
+          bad(`cues is keyed by "${tag}", the correct answer — cues are keyed by misconception tag, and a right answer has no misconception behind it`);
+        else if (!tags.has(tag))
+          bad(`cues names "${tag}", which no option carries — add it to errorTags or drop the cue`);
+        if (typeof cue !== "string" || !cue.trim())
+          bad(`cues["${tag}"] must be a non-empty cue`);
+      }
+    }
+  }
+
   return { ok: errors.length === 0, errors };
 }

@@ -127,3 +127,64 @@ test("a wrapped scenario may not reach outside the bundle for its simulation", (
 test("a wrapped scenario cannot carry parameters it could not score", () => {
   fails({ ...embedded(), params: { r: 1.2 } }, /param/i);
 });
+
+/* ── Cues (ADR 0014) ──────────────────────────────────────────────────────
+ *
+ * A cue is keyed by the misconception tag, not the option id: it answers
+ * "what should someone who believes THIS be told to watch?", and the same
+ * wrong belief shows up in more than one scenario.
+ */
+
+const cued = (over = {}) => ({
+  schema: 1,
+  primitive: "circular-release",
+  params: { radius: 1.2, omega: 2.4 },
+  question: "Which way does it fly?",
+  explain: "No force means a straight line.",
+  options: [
+    { id: "out", label: "Straight outward" },
+    { id: "tan", label: "Along the tangent" },
+    { id: "curve", label: "It keeps curving" },
+  ],
+  correct: "tan",
+  errorTags: { out: "outward-in-circles", curve: "force-is-stored" },
+  ...over,
+});
+
+test("a cue for every tag an option carries is valid", () => {
+  const v = validateScenario(cued({
+    cues: {
+      "outward-in-circles": "Watch the moment the string goes slack — what is still pulling?",
+      "force-is-stored": "Look at what touches the ball after the cut.",
+    },
+  }));
+  assert.deepEqual(v.errors, []);
+  assert.equal(v.ok, true);
+});
+
+test("a cue for a tag no option carries is refused", () => {
+  const v = validateScenario(cued({ cues: { "things-naturally-stop": "Watch the speed." } }));
+  assert.match(v.errors.join("\n"), /things-naturally-stop.*no option carries/s);
+  assert.equal(v.ok, false);
+});
+
+test("a cue keyed by the correct answer is refused", () => {
+  const v = validateScenario(cued({ cues: { tan: "Watch the tangent." } }));
+  assert.match(v.errors.join("\n"), /correct answer/);
+  assert.equal(v.ok, false);
+});
+
+test("an empty cue is refused — a blank cue is worse than none", () => {
+  const v = validateScenario(cued({ cues: { "outward-in-circles": "   " } }));
+  assert.match(v.errors.join("\n"), /must be a non-empty cue/);
+  assert.equal(v.ok, false);
+});
+
+test("cues must be an object", () => {
+  const v = validateScenario(cued({ cues: ["watch it"] }));
+  assert.match(v.errors.join("\n"), /cues must be an object/);
+});
+
+test("cues are optional", () => {
+  assert.equal(validateScenario(cued()).ok, true);
+});
