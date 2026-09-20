@@ -109,7 +109,10 @@ Artifact tool takes. `dist/` is build output and is never committed.
 
 ## Deployed
 
-Live on the dev server over Tailscale: **http://100.82.243.108:8086/**
+Deployed to the dev server with `./deploy/deploy-lab.sh`, which prints the URL it
+verified. The host comes from `PRAXIS_HOST` (an ssh alias, default `ai`); the address
+to check over is resolved from your ssh config, or set `PRAXIS_WEB_HOST` directly.
+No address is hardcoded here — `tools/repo-hygiene.test.mjs` keeps it that way.
 
 ```bash
 ./deploy/deploy-lab.sh          # build, ship, serve, and check it answers
