@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * Primitive · two-pucks — one with a steady push, one with nothing.
  * Baits `motion-implies-force`.

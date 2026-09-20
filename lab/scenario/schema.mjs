@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * The scenario specification — the contract a generator must satisfy.
  *

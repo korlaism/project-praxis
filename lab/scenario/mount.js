@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * Mount a scenario specification in the browser.
  *

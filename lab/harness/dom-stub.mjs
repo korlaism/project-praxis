@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * The smallest DOM the harness actually touches.
  *

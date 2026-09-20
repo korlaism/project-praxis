@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export default {
   schema: 1,
   id: "truck-and-fly",

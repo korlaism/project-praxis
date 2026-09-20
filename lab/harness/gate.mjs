@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * The commit-before-reveal gate.
  *

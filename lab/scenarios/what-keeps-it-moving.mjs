@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 export default {
   schema: 1,
   id: "what-keeps-it-moving",

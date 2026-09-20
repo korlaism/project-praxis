@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /** The primitive registry — the vocabulary a scenario may compose from. */
 import * as circularRelease from "./circular-release.mjs";
 import * as contactCollision from "./contact-collision.mjs";

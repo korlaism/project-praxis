@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * Run a scenario with no DOM and no canvas.
  *

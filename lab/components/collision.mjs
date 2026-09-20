@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * Contact, force and collision in one dimension.
  *

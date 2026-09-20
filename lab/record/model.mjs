@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * What the record page shows, as plain data — so it can be tested without a DOM.
  *

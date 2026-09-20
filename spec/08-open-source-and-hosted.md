@@ -42,7 +42,7 @@ These three are what a build has to honour to call itself Praxis. Worth writing 
 * **Network copyleft (AGPL-3.0).** A competitor who hosts a modified version must publish their changes. Deters some commercial adopters and some schools' procurement, and is the usual choice for this exact shape.
 * **Open core.** Core open, hosted-only features proprietary. The common failure is that the open part slowly hollows out and the goodwill goes with it.
 
-No recommendation here on purpose — it decides what the business is, not just what the repository says, and it deserves its own ADR.
+**Decided 2026-09-20 — [ADR 0008](../decisions/0008-licence-split.md):** the lab kit is MIT, the application is AGPL-3.0-or-later. The split follows one this project already made — ADR 0005 treats the tools as the acquisition surface and ADR 0006 says the notebook is the product, so they get different licences.
 
 ## What the hosted version costs
 
