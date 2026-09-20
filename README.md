@@ -45,9 +45,10 @@ Step 2 is the load-bearing one. Everything else is in service of having an hones
 | [0006](decisions/0006-the-notebook-is-the-product.md) | The notebook is the product, the tools are the surface | Accepted |
 | [0007](decisions/0007-generated-scenarios.md) | Scenarios are generated from verified primitives | Proposed |
 | [0008](decisions/0008-licence-split.md) | MIT for the lab kit, AGPL-3.0 for the application | Accepted |
-| [0009](decisions/0009-wrap-phet-where-it-exists.md) | Wrap PhET where it exists, build where it does not | Accepted |
+| [0009](decisions/0009-wrap-phet-where-it-exists.md) | Wrap PhET where it exists, build where it does not | Superseded by 0012 |
 | [0010](decisions/0010-channel-youtube-shorts.md) | YouTube Shorts, one topic a fortnight | Accepted |
 | [0011](decisions/0011-author-our-own-items.md) | Author our own items against the documented misconceptions | Accepted |
+| [0012](decisions/0012-no-phet-author-our-own-simulations.md) | Author our own simulations — PhET is NonCommercial now | Accepted |
 
 Ten accepted, one proposed. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
 
