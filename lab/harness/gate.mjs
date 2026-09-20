@@ -25,11 +25,34 @@ export function createGate({ options, correct }) {
     throw new Error(`the correct answer "${correct}" is not one of the options`);
 
   let state = "awaiting";
+  // Append-only. ADR 0014 lets a learner predict again after a cue, and the
+  // only way that does real damage is if the second prediction can replace the
+  // first — R-010 would be measuring post-hoc confidence and every Brier score
+  // would be quietly flattering. So attempts accumulate and nothing is edited.
+  const attempts = [];
+  let attempt = 0;
+  let retryOf = null;
   let choice = null;
   let confidence = null;
   let committedAt = null;
   let revealedAt = null;
   let observed = null;
+
+  /** Freeze the current attempt into the history. Nothing here is ever edited. */
+  function archive() {
+    attempts.push(Object.freeze({
+      attempt, retryOf, choice, confidence, committedAt, revealedAt, observed,
+      correct: state === "revealed" ? choice === observed : null,
+      unlisted: state === "revealed" ? !ids.includes(observed) : null,
+    }));
+  }
+
+  function begin(previous) {
+    attempt = attempts.length;
+    retryOf = previous;
+    state = "awaiting";
+    choice = confidence = committedAt = revealedAt = observed = null;
+  }
 
   return {
     get state() {
@@ -66,11 +89,17 @@ export function createGate({ options, correct }) {
 
     get record() {
       return {
+        attempt, retryOf,
         choice, confidence, committedAt, revealedAt, observed,
         correct: this.isCorrect,
         // What happened was none of the choices offered — nobody could have been right.
         unlisted: state === "revealed" ? !ids.includes(observed) : null,
       };
+    },
+
+    /** Every completed attempt, oldest first. Frozen: not a convention, a guarantee. */
+    get attempts() {
+      return attempts.slice();
     },
 
     commit(id, level = null) {
@@ -94,9 +123,29 @@ export function createGate({ options, correct }) {
       return this;
     },
 
+    /**
+     * Predict again, having been shown a cue (ADR 0014). The attempt just
+     * finished is archived and the gate locks: a retry that could be watched
+     * before it is committed is not a gate.
+     */
+    retry() {
+      if (state !== "revealed") throw new Error("nothing to retry — no attempt has been revealed");
+      const previous = attempt;
+      archive();
+      begin(previous);
+      return this;
+    },
+
+    /**
+     * Start over — what the Reset button and a changed parameter do. Like a
+     * retry it archives rather than erases, but it starts a new line rather
+     * than continuing one, so it is not recorded as a second try at the same
+     * question. An untouched attempt archives nothing: parameter changes call
+     * this constantly and must not fill the record with blanks.
+     */
     reset() {
-      state = "awaiting";
-      choice = confidence = committedAt = revealedAt = observed = null;
+      if (choice !== null) archive();
+      begin(null);
       return this;
     },
   };
