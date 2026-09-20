@@ -61,6 +61,17 @@ So the standard is now *publisher abstract*, which is well above the secondary s
 
 **A name collision, so nobody merges them later.** Alexander, P. A. (2013), *"Calibration: what is it and why it matters? An introduction to the special issue on Calibrating Calibration"*, **Learning and Instruction** — a different piece, in a different journal, sharing the phrase.
 
+## 1c · Fonts we ship
+
+Self-hosted since `P-76`. They were loaded from `fonts.googleapis.com`, which sent every learner's IP address and user-agent to a third party on every page view — see [ADR 0015](../decisions/0015-the-record-stays-where-the-learner-is.md).
+
+| Status | What | Licence | Where |
+|---|---|---|---|
+| V | **Familjen Grotesk** by Familjen STHLM AB | **OFL-1.1** — confirmed from `google/fonts` METADATA, `license: "OFL"` | `lab/harness/fonts/`, with `OFL-familjen-grotesk.txt` |
+| V | **Spline Sans Mono** by Eben Sorkin, Mirko Velimirović | **OFL-1.1** — same source | `lab/harness/fonts/`, with `OFL-spline-sans-mono.txt` |
+
+Variable woff2, latin and latin-ext subsets only: 89 KB for both families across the whole weight range. **The OFL obliges the licence text to travel with the fonts**, and a built bundle is a redistribution, so `tools/build-topic.mjs` carries any `OFL*`/`LICENSE*` file sitting beside an asset whether or not anything references it. A test fails the build if fonts ever ship without it.
+
 ## 2 · Software we depend on at runtime
 
 Short list, deliberately. The lab has **no npm dependencies and no build step**; every primitive is written here so the equations stay visible (ADR 0007).

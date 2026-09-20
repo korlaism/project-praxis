@@ -9,14 +9,22 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, statSync, readdirSync } from "node:fs";
+import { join, dirname, relative } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { buildBundle, checkBundle, specifiersIn } from "./build-topic.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SCRATCH = join(ROOT, "dist", ".test");
 const TOPICS = ["which-way-does-it-fly", "truck-and-fly", "what-keeps-it-moving"];
+
+/** Every file in a built bundle, recursively. */
+function walkAll(dir) {
+  return readdirSync(dir).flatMap((name) => {
+    const p = join(dir, name);
+    return statSync(p).isDirectory() ? walkAll(p) : [p];
+  });
+}
 
 function fresh(name) {
   const dir = join(SCRATCH, name);
@@ -137,4 +145,53 @@ test("the hub bundles as one page carrying every scenario, the record and the no
   const probe = join(out, "__entry-probe.mjs");
   writeFileSync(probe, specifiersIn(html).map((s) => `import ${JSON.stringify(s)};`).join("\n") + "\n");
   await import(pathToFileURL(probe).href);
+});
+
+/* ── Assets referenced from CSS (P-76) ────────────────────────────────────
+ *
+ * The bundler followed stylesheets and import graphs but never looked inside
+ * a stylesheet, so a self-hosted font would have been referenced by CSS that
+ * shipped and a file that did not. The page would have fallen back silently
+ * to a system font — the worst kind of broken, because it still looks fine.
+ */
+
+test("a file referenced by url() in CSS is copied into the bundle", () => {
+  const out = fresh("css-assets");
+  const { files } = buildBundle(join(ROOT, "lab/index.html"), out);
+  const fonts = files.filter((f) => f.endsWith(".woff2"));
+  assert.ok(fonts.length > 0, "the bundle carries no fonts at all");
+  for (const f of fonts)
+    assert.ok(statSync(join(out, f)).size > 1000, `${f} is present but empty`);
+});
+
+test("the bundle asks no third party for anything", () => {
+  // P-44's invariant, the half that was left for this ticket. Fonts were the
+  // only offender; this stops the next one arriving unnoticed.
+  const out = fresh("third-party");
+  buildBundle(join(ROOT, "lab/index.html"), out);
+  const offenders = [];
+  for (const f of walkAll(out)) {
+    if (!/\.(html|css|m?js)$/i.test(f)) continue;
+    for (const [n, line] of readFileSync(f, "utf8").split("\n").entries()) {
+      const m = line.match(/https?:\/\/[^\s"')]+/);
+      // The SVG namespace is an identifier, not a fetch — nothing is requested.
+      if (m && !m[0].startsWith("http://www.w3.org/")) 
+        offenders.push(`${relative(out, f)}:${n + 1}  ${m[0]}`);
+    }
+  }
+  assert.deepEqual(offenders, [], `the lab must ask no third party for anything:\n  ${offenders.join("\n  ")}`);
+});
+
+test("a font's licence travels with it", () => {
+  // The OFL permits redistribution and requires the licence to accompany the
+  // fonts. A bundle is a redistribution, so a bundle without OFL.txt is not
+  // one we are allowed to publish. P-76.
+  const out = fresh("font-licence");
+  const { files } = buildBundle(join(ROOT, "lab/index.html"), out);
+  const fontDirs = new Set(files.filter((f) => f.endsWith(".woff2")).map((f) => dirname(f)));
+  assert.ok(fontDirs.size > 0, "no fonts to check");
+  for (const dir of fontDirs) {
+    const licences = files.filter((f) => dirname(f) === dir && /^(OFL|LICEN[SC]E)/i.test(f.split("/").pop()));
+    assert.ok(licences.length > 0, `${dir} ships fonts with no licence text beside them`);
+  }
 });
