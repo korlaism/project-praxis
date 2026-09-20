@@ -50,7 +50,7 @@ These are the reason the phase exists. Each maps to a kill criterion.
 | `R-030` | Two arms: treatment (full loop) and control (same content and contact time, no commit step). | Without the control, K-01 is unfalsifiable. |
 | `R-031` | Minimum 24 learners per arm. | *Guess.* Needs a power calculation against expected effect size before recruitment — this number is currently vibes. |
 | `R-032` | Teacher-mediated: a named teacher runs both arms and the weekly mistake session. | See ADR 0004. |
-| `R-033` | Guardian consent obtained in writing before any data is collected; no learner data leaves the pilot dataset. | Non-negotiable. Minors. |
+| `R-033` | Guardian consent obtained in writing before any data is collected; no learner data leaves the pilot dataset. | Non-negotiable. Minors. [ADR 0015](../decisions/0015-the-record-stays-where-the-learner-is.md) turns this into a property rather than a promise: nothing is collected, and `lab/notebook/privacy.test.mjs` fails the build if that changes. |
 | `R-034` | A weekly 30-minute session where a learner presents a **mistake**, not a success. | The culture-setting move and the cheapest source of social stake. |
 
 ## 5. Explicit non-requirements for Phase 1
