@@ -54,7 +54,8 @@ The budget is why `P-25` builds a reusable harness first. Tools are the durable 
 
 * **Not a study.** No control arm, no cohort, no consent apparatus, no statistical claim. Nothing observed here tests `R-001`–`R-005`, and no number from it may be reported as though it did.
 * **Not the notebook.** Prediction cards, the confusion log and the error record are Phase 1 and later. A topic tool takes no account and stores nothing about a person.
-* **Not a licence to drop the honesty rules.** The literature/ours split holds, the unverified bibliography stays unverified (`P-06`), and a simulation that misrepresents the physics is a defect whatever it does for reach.
+* **Not a licence to drop the honesty rules.** The literature/ours split holds, every source is registered as it is cited ([Resources Index](../research/06-resources.md)), and a simulation that misrepresents the physics is a defect whatever it does for reach.
+* **Not a licence to publish someone else's instrument.** The FCI and FMCE are restricted to verified educators precisely so their items do not leak. We build on the documented misconceptions, which are open, and write our own items — `P-58`.
 
 ## What it produces
 
