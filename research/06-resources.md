@@ -79,7 +79,7 @@ PhET's own announcement confirms the change: simulations released **before 29 Ma
 
 **What that means here.** The open, self-hosted build could use them. **A paid hosted version is precisely the case the NonCommercial clause excludes**, and that is the business ADR 0008 was written for. The separate fact that PhET's *source* is GPL-3.0 — which does permit commercial use — is a different and heavier route, and its assets may not follow the source.
 
-`P-66` holds the decision. Nothing wraps a PhET simulation until it is taken.
+Decided in [ADR 0012](../decisions/0012-no-phet-author-our-own-simulations.md): **no PhET simulation ships in any build.** PhET stays here as prior art and as the reference for what good looks like — reading a simulation and learning from it is not redistribution.
 
 ## 4 · Obligations we have taken on
 

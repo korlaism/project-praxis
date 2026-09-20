@@ -17,7 +17,7 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "83fb209470b2e46f"
+      "hash": "60ae07c6a458ed3f"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
@@ -161,7 +161,7 @@
       "id": "e4dfa100-57f8-4e47-acc5-18dd90056482",
       "url": "/doc/resources-index-kfJcZXwJWn",
       "title": "Resources Index",
-      "hash": "e81643a705dd5def"
+      "hash": "f1e103a0904c9570"
     },
     "research/07-reading-list.md": {
       "id": "12c50507-7678-4e95-9728-7f82b6617a90",
@@ -191,7 +191,7 @@
       "id": "a5fc06d4-ec64-4b1f-91b8-1631a947cbfd",
       "url": "/doc/adr-0009-wrap-phet-where-it-exists-WkGLg5FO5a",
       "title": "ADR 0009 \u00b7 Wrap PhET Where It Exists",
-      "hash": "754c68e5500d2b31"
+      "hash": "7572d377478ee7f3"
     },
     "decisions/0010-channel-youtube-shorts.md": {
       "id": "29919a78-727b-4921-92e7-7b85d6dfacf5",
@@ -204,6 +204,12 @@
       "url": "/doc/adr-0011-author-our-own-items-doadqwtqQx",
       "title": "ADR 0011 \u00b7 Author Our Own Items",
       "hash": "bb97d9c3943397cd"
+    },
+    "decisions/0012-no-phet-author-our-own-simulations.md": {
+      "id": "f4ef256a-6728-453d-bacd-8a865d4e3d68",
+      "url": "/doc/0012-no-phet-author-our-own-simulations-fRDhpdDFiH",
+      "title": "0012 No Phet Author Our Own Simulations",
+      "hash": "5e8e12ebc33d24a7"
     }
   }
 }

@@ -1,8 +1,8 @@
 # ADR 0009 · Wrap PhET Where It Exists, Build Where It Does Not
 
-**Date:** 2026-09-20 **Status:** Accepted **Tickets:** P-33, P-66 **Rests on:** judgment
+**Date:** 2026-09-20 **Status:** Superseded by 0012 **Tickets:** P-33, P-66 **Rests on:** judgment
 
-**Its premise was invalidated the same day. Nothing wraps a PhET simulation until `P-66` is decided.**
+**Its premise was false and [ADR 0012](0012-no-phet-author-our-own-simulations.md) supersedes it. No PhET simulation ships in any build.**
 
 > **Its premise is false.** This ADR was accepted on the belief that PhET's simulations are
 > CC BY 4.0, which came from a wrong entry in the resources index. They moved to **CC BY-NC 4.0**
