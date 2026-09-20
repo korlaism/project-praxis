@@ -102,3 +102,35 @@ test("the answer check catches params that contradict the answer", () => {
   const r = checkAnswer(pucks, p, resolveParams(p, { ...pucks.params, friction: 0.25, push: 0.4 }));
   assert.equal(r.ok, false, `expected a mismatch, observed "${r.observed}"`);
 });
+
+/* ── Every shipped scenario cues every misconception it names (ADR 0014) ──
+ *
+ * A wrong option with a tag but no cue is a learner told they are wrong and
+ * handed the explanation — the arm the evidence says lost. If we are going to
+ * tag the belief, we owe it a cue.
+ */
+
+test("every misconception tag a scenario carries has a cue", () => {
+  for (const spec of Object.values(SHIPPED)) {
+    const tags = new Set(Object.values(spec.errorTags ?? {}));
+    for (const tag of tags)
+      assert.ok(spec.cues?.[tag], `${spec.id} tags "${tag}" but offers no cue for it`);
+  }
+});
+
+test("a cue never quotes the answer it is supposed to withhold", () => {
+  // No validator can tell whether a cue gives the game away; this catches only
+  // the crudest version, which is pasting the right option in. The real rule
+  // is the authoring one: a learner who reads only the cue must still have
+  // something left to decide.
+  for (const spec of Object.values(SHIPPED)) {
+    const right = spec.options.find((o) => o.id === spec.correct);
+    for (const [tag, cue] of Object.entries(spec.cues ?? {})) {
+      const c = cue.toLowerCase();
+      assert.ok(!c.includes(right.label.toLowerCase()),
+        `${spec.id} cue for "${tag}" quotes the correct option`);
+      assert.ok(cue.trim().length > 30,
+        `${spec.id} cue for "${tag}" is too short to point at anything`);
+    }
+  }
+});

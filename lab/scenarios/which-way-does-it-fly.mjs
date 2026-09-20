@@ -19,6 +19,16 @@ export default {
     curve: "force-is-stored",
     spiral: "outward-in-circles",
   },
+  // ADR 0014. Each cue names what to look at and what to decide, and stops
+  // there. If reading the cue settles the question, it is an explanation.
+  cues: {
+    "outward-in-circles":
+      "Before the cut, find the one thing that was touching the ball. Which way was it " +
+      "pulling — towards the centre, or away from it? Nothing else was in contact with it at all.",
+    "force-is-stored":
+      "After the cut, list everything still touching the ball. Then ask what is left to " +
+      "keep bending its path, and where that bend would come from.",
+  },
   explain:
     "The string was pulling the ball INWARD the whole time — that is the only force there was. " +
     "Remove it and nothing pushes the ball anywhere, so it simply keeps the velocity it already had: " +

@@ -135,3 +135,51 @@ test("the cue for a wrong choice is the one its misconception carries", () => {
   assert.equal(cue({ choice: "out", observed: "nowhere", correct: false, unlisted: true }), null,
     "an outcome nobody predicted means nobody held a misconception about it");
 });
+
+/* ── The authored cue reaches the panel, and a retry files its own card ──── */
+
+test("a real scenario shows its authored cue instead of the explanation", async () => {
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const notebook = openNotebook({ backend: memoryBackend() });
+
+  mountScenario(truckFly, { notebook });
+  dom.body.find((n) => n.id === "opt-truck").onclick();   // bigger-pushes-harder
+  dom.tick(2000);
+
+  const verdict = dom.body.find((n) => n.className?.split(" ").includes("lab-verdict"));
+  const said = [];
+  (function walk(n) { if (n.textContent) said.push(n.textContent); n.children?.forEach(walk); })(verdict);
+  const shown = said.join(" ");
+
+  assert.match(shown, /Watch the two contact arrows/, "the authored cue must reach the panel");
+  assert.ok(!shown.includes(truckFly.explain.slice(0, 40)),
+    "the explanation waits until it is asked for");
+  dom.restore();
+});
+
+test("a retry files a second card that points at the first", async () => {
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const notebook = openNotebook({ backend: memoryBackend() });
+
+  mountScenario(truckFly, { notebook });
+  dom.body.find((n) => n.id === "opt-truck").onclick();
+  dom.tick(2000);
+  dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "Predict again").onclick();
+  dom.body.find((n) => n.id === "opt-equal").onclick();
+  dom.tick(2000);
+
+  const cards = notebook.cards("physics");
+  assert.equal(cards.length, 2, "a retry is a second card, never an edit of the first");
+  const [first, second] = cards.sort((a, b) => a.attempt - b.attempt);
+  assert.equal(first.attempt, 0);
+  assert.equal(first.retryOf, null);
+  assert.equal(first.choice, "truck");
+  assert.equal(first.correct, false);
+  assert.equal(second.attempt, 1);
+  assert.equal(second.retryOf, 0, "the link back is what makes the pair readable");
+  assert.equal(second.choice, "equal");
+  assert.equal(second.correct, true);
+  dom.restore();
+});
