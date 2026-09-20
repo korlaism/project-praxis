@@ -15,6 +15,12 @@
 set -euo pipefail
 
 HOST=${PRAXIS_HOST:-ai}
+# The address to VERIFY over, which is not the same as the ssh alias: an alias
+# lives in ssh config and means nothing to curl. Ask ssh for the hostname it
+# already resolves to, so nobody's tailnet address has to live in this file.
+# Override with PRAXIS_WEB_HOST when the two genuinely differ.
+WEB_HOST=${PRAXIS_WEB_HOST:-$(ssh -G "$HOST" 2>/dev/null | awk '/^hostname /{print $2; exit}')}
+WEB_HOST=${WEB_HOST:-localhost}
 REMOTE=${PRAXIS_REMOTE_DIR:-apps/praxis}
 PORT=${PRAXIS_PORT:-8086}
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -68,6 +74,6 @@ echo "==> deploying to $HOST:~/$REMOTE"
 ssh "$HOST" wsl bash -s < "$WORK/remote.sh"
 
 echo "==> checking it answers"
-curl -fsS -o /dev/null -w "    index.html  %{http_code}\n" "http://100.82.243.108:$PORT/"
-curl -fsS -o /dev/null -w "    a module    %{http_code}  %{content_type}\n" "http://100.82.243.108:$PORT/scenario/mount.js"
-echo "==> live at http://100.82.243.108:$PORT/"
+curl -fsS -o /dev/null -w "    index.html  %{http_code}\n" "http://$WEB_HOST:$PORT/"
+curl -fsS -o /dev/null -w "    a module    %{http_code}  %{content_type}\n" "http://$WEB_HOST:$PORT/scenario/mount.js"
+echo "==> live at http://$WEB_HOST:$PORT/"
