@@ -39,6 +39,18 @@ export function specifiersIn(src) {
   return [...found];
 }
 
+/**
+ * Files a stylesheet points at with url(...) — fonts, images. P-76.
+ *
+ * Skips data: URIs, which are already inline, and anything absolute, which is
+ * someone else's server and refused elsewhere.
+ */
+export function urlsIn(css) {
+  return [...css.matchAll(/url\(\s*(["']?)([^"')]+)\1\s*\)/g)]
+    .map((m) => m[2].trim())
+    .filter((u) => u && !/^data:/i.test(u));
+}
+
 function stylesheetsIn(html) {
   const out = [];
   for (const tag of html.match(/<link\b[^>]*>/gi) ?? []) {
@@ -68,19 +80,36 @@ function commonRoot(paths) {
 function collect(entry) {
   const seen = new Set();
   const queue = [resolve(entry)];
+  // Files a stylesheet points at with url(). They are carried into the bundle
+  // but never read as source: a woff2 parsed as UTF-8 is noise, and noise that
+  // looks like an import throws (P-76).
+  const assets = new Set();
   while (queue.length) {
     const file = queue.shift();
     if (seen.has(file)) continue;
     if (!existsSync(file)) throw new Error(`referenced file does not exist: ${file}`);
     seen.add(file);
     const src = readFileSync(file, "utf8");
-    const refs = isHtml(file) ? [...stylesheetsIn(src), ...specifiersIn(src)] : specifiersIn(src);
+    const refs = isHtml(file) ? [...stylesheetsIn(src), ...specifiersIn(src)]
+               : /\.css$/i.test(file) ? urlsIn(src)
+               : specifiersIn(src);
     for (const ref of refs) {
       if (isExternal(ref)) continue;
       if (isBare(ref)) throw new Error(`bare specifier "${ref}" in ${file} — use "./" or "../"`);
       const target = resolve(dirname(file), ref);
       if (isModule(target) || /\.css$/i.test(target)) queue.push(target);
+      else assets.add(target);     // a font, an image: carried, never parsed
     }
+  }
+  for (const a of assets) {
+    if (!existsSync(a)) throw new Error(`referenced file does not exist: ${a}`);
+    seen.add(a);
+    // The OFL permits redistribution and requires its text to accompany the
+    // fonts. A bundle IS a redistribution, so the licence sitting beside an
+    // asset is carried whether or not anything references it (P-76).
+    const dir = dirname(a);
+    for (const name of readdirSync(dir))
+      if (/^(OFL|LICEN[SC]E)/i.test(name)) seen.add(join(dir, name));
   }
   return [...seen];
 }
