@@ -17,7 +17,7 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "b9bc745d599e40a9"
+      "hash": "5af1566b96de0eb3"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
@@ -29,7 +29,7 @@
       "id": "80a66b80-2e08-4f47-9bb2-a20d2690fe40",
       "url": "/doc/phase-0-requirements-PBSyxXMsdz",
       "title": "Phase 1 Requirements",
-      "hash": "d1c365b794f81bb6"
+      "hash": "a111409adaaa5612"
     },
     "spec/03-pilot-design.md": {
       "id": "d07d1370-66b9-4895-bea5-631b904197a0",
@@ -216,6 +216,12 @@
       "url": "/doc/0013-split-r005-transfer-is-exploratory-KNvZZf1FDd",
       "title": "0013 Split R005 Transfer Is Exploratory",
       "hash": "b64cb869c35269e8"
+    },
+    "decisions/0014-the-reveal-cues-before-it-explains.md": {
+      "id": "5271157f-21b2-4ef2-85ab-6aaefeaf7e2f",
+      "url": "/doc/0014-the-reveal-cues-before-it-explains-7AM2yJwcfx",
+      "title": "0014 The Reveal Cues Before It Explains",
+      "hash": "12e5e221d02164e2"
     }
   }
 }
