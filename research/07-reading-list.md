@@ -59,4 +59,10 @@ The full register of everything cited is [Resources Index](06-resources.md). Thi
 
 ## The gap worth knowing about
 
-**Calibration training in 11–15 year olds.** Verification did not find it, and found something less comfortable than silence: calibration improves with **age** by itself, while **feedback-based training has repeatedly failed to improve monitoring accuracy in younger children** — kindergarten, first grade, 7–8 year olds, separate studies. None of that sits in our band, so nothing is settled. But `R-005` is now clearly the riskiest claim in the project, and `K-04` is the pivot most likely to fire. `P-07`.
+**Calibration training in 11–15 year olds — found, and it changed the claim.** `P-07` searched again and the picture is better and more specific than `P-06` recorded. Three worth your time, in this order:
+
+1. **Kleider-Tesler, Prior & Katzir (2019)** — ninety 10th-graders, three online sessions, three feedback conditions. **Scaffolded correction beat telling learners their confidence was miscalibrated.** Read this one first: it is about what we should build, not just whether the claim survives.
+2. **Gutierrez de Blume (2022)** — the meta-analysis, 56 effect sizes. Read the moderator table. The effect is real and **adults move more than children do**.
+3. **DiGiacomo & Chen (2016)** — grades 6–7, *n*=30. The only in-band study found. Small, randomised, positive.
+
+`R-005` is narrowed to the improvement claim and keeps `K-04`. Transfer became `R-035`, exploratory, because none of these tested it — ADR 0013. All three are paywalled and were verified at citation level only; `P-71` is to read them properly.

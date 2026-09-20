@@ -19,7 +19,7 @@ Then the spec: [Problem Statement](../spec/01-problem-statement.md) → [Phase 1
 |---|---|---|
 | **Misconception research** | The error taxonomy. Force and motion specifically. | **Verified** (`P-06`). One constraint came with it: the instruments are restricted and cannot be published — `P-58` |
 | **Memory and practice design** | Spacing, interleaving, retrieval, generation, desirable difficulties. | **Verified** (`P-06`). The strongest ground the project stands on |
-| **Metacognition and calibration** | Confidence capture, Brier scoring, hypercorrection. | **Gap, and now characterised.** Hypercorrection is shown in children; calibration *training* has repeatedly failed in younger ones. `R-005` is the riskiest claim we hold — `P-07` |
+| **Metacognition and calibration** | Confidence capture, Brier scoring, hypercorrection. | **Gap closed enough to split the claim.** In-band evidence exists and is positive but thin; a meta-analysis supports the field with **age moderating against us**. `R-005` narrowed, transfer split out as exploratory `R-035` — ADR 0013, `P-07` |
 | **Instructional design counter-position** | Cognitive load, worked examples, expertise reversal, the Kirschner critique. | **Verified** (`P-06`); engaged in research/02, not dismissed |
 | **India schooling context** | Board curricula, device reality, teacher workload, language mixing, who actually pays. | **Not started** — `P-08`, and the largest unexamined risk |
 
@@ -27,9 +27,11 @@ Then the spec: [Problem Statement](../spec/01-problem-statement.md) → [Phase 1
 
 **Strong ground.** That misconceptions are systematic and catalogued. That retrieval, spacing, interleaving and generation improve delayed retention. That prediction-before-observation aids conceptual change. That fluency of explanation is a poor cue for actual learning. Little of this is contested.
 
-**Our own extrapolations, unproven.** That per-learner error signatures are *stable across topics* (`R-002`). That calibration is trainable in 11–15 year olds and transfers (`R-005`). That baiting a signature beats routing around it (`R-003`). These three are the project, and the three not to state as fact outside this repository.
+**Our own extrapolations, unproven.** That per-learner error signatures are *stable across topics* (`R-002`). That calibration is trainable in 11–15 year olds (`R-005`) and that improvement transfers (`R-035`, exploratory). That baiting a signature beats routing around it (`R-003`). These are the project, and the ones not to state as fact outside this repository.
 
-Verification changed their standing relative to one another. `R-003` gained support — hypercorrection is demonstrated in children (Metcalfe & Finn, 2012). `R-005` lost it: calibration improves with age unaided, but feedback-based training has repeatedly failed in younger children, so the adjacent evidence is mixed-to-negative rather than silent. **`R-005` is now the riskiest of the three.**
+Verification changed their standing relative to one another. `R-003` gained support — hypercorrection is demonstrated in children (Metcalfe & Finn, 2012). `R-005` was recorded as having lost it, and `P-07` found that reading incomplete in both directions: there **is** in-band evidence and it is positive, and there **is** a meta-analysis, whose age moderator runs against us. The transfer half had nothing behind it at any age and is now `R-035`, exploratory — ADR 0013.
+
+**`R-002` is now the riskiest of the three**, by elimination rather than by new evidence: it is the one nothing has been found for, either way.
 
 **Known gap we have not addressed.** Expertise reversal cuts directly against error-signature baiting. Phase 1 does not test it. See [03 · Personalisation Axes](03-personalisation-axes.md).
 

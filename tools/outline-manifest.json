@@ -17,19 +17,19 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "60ae07c6a458ed3f"
+      "hash": "b9bc745d599e40a9"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
       "url": "/doc/problem-statement-OSGcnEh5Kd",
       "title": "Problem Statement",
-      "hash": "e3f4d071262779aa"
+      "hash": "5c64ab93149d0546"
     },
     "spec/02-requirements.md": {
       "id": "80a66b80-2e08-4f47-9bb2-a20d2690fe40",
       "url": "/doc/phase-0-requirements-PBSyxXMsdz",
       "title": "Phase 1 Requirements",
-      "hash": "c719eb6eacb147d1"
+      "hash": "d1c365b794f81bb6"
     },
     "spec/03-pilot-design.md": {
       "id": "d07d1370-66b9-4895-bea5-631b904197a0",
@@ -47,7 +47,7 @@
       "id": "2977b12d-ff0c-4339-a47a-438362d77c46",
       "url": "/doc/kill-criteria-IpXsSuKucM",
       "title": "Kill Criteria",
-      "hash": "30f0352a7dd5ad7d"
+      "hash": "e0525364d29224a9"
     },
     "spec/06-working-agreement.md": {
       "id": "c92948cf-7677-43fb-a016-9c92505c751a",
@@ -59,7 +59,7 @@
       "id": "b71451bb-e16d-430a-a09d-303793e90bdd",
       "url": "/doc/domain-map-reading-path-YVUg5m2a3B",
       "title": "Domain Map & Reading Path",
-      "hash": "c84ab292098a1ad3"
+      "hash": "db65dfc4c8710ef5"
     },
     "research/01-the-economics-flip.md": {
       "id": "8a1b723b-fd81-44b6-8bca-59cbcfec75c1",
@@ -71,7 +71,7 @@
       "id": "1320b0e1-e5b9-4b67-9af0-09f69d3623cc",
       "url": "/doc/02-misconceptions-diagnostic-instruments-nGtCaObfF4",
       "title": "02 \u00b7 Misconceptions & Diagnostic Instruments",
-      "hash": "ca4f16268413fcf2"
+      "hash": "c9b5279d81ad6a59"
     },
     "research/03-personalisation-axes.md": {
       "id": "ff1c0a8d-c54e-4389-ba3c-53b60bcb1a80",
@@ -161,13 +161,13 @@
       "id": "e4dfa100-57f8-4e47-acc5-18dd90056482",
       "url": "/doc/resources-index-kfJcZXwJWn",
       "title": "Resources Index",
-      "hash": "f1e103a0904c9570"
+      "hash": "1bdff1fe386b76fe"
     },
     "research/07-reading-list.md": {
       "id": "12c50507-7678-4e95-9728-7f82b6617a90",
       "url": "/doc/reading-list-for-you-NmgCZZvYyx",
       "title": "Reading List \u2b50 For You",
-      "hash": "a7b4a14eb09d21c8"
+      "hash": "61d01f3179d54e68"
     },
     "spec/08-open-source-and-hosted.md": {
       "id": "7ce18caf-bf29-42be-a929-1c1e031d7e5e",
@@ -210,6 +210,12 @@
       "url": "/doc/0012-no-phet-author-our-own-simulations-fRDhpdDFiH",
       "title": "0012 No Phet Author Our Own Simulations",
       "hash": "5e8e12ebc33d24a7"
+    },
+    "decisions/0013-split-r005-transfer-is-exploratory.md": {
+      "id": "c0707672-3a08-45d8-b8a7-ddc051fe7fbe",
+      "url": "/doc/0013-split-r005-transfer-is-exploratory-KNvZZf1FDd",
+      "title": "0013 Split R005 Transfer Is Exploratory",
+      "hash": "b64cb869c35269e8"
     }
   }
 }

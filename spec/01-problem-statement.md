@@ -32,7 +32,8 @@ A school cannot let thirty children each break a different circuit, misjudge a c
 2. A learner's errors are **not random**; they cluster into a small number of stable, nameable signatures that persist across surface topics. — `R-002`
 3. Naming a learner's error signature back to them, and then **deliberately baiting it**, beats routing around it. — `R-003`
 4. Confusion that is **logged** — made legitimate, timestamped, addressable — gets resolved more often than confusion that is merely felt. — `R-004`
-5. **Calibration is trainable** in six weeks in 11–15 year olds, and improving it transfers beyond the topic taught. — `R-005`
+5. **Calibration is trainable** in six weeks in 11–15 year olds. — `R-005`
+6. **Improved calibration transfers** beyond the topic taught. — `R-035`, **exploratory**: split from `R-005` by ADR 0013 because there is in-band evidence for the first and none at all for this one.
 
 Claims 1, 2 and 4 rest on existing literature and we expect them to hold; see [02 · Misconceptions & Diagnostic Instruments](../research/02-misconceptions-and-diagnostics.md). Claims 3 and 5 are ours, are the commercially interesting ones, and are the reason the pilot exists.
 

@@ -5,6 +5,8 @@
 
 A requirement whose **Source** column is blank is a guess and is marked as one.
 
+A claim marked **Exploratory** is one the phase measures but does not test: it maps to no kill criterion, and no ADR may be Accepted resting on it. `tools/check-docs.py` enforces the second half and `tools/claims.test.mjs` keeps the two lists in step.
+
 ---
 
 ## 1. The falsifiable claims
@@ -17,7 +19,8 @@ These are the reason the phase exists. Each maps to a kill criterion.
 | `R-002` | Per-learner errors cluster into ≤6 stable, nameable signatures with internal consistency above chance reassignment. | *Guess.* Misconception catalogues establish that errors are systematic **across** learners; per-learner stability is our extrapolation. | K-02 |
 | `R-003` | Deliberately baiting a learner's named signature beats routing around it. | *Guess.* Hypercorrection effect is suggestive, not sufficient. | — |
 | `R-004` | Logged confusion is resolved more often than unlogged confusion. | Self-explanation and metacognitive monitoring literature | — |
-| `R-005` | Calibration (Brier) improves measurably in six weeks in ages 11–15, and transfers beyond force and motion. | *Guess, and the riskiest one.* `P-06` found calibration improves with **age** unaided, but that **feedback-based calibration training repeatedly failed** in younger children (kindergarten, first grade, 7–8). Nothing found in the 11–15 band. Adjacent evidence is mixed-to-negative, not silent. | K-04 |
+| `R-005` | Calibration (Brier) improves measurably in six weeks in ages 11–15. | Weak, and in-band. DiGiacomo & Chen (2016), grades 6–7, *n*=30, randomised with a delayed-treatment control, improved calibration accuracy. Gutierrez de Blume (2022) meta-analysis, 56 effect sizes, 7,667 participants, *g* = −.565 — but **adult samples moved more than younger ones**, so the moderator runs against us. See research/02. | K-04 |
+| `R-035` | **Exploratory.** Improved calibration transfers beyond force and motion. | *Nothing found, in any age band.* Split out of `R-005` by [ADR 0013](../decisions/0013-split-r005-transfer-is-exploratory.md) because the evidence for the two halves is not the same evidence. Measured and reported; **no decision may rest on it** and no kill criterion fires on it. | — |
 
 ## 2. The instrument
 
