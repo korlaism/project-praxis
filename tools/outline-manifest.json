@@ -53,13 +53,13 @@
       "id": "c92948cf-7677-43fb-a016-9c92505c751a",
       "url": "/doc/working-agreement-BACM7HFwcI",
       "title": "Working Agreement",
-      "hash": "7efa9775393dfce5"
+      "hash": "a45624ec21a31d55"
     },
     "research/00-domain-map.md": {
       "id": "b71451bb-e16d-430a-a09d-303793e90bdd",
       "url": "/doc/domain-map-reading-path-YVUg5m2a3B",
       "title": "Domain Map & Reading Path",
-      "hash": "7d8687d565ece502"
+      "hash": "b8cb0198ba83d227"
     },
     "research/01-the-economics-flip.md": {
       "id": "8a1b723b-fd81-44b6-8bca-59cbcfec75c1",
@@ -71,7 +71,7 @@
       "id": "1320b0e1-e5b9-4b67-9af0-09f69d3623cc",
       "url": "/doc/02-misconceptions-diagnostic-instruments-nGtCaObfF4",
       "title": "02 \u00b7 Misconceptions & Diagnostic Instruments",
-      "hash": "8b5bd3ac8c5970a8"
+      "hash": "5be551dfa670ced3"
     },
     "research/03-personalisation-axes.md": {
       "id": "ff1c0a8d-c54e-4389-ba3c-53b60bcb1a80",
@@ -83,7 +83,7 @@
       "id": "dc86b44f-c668-4722-a017-067ca8090ff0",
       "url": "/doc/bibliography-j4Jl476HfB",
       "title": "Bibliography",
-      "hash": "34622f96211e9a54"
+      "hash": "7c3cd17b206e7e34"
     },
     "decisions/0000-adr-template.md": {
       "id": "a235c4e8-cb18-422f-a8b3-c3a60c9e8124",
@@ -156,6 +156,18 @@
       "url": "/doc/05-generation-spike-twenty-scenarios-through-the-checks-x75beVOPMR",
       "title": "05 \u00b7 Generation Spike \u2014 Twenty Scenarios Through the Checks",
       "hash": "17f2eafe92e4df1d"
+    },
+    "research/06-resources.md": {
+      "id": "e4dfa100-57f8-4e47-acc5-18dd90056482",
+      "url": "/doc/resources-index-kfJcZXwJWn",
+      "title": "Resources Index",
+      "hash": "0914aa99a9ec5412"
+    },
+    "research/07-reading-list.md": {
+      "id": "12c50507-7678-4e95-9728-7f82b6617a90",
+      "url": "/doc/reading-list-for-you-NmgCZZvYyx",
+      "title": "Reading List \u2b50 For You",
+      "hash": "412f70133f85a1f0"
     }
   }
 }
