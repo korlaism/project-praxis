@@ -1,0 +1,59 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# P-65. The channel links to the lab from every video, so the lab needs a URL
+# that is not on a tailnet and not in a private artifact.
+#
+# The build is not committed — dist/ is ignored — so Pages builds it here. The
+# tests run first on purpose: this workflow is the only thing between a commit
+# and a public page, and a broken gate is worse in public than at home.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never two deploys at once, and never cancel one half-done.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Tests
+        run: node --test $(find lab tools -name "*.test.mjs" -o -name "*.test.js")
+
+      - name: Documents agree with each other
+        run: python3 tools/check-docs.py
+
+      # build-topic.mjs resolves every import and refuses a bare specifier, so
+      # a bundle that builds is a bundle that loads. See P-35.
+      - name: Build
+        run: node tools/build-topic.mjs lab/index.html
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/index
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
