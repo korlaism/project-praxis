@@ -1,0 +1,13 @@
+# The Praxis lab, served as static files on the dev server.
+# Deliberately separate from the dev-stack compose so it can be started,
+# stopped and replaced without touching anything else running there.
+services:
+  praxis-lab:
+    image: nginx:alpine
+    container_name: dev-praxis
+    restart: unless-stopped
+    ports:
+      - "8086:80"
+    volumes:
+      - ./site:/usr/share/nginx/html:ro
+      - ./nginx-praxis.conf:/etc/nginx/conf.d/default.conf:ro
