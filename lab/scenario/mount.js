@@ -20,6 +20,11 @@ export function mountScenario(spec, { notebook = openNotebook() } = {}) {
   const v = validateScenario(spec);
   if (!v.ok) throw new Error("invalid scenario:\n  " + v.errors.join("\n  "));
 
+  // A wrapped scenario (ADR 0009) embeds someone else's simulation. Nothing
+  // can watch it, so there is no primitive, no parameters and no answer check
+  // — its answer is asserted by the author, and the card says so.
+  if (spec.embed) return mountWrapped(spec, notebook);
+
   const primitive = getPrimitive(spec.primitive);
   const params = resolveParams(primitive, spec.params);
 
@@ -45,18 +50,39 @@ export function mountScenario(spec, { notebook = openNotebook() } = {}) {
     },
     draw: (ctx, s, p, view, ui) => primitive.draw(ctx, s, p, view, ui),
     // Every reveal becomes a card in the scenario's subject notebook (ADR 0006).
-    onReveal: (record) => {
-      if (!spec.id || !spec.subject) return;          // a draft scenario has nowhere to file
-      const r = notebook.record({
-        ...record,
-        scenario: spec.id,
-        subject: spec.subject,
-        errorTag: errorTagFor(spec, record),
-      });
-      if (r.warning) console.warn(r.warning);
-    },
+    onReveal: (record) => file(spec, record, notebook, "observed"),
   });
   return lab;
+}
+
+function mountWrapped(spec, notebook) {
+  return mountLab({
+    question: spec.question,
+    note: spec.note,
+    options: spec.options,
+    correct: spec.correct,
+    explain: spec.explain,
+    embed: spec.embed,
+    // No observation is possible, so reveal() carries nothing and the gate
+    // falls back to the authored answer — the seam P-52 already left open.
+    onReveal: (record) => file(spec, record, notebook, "asserted"),
+  });
+}
+
+/**
+ * Put a reveal in the learner's notebook, saying how its outcome was
+ * established: watched by us, or asserted by whoever wrote the scenario.
+ */
+function file(spec, record, notebook, outcomeSource) {
+  if (!spec.id || !spec.subject) return;              // a draft scenario has nowhere to file
+  const r = notebook.record({
+    ...record,
+    scenario: spec.id,
+    subject: spec.subject,
+    errorTag: errorTagFor(spec, record),
+    outcomeSource,
+  });
+  if (r.warning) console.warn(r.warning);
 }
 
 /**

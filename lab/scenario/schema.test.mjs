@@ -76,3 +76,54 @@ test("id and subject are optional, but must be real strings when given", () => {
   fails({ ...ok(), id: "" }, /id/);
   fails({ ...ok(), subject: 7 }, /subject/);
 });
+
+// ---- P-63 / ADR 0009: a scenario that wraps someone else's simulation ----
+
+const embedded = () => ({
+  schema: 1,
+  id: "wrapped-example",
+  subject: "physics",
+  embed: {
+    src: "embeds/example/index.html",
+    title: "Example simulation",
+    attribution: { work: "Example Sim", author: "PhET Interactive Simulations",
+                   licence: "CC BY 4.0", url: "https://phet.colorado.edu/" },
+  },
+  question: "What happens when you let go?",
+  options: [{ id: "a", label: "A" }, { id: "b", label: "B" }],
+  correct: "b",
+  errorTags: { a: "outward-in-circles" },
+  explain: "Because.",
+});
+
+test("a wrapped scenario validates", () => {
+  assert.deepEqual(validateScenario(embedded()).errors, []);
+});
+
+test("a scenario is either ours or wrapped, never both", () => {
+  // They carry different guarantees. A spec claiming both would leave it
+  // ambiguous whether the answer was checked or merely asserted.
+  fails({ ...embedded(), primitive: "circular-release" }, /both|either/i);
+  const neither = { ...embedded() }; delete neither.embed;
+  fails(neither, /primitive/i);
+});
+
+test("a wrapped scenario must say whose work it is", () => {
+  const noAttr = embedded(); delete noAttr.embed.attribution;
+  fails(noAttr, /attribution/i);
+  const noSrc = embedded(); delete noSrc.embed.src;
+  fails(noSrc, /src/i);
+  const thin = embedded(); thin.embed.attribution = { work: "x" };
+  fails(thin, /licence|author/i);
+});
+
+test("a wrapped scenario may not reach outside the bundle for its simulation", () => {
+  // ADR 0009: self-host the sim. A remote src is a network dependency in the
+  // core loop and breaks wherever third-party frames are blocked.
+  fails({ ...embedded(), embed: { ...embedded().embed, src: "https://phet.colorado.edu/sims/x" } },
+        /self-host|relative/i);
+});
+
+test("a wrapped scenario cannot carry parameters it could not score", () => {
+  fails({ ...embedded(), params: { r: 1.2 } }, /param/i);
+});

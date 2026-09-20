@@ -251,3 +251,11 @@ test("a card keeps the error class behind a wrong answer", () => {
   assert.equal(nb.export().subjects.physics[0].errorTag, "bigger-pushes-harder",
     "the export is how this reaches R-002 analysis — it must carry the tag");
 });
+
+test("a card says whether its outcome was observed or merely asserted", () => {
+  // ADR 0009: a wrapped simulation cannot be watched, so its answer is
+  // asserted by an author. R-002 analysis must be able to tell them apart.
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  nb.record(card({ outcomeSource: "asserted" }));
+  assert.equal(nb.cards("physics")[0].outcomeSource, "asserted");
+});

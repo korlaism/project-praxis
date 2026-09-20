@@ -29,9 +29,15 @@ async function mount(overrides = {}) {
   });
 
   const el = (cls) => dom.body.find((n) => n.className?.split(" ").includes(cls));
-  return { dom, lab, seen, el,
+  const text = () => {
+    const out = [];
+    const walk = (n) => { if (n.textContent) out.push(n.textContent); n.children?.forEach(walk); };
+    walk(dom.body);
+    return out.join(" | ");
+  };
+  return { dom, lab, seen, el, text,
            button: (label) => dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === label),
-           clock: () => el("lab-clock").textContent };
+           clock: () => el("lab-clock")?.textContent };
 }
 
 test("mounting does not throw, and draws with state already defined", async () => {
@@ -264,5 +270,53 @@ test("destroy is safe to call twice, and a late reveal after it is ignored", asy
   lab.destroy();
   lab.reveal("yes");
   assert.equal(seen.length, 0, "a scenario that has left must not write to the notebook");
+  dom.restore();
+});
+
+// ---- P-63 / ADR 0009: wrapping someone else's simulation ----
+
+const EMBED = {
+  src: "embeds/example/index.html",
+  title: "Example simulation",
+  attribution: { work: "Example Sim", author: "PhET Interactive Simulations",
+                 licence: "CC BY 4.0", url: "https://phet.colorado.edu/" },
+};
+const mountEmbed = (over = {}) => mount({ embed: EMBED, setup: undefined, step: undefined, draw: undefined, ...over });
+
+test("a wrapped simulation does not exist until a commit does", async () => {
+  // R-010 in its strictest form: not hidden, not disabled — not loaded.
+  const { dom } = await mountEmbed();
+  assert.equal(dom.body.find((n) => n.tagName === "IFRAME"), null);
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  const frame = dom.body.find((n) => n.tagName === "IFRAME");
+  assert.ok(frame, "the simulation should appear once committed");
+  assert.equal(frame.attrs.src, EMBED.src);
+  dom.restore();
+});
+
+test("a wrapped scenario has no canvas and no transport to run", async () => {
+  const { dom, el } = await mountEmbed();
+  assert.equal(dom.body.find((n) => n.tagName === "CANVAS"), null);
+  const labels = dom.body.findAll((n) => n.tagName === "BUTTON").map((b) => b.textContent);
+  for (const gone of ["Play", "Step", "Reset"]) assert.ok(!labels.includes(gone), `${gone} should not be offered`);
+  assert.ok(el("lab-embed"), "the stage should hold the embed");
+  dom.restore();
+});
+
+test("the learner reveals it themselves, since nothing can watch it for them", async () => {
+  const { dom, el, button } = await mountEmbed();
+  assert.equal(button("Show the answer").disabled, true, "locked until committed");
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  assert.equal(button("Show the answer").disabled, false);
+  button("Show the answer").onclick();
+  assert.equal(el("lab-verdict").hidden, false);
+  dom.restore();
+});
+
+test("credit is shown, because the licence obliges it", async () => {
+  const { dom, text } = await mountEmbed();
+  const t = text();
+  assert.match(t, /PhET Interactive Simulations/);
+  assert.match(t, /CC BY 4\.0/);
   dom.restore();
 });

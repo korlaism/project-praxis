@@ -10,6 +10,13 @@
  * requestAnimationFrame is a queue you drive by hand, so a test can advance
  * exactly N frames with an exact dt. Real rAF does not run in a hidden tab,
  * which is precisely how a frozen-looking simulation fooled us once already.
+ *
+ * Known divergence, and it has bitten: `children` here is a plain array, while
+ * a browser's is an HTMLCollection with none of Array's methods. Code calling
+ * `.children.find(...)` passes every test here and throws in a browser. Hold
+ * references to elements you need rather than searching a child list. The stub
+ * cannot enforce this without breaking its own internals, so it is written
+ * down instead.
  */
 
 class StubCtx {

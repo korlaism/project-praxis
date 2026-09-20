@@ -29,6 +29,14 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
   padding:16px;overflow:hidden}
 .lab-stage canvas{display:block;border-radius:3px}
 
+/* A wrapped simulation (ADR 0009): someone else's, embedded, and credited.
+   The box exists from the start so the stage does not jump when it loads —
+   but the frame itself is only created once a commit exists. */
+.lab-embed{width:100%;height:100%;display:grid;place-items:center}
+.lab-frame{width:100%;height:100%;min-height:260px;border:1px solid var(--line);
+  border-radius:3px;background:var(--panel)}
+.lab-credit{margin:0;color:var(--ink-3);font:.74rem var(--mono);width:100%}
+
 /* The gate is a panel BENEATH the stage, never an overlay. You cannot predict
    about apparatus you cannot see, and covering the canvas was exactly that. */
 .lab-gate{display:grid;gap:12px;padding:16px 24px 18px;

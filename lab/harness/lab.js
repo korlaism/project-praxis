@@ -38,11 +38,21 @@ export function mountLab(topic) {
   el("h1", "lab-q", head).textContent = topic.question;
   if (topic.note) el("p", "lab-sub", head).textContent = topic.note;
 
+  // A wrapped scenario embeds someone else's simulation instead of drawing our
+  // own (ADR 0009). Nothing can watch what happens inside it, so there is no
+  // loop, no transport and no answer check — the learner reveals it themselves.
+  const wrapped = !!topic.embed;
+
   // ---- stage ------------------------------------------------------------
   const stage = el("div", "lab-stage", root);
-  const canvas = document.createElement("canvas");
-  stage.appendChild(canvas);
-  const ctx = canvas.getContext("2d");
+  let canvas = null, ctx = null, frame_ = null, embedBox = null;
+  if (wrapped) {
+    embedBox = el("div", "lab-embed", stage);   // filled once a commit exists
+  } else {
+    canvas = document.createElement("canvas");
+    stage.appendChild(canvas);
+    ctx = canvas.getContext("2d");
+  }
 
   const gateEl = el("div", "lab-gate", root);
   el("div", "lab-gate-label", gateEl).textContent = "Commit before you watch";
@@ -73,7 +83,9 @@ export function mountLab(topic) {
       gate.commit(opt.id, pendingConfidence);
       committedParams = { ...params };
       gateEl.hidden = true;
-      play();
+      // The simulation is not merely hidden before a commit — it does not
+      // exist. R-010 at its strictest, and it saves loading it too.
+      if (wrapped) showEmbed(); else play();
       render();
     };
   }
@@ -84,9 +96,14 @@ export function mountLab(topic) {
   // ---- foot -------------------------------------------------------------
   const foot = el("div", "lab-foot", root);
   const transport = el("div", "lab-transport", foot);
-  const playBtn = button(transport, "Play", () => (running ? pause() : play()), "primary");
-  const stepBtn = button(transport, "Step", () => { tick(1 / 60); render(); });
-  const resetBtn = button(transport, "Reset", () => { softReset(); render(); });
+  let playBtn = null, stepBtn = null, resetBtn = null, showBtn = null;
+  if (wrapped) {
+    showBtn = button(transport, "Show the answer", () => reveal(), "primary");
+  } else {
+    playBtn = button(transport, "Play", () => (running ? pause() : play()), "primary");
+    stepBtn = button(transport, "Step", () => { tick(1 / 60); render(); });
+    resetBtn = button(transport, "Reset", () => { softReset(); render(); });
+  }
   const againBtn = button(transport, "Ask again", () => { gate.reset(); softReset(); render(); });
 
   // Topic-supplied actions — "Cut the string", "Release", "Collide". The
@@ -127,6 +144,19 @@ export function mountLab(topic) {
   const clock = el("div", "lab-clock", foot);
 
   // ---- loop -------------------------------------------------------------
+  /** Load the wrapped simulation, and credit it — the licence obliges that. */
+  function showEmbed() {
+    // Held by reference, not searched for: a real HTMLCollection has no
+    // .find, so searching worked against the test stub and threw in a browser.
+    if (!embedBox || frame_) return;
+    frame_ = document.createElement("iframe");
+    frame_.setAttribute("src", topic.embed.src);
+    frame_.setAttribute("title", topic.embed.title);
+    frame_.setAttribute("loading", "lazy");
+    frame_.className = "lab-frame";
+    embedBox.appendChild(frame_);
+  }
+
   let state, t, running = false, raf = null, last = 0;
   let dpr = 1, viewW = 0, viewH = 0, drawFailed = false;
   let destroyed = false, observer = null;
@@ -136,11 +166,18 @@ export function mountLab(topic) {
     // mountLab, which kills resize() and leaves the canvas black forever.
     t = 0;
     state = topic.setup?.({}, params) ?? {};
+    if (wrapped) {
+      // Asking again means the simulation goes away until the next commit.
+      frame_?.remove();
+      frame_ = null;
+      render();
+      return;
+    }
     pause();
   }
 
   function tick(dt) {
-    if (destroyed || !gate.canRun) return;   // locked until committed, and gone once left
+    if (destroyed || wrapped || !gate.canRun) return;   // locked until committed, and gone once left
     t += dt;
     topic.step?.(state, dt, params);
   }
@@ -169,7 +206,7 @@ export function mountLab(topic) {
 
   // ---- render -----------------------------------------------------------
   function resize() {
-    if (destroyed) return;
+    if (destroyed || wrapped) return;        // nothing of ours to size
     const r = stage.getBoundingClientRect();
     dpr = Math.min(devicePixelRatio || 1, 2);
     // A stage that has not laid out yet reports ~0. Falling back to the viewport
@@ -187,6 +224,8 @@ export function mountLab(topic) {
   }
 
   function render() {
+    if (destroyed) return;
+    if (wrapped) { renderChrome(); return; }
     const view = { w: viewW, h: viewH, t };
     ctx.clearRect(0, 0, view.w, view.h);
     try {
@@ -200,14 +239,25 @@ export function mountLab(topic) {
       ctx.fillText("topic draw() failed — see console", 16, 24);
     }
 
-    gateEl.hidden = gate.canRun;
     playBtn.textContent = running ? "Pause" : "Play";
     for (const b of [playBtn, stepBtn, resetBtn]) b.disabled = !gate.canRun;
+    clock.textContent = `t = ${t.toFixed(2)}s`;
+    renderChrome();
+
+    renderVerdict();
+  }
+
+  /** Everything that is the same whether we drew it or embedded it. */
+  function renderChrome() {
+    gateEl.hidden = gate.canRun;
     againBtn.disabled = !gate.canRun;
+    if (showBtn) showBtn.disabled = !gate.canRun || gate.state === "revealed";
     for (const { b, a } of actionBtns)
       b.disabled = !gate.canRun || (a.enabled ? !a.enabled(state, params) : false);
-    clock.textContent = `t = ${t.toFixed(2)}s`;
+    renderVerdict();
+  }
 
+  function renderVerdict() {
     if (gate.state === "revealed") {
       const rec = api.record;
       verdict.hidden = false;
@@ -269,6 +319,12 @@ export function mountLab(topic) {
     if (e.key === "r") { softReset(); render(); }
   }
 
+  if (wrapped) {
+    const a = topic.embed.attribution;
+    el("p", "lab-credit", foot,
+       `${a.work} by ${a.author} — ${a.licence}`);
+  }
+
   softReset();
   addEventListener("resize", resize);
   resize();
@@ -282,9 +338,10 @@ export function mountLab(topic) {
 }
 
 // ---- tiny helpers --------------------------------------------------------
-function el(tag, cls, parent) {
+function el(tag, cls, parent, text) {
   const n = document.createElement(tag);
   if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
   parent?.appendChild(n);
   return n;
 }
