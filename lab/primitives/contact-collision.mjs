@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * Primitive · contact-collision — a heavy body meets a light one.
  * Baits `bigger-pushes-harder`.

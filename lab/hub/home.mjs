@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /** What the lab's front page lists, as plain data. */
 export function homeModel(notebook, scenarios) {
   const answered = {};

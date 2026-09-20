@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * The hub, driven the way a learner drives it — by clicking.
  *

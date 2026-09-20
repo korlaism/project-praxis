@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Praxis Lab — every scenario and the record, in one page.
  *

@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * Primitive · circular-release — a body whirled on a string, then let go.
  * Baits `outward-in-circles`.

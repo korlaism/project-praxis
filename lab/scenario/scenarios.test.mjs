@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * Every shipped scenario, held to the contract a generated one will face.
  *

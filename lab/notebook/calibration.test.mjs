@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Calibration — does "certain" actually mean you are usually right?
  *

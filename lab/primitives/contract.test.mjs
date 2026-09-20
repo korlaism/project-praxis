@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * The primitive contract, swept across every control range.
  *

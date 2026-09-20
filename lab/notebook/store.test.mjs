@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
 /**
  * Notebook v0 — predictions that survive the tab closing.
  *

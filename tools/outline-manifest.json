@@ -17,7 +17,7 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "9bedcb78c6318ad1"
+      "hash": "9e822aa45313c9a7"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
@@ -173,7 +173,19 @@
       "id": "7ce18caf-bf29-42be-a929-1c1e031d7e5e",
       "url": "/doc/open-source-with-a-paid-hosted-version-3azsBcGC2Q",
       "title": "Open Source, With a Paid Hosted Version",
-      "hash": "49c2c8265a5f5a50"
+      "hash": "086d02ab56c87ef8"
+    },
+    "decisions/0008-licence-split.md": {
+      "id": "9c0e29ae-3ffc-47a8-b509-a50d31b3dd14",
+      "url": "/doc/adr-0008-mit-for-the-lab-kit-agpl-30-for-the-application-4GIyXw1UEy",
+      "title": "ADR 0008 \u00b7 MIT for the Lab Kit, AGPL-3.0 for the Application",
+      "hash": "6fdfdfe86945f14c"
+    },
+    "LICENSING.md": {
+      "id": "382b273c-e9c6-4c16-b9fa-80f57b5818e4",
+      "url": "/doc/licensing-6dpcibgSCY",
+      "title": "Licensing",
+      "hash": "1751b64ee8a6a4ee"
     }
   }
 }

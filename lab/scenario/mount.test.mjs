@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 /**
  * End to end: a real scenario, mounted, played, and written to the notebook.
  * The harness and the store are each tested alone; this proves they meet.
