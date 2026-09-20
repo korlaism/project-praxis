@@ -44,6 +44,10 @@ A topic ships when all four exist:
 3. **The recording.** The tool being used, cut short, opening on the provocation.
 4. **The link.** Anyone watching can go and use the thing themselves.
 
+## Where it goes
+
+**YouTube Shorts, one topic a fortnight** ([ADR 0010](../decisions/0010-channel-youtube-shorts.md)). Vertical, 30–60 seconds, opening on the provocation. The lab is linked in the description and a pinned comment — which only works once the lab is publicly reachable, and today it is not (`P-65`).
+
 ## Time budget
 
 **Two days per topic, hard.** A tight simulation is a day or two; an untethered one is three weeks, and at three weeks you ship four topics a year and the project dies of slowness. If a topic cannot be done in two days, the topic is too big — split it or drop it.
