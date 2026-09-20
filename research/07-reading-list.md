@@ -65,4 +65,6 @@ The full register of everything cited is [Resources Index](06-resources.md). Thi
 2. **Gutierrez de Blume (2022)** — the meta-analysis, 56 effect sizes. Read the moderator table. The effect is real and **adults move more than children do**.
 3. **DiGiacomo & Chen (2016)** — grades 6–7, *n*=30. The only in-band study found. Small, randomised, positive.
 
-`R-005` is narrowed to the improvement claim and keeps `K-04`. Transfer became `R-035`, exploratory, because none of these tested it — ADR 0013. All three are paywalled and were verified at citation level only; `P-71` is to read them properly.
+`R-005` is narrowed to the improvement claim and keeps `K-04`. Transfer became `R-035`, exploratory, because none of these tested it — ADR 0013.
+
+**Access, as at `P-71`:** all three full texts are closed — no open-access copy, and the publishers refuse. The abstracts are read verbatim from ERIC and APA PsycNet, which is as far as anyone gets without a library or an email to the authors. Researchers usually send a PDF when asked, and **one question is worth the email**: in Kleider-Tesler et al., did calibration feedback fail outright, or merely do less well than scaffolding? ADR 0014 defers a real product decision on the answer.

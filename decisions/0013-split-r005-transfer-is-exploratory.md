@@ -51,4 +51,12 @@ The single most actionable finding of `P-07` is that **calibration feedback alon
 
 * The cohort runs and `K-04` either fires or does not.
 * Anyone finds a study testing calibration **transfer** across topics in 11–15 year olds. Then `R-035` can stop being exploratory and become a claim with a kill criterion.
-* Full texts become reachable. The three sources here are verified at citation level, but their results were read from abstracts and secondary summaries — the full texts are paywalled. That is recorded in research/06 and is weaker than `P-06`'s standard.
+* Full texts become reachable. `P-71` got as far as publisher abstracts — ERIC and APA PsycNet, read verbatim — and confirmed every citation against Crossref. All three full texts are closed.
+
+> **`P-71`, 2026-09-20 — two premises above are overstated, and the decision survives both.**
+>
+> *"The effect is **larger for adult-only samples**. Age moderates, in the direction we did not want."* The abstract says the weighted mean effect size was larger for studies conducted in laboratories with adult-only samples **of 101–200 participants, using deep learning strategies, prediction and postdiction judgments, and multiple-choice tests** — one compound description, not age isolated. Age may still run against us; this does not establish it.
+>
+> What the same sentence does say, and nobody had noticed: **duration did not moderate**. `R-005` claims six weeks, so that is a small point in its favour.
+>
+> Neither touches the decision. The split rests on transfer having **no** evidence at any age, which is unchanged.

@@ -76,7 +76,7 @@ Also genuinely unresolved: **expertise reversal cuts against our own personalisa
   `R-005` was recorded as the riskier of the two on a search that `P-07` has since found incomplete. The corrected picture:
 
   * **In band, positive, thin.** DiGiacomo & Chen (2016), grades 6–7, *n*=30, randomised against a delayed-treatment control: calibration accuracy improved. Kleider-Tesler, Prior & Katzir (2019), ninety 10th-graders, three online sessions: calibration improved in the best condition.
-  * **Meta-analytic, supportive, with the moderator against us.** Gutierrez de Blume (2022): 56 effect sizes, 7,667 participants, *g* = −.565 [−.639, −.491] for learning-strategy instruction on monitoring accuracy — **larger for adult-only samples**.
+  * **Meta-analytic and supportive.** Gutierrez de Blume (2022): 56 effect sizes, 7,667 participants, *g* = −.565 [−.639, −.491] for learning-strategy instruction on monitoring accuracy. `P-71` read the real abstract and found two things: the "larger for adult-only samples" line is **one compound clause** describing which studies showed larger effects, not age isolated as a moderator; and **duration did not moderate**, which is the nearest thing `R-005`'s "six weeks" has to support. The meta-analysis is about *learning strategy instruction*, which is not what we do — it bounds the field, not us.
   * **The earlier negative results stand**, and they sit in much younger children than ours.
   * **Transfer has nothing behind it at any age.** None of the above tested transfer to another topic. Split out as `R-035`, exploratory, by ADR 0013.
 
