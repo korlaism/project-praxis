@@ -149,3 +149,97 @@ test("a listed outcome is not flagged as unlisted", () => {
   assert.equal(g.record.unlisted, false);
   assert.equal(g.isCorrect, false);
 });
+
+/* ── Retries never overwrite the original commitment ──────────────────────
+ *
+ * P-72, written before the feature exists. ADR 0014 lets a learner predict
+ * again after a cue. The only way that does real damage is if the second
+ * prediction can replace the first: R-010 would then be measuring post-hoc
+ * confidence, every Brier score in the dataset would be flattering and wrong,
+ * and K-03 would have fired without anyone noticing.
+ *
+ * So the gate is append-only. Attempts accumulate; nothing is ever edited.
+ */
+
+test("a retry leaves the original commitment exactly as it was", () => {
+  const gate = createGate({ ...opts(), correct: "tan" });
+  gate.commit("out", "certain").reveal("tan");
+  const before = { ...gate.record };
+
+  gate.retry();
+  gate.commit("tan", "guessing").reveal("tan");
+
+  const original = gate.attempts[0];
+  assert.equal(original.choice, "out");
+  assert.equal(original.confidence, "certain");
+  assert.equal(original.committedAt, before.committedAt);
+  assert.equal(original.revealedAt, before.revealedAt);
+  assert.equal(original.correct, false);
+});
+
+test("an archived attempt cannot be mutated, not merely should not be", () => {
+  const gate = createGate({ ...opts(), correct: "tan" });
+  gate.commit("out", "certain").reveal("tan");
+  gate.retry();
+
+  const original = gate.attempts[0];
+  assert.throws(() => { "use strict"; original.choice = "tan"; }, TypeError);
+  assert.equal(gate.attempts[0].choice, "out");
+});
+
+test("the retry is a separate record that links back to the original", () => {
+  const gate = createGate({ ...opts(), correct: "tan" });
+  gate.commit("out", "certain").reveal("tan");
+  gate.retry();
+  gate.commit("tan", "leaning").reveal("tan");
+
+  assert.equal(gate.attempts[0].attempt, 0);
+  assert.equal(gate.attempts[0].retryOf, null);
+  assert.equal(gate.record.attempt, 1);
+  assert.equal(gate.record.retryOf, 0);
+  assert.equal(gate.record.choice, "tan");
+  assert.equal(gate.record.correct, true);
+});
+
+test("committing again without retrying is still refused", () => {
+  const gate = createGate({ ...opts(), correct: "tan" });
+  gate.commit("out", "certain").reveal("tan");
+  assert.throws(() => gate.commit("tan", "certain"), /already committed/);
+});
+
+test("a retry is only possible once something has been revealed", () => {
+  const gate = createGate({ ...opts(), correct: "tan" });
+  assert.throws(() => gate.retry(), /nothing to retry/);
+  gate.commit("out", "certain");
+  assert.throws(() => gate.retry(), /nothing to retry/);
+});
+
+test("the simulation locks again until the retry is committed", () => {
+  const gate = createGate({ ...opts(), correct: "tan" });
+  gate.commit("out", "certain").reveal("tan");
+  assert.equal(gate.canRun, true);
+  gate.retry();
+  assert.equal(gate.canRun, false, "a retry that can be watched before it is committed is not a gate");
+  assert.equal(gate.isCorrect, null, "the verdict must not survive into the next attempt");
+});
+
+test("reset after a retry does not resurrect the first attempt as editable", () => {
+  const gate = createGate({ ...opts(), correct: "tan" });
+  gate.commit("out", "certain").reveal("tan");
+  gate.retry();
+  gate.commit("tan", "leaning").reveal("tan");
+  gate.reset();
+
+  assert.equal(gate.attempts.length, 2, "reset must archive, not discard");
+  assert.equal(gate.attempts[0].choice, "out");
+  assert.equal(gate.attempts[1].choice, "tan");
+  assert.equal(gate.record.choice, null, "a fresh attempt, not an editable old one");
+  assert.equal(gate.record.attempt, 2);
+  assert.equal(gate.record.retryOf, null, "reset starts a new line, it is not a retry");
+});
+
+test("reset on an untouched gate archives nothing", () => {
+  const gate = createGate({ ...opts(), correct: "tan" });
+  gate.reset().reset();
+  assert.deepEqual(gate.attempts, [], "param changes call reset constantly — they must not fill the record with blanks");
+});
