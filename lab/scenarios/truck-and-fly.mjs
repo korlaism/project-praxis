@@ -2,6 +2,8 @@
 export default {
   schema: 1,
   id: "truck-and-fly",
+  concept: "action-and-reaction",
+  difficulty: "easy",
   subject: "physics",
   primitive: "contact-collision",
   params: { mt: 2, mf: 200, u: 20 },

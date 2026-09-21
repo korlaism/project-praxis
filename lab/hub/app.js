@@ -63,12 +63,23 @@ function home() {
     page.append(el("p", "hub-warn", "This browser won't let the lab keep your record — predictions will be gone when you close the tab."));
 
   for (const s of m.subjects) {
-    const list = el("div", "hub-list");
-    for (const sc of s.scenarios)
-      list.append(navButton("hub-card", sc.path,
-        el("span", "hub-card-q", sc.question),
-        el("span", "hub-card-n", sc.answered ? `answered ${sc.answered}×` : "not tried yet")));
-    page.append(el("section", "hub-subject", el("h2", "hub-h2", s.subject), list));
+    const subject = el("section", "hub-subject", el("h2", "hub-h2", s.subject));
+    for (const c of s.concepts) {
+      const list = el("div", "hub-list");
+      for (const sc of c.scenarios)
+        list.append(navButton("hub-card", sc.path,
+          el("span", "hub-card-q", sc.question),
+          el("span", "hub-card-n", sc.answered ? `answered ${sc.answered}×` : "not tried yet"),
+          sc.difficulty ? el("span", `hub-card-d is-${sc.difficulty}`, sc.difficulty) : null));
+      subject.append(el("section", "hub-concept",
+        el("h3", "hub-h3",
+          el("span", "hub-concept-name", c.title),
+          // Tried, not correct. Being right is the record page's business, and
+          // a front page that scores you is the report card K-06 forbids.
+          el("span", "hub-concept-n", `${c.answered}/${c.total} tried`)),
+        list));
+    }
+    page.append(subject);
   }
   document.body.append(page);
   return () => page.remove();

@@ -12,6 +12,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { SCENARIOS } from "../scenarios/index.mjs";
 import { installDom } from "../harness/dom-stub.mjs";
 import { openNotebook, memoryBackend } from "../notebook/store.mjs";
 
@@ -27,7 +28,9 @@ async function start() {
 test("the front page lists every scenario as a button, not a link", async () => {
   const { dom, all } = await start();
   const cards = all("hub-card");
-  assert.equal(cards.length, 3);
+  // Derived from the registry, not written down: a literal here meant the
+  // front page silently stopped listing new scenarios as the bank grew (P-80).
+  assert.equal(cards.length, Object.keys(SCENARIOS).length);
   for (const c of cards) assert.equal(c.tagName, "BUTTON", "links do not navigate inside a published page");
   dom.restore();
 });
@@ -39,7 +42,7 @@ test("clicking a scenario opens it, and clicking back returns without leaving it
   assert.ok(one("hub-back"), "there must be a way back");
   one("hub-back").onclick();
   assert.equal(one("lab"), null, "the scenario must be gone");
-  assert.equal(all("hub-card").length, 3, "the front page must be back");
+  assert.equal(all("hub-card").length, Object.keys(SCENARIOS).length, "the front page must be back");
   dom.restore();
 });
 
@@ -62,9 +65,23 @@ test("the record opens from the front page and comes back", async () => {
   dom.restore();
 });
 
+/** The front-page card for a scenario, found by its question rather than its place. */
+function cardFor(all, id) {
+  const question = SCENARIOS[id].question;
+  const card = all("hub-card").find((c) => {
+    let text = "";
+    (function walk(n) { if (n.textContent) text += n.textContent; n.children?.forEach(walk); })(c);
+    return text.includes(question);
+  });
+  assert.ok(card, `no front-page card for "${id}"`);
+  return card;
+}
+
 test("a prediction made in a scenario shows up in the record", async () => {
   const { dom, one, all } = await start();
-  all("hub-card")[1].onclick();                       // truck and fly
+  // By identity, not by position: concept grouping reordered the list and an
+  // index silently opened a different scenario (P-80).
+  cardFor(all, "truck-and-fly").onclick();
   dom.body.find((n) => n.id === "opt-truck").onclick();
   dom.tick(2000);
   one("hub-back").onclick();

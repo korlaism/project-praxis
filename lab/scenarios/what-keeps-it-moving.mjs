@@ -2,6 +2,8 @@
 export default {
   schema: 1,
   id: "what-keeps-it-moving",
+  concept: "motion-without-force",
+  difficulty: "medium",
   subject: "physics",
   primitive: "two-pucks",
   params: { push: 0.6, friction: 0, u: 4 },
