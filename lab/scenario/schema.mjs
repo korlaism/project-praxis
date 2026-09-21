@@ -112,6 +112,18 @@ export function validateScenario(spec) {
     }
   }
 
+  // R-023: an item is tagged with its concept and its difficulty. The intended
+  // misconception is already carried per-option by errorTags. Difficulty is an
+  // author's estimate until a cohort produces real numbers — it is recorded so
+  // it can be checked against them later, not because we know it.
+  const CONCEPTS = ["motion-without-force", "falling", "action-and-reaction",
+                    "circular-motion", "friction-and-inertia"];
+  const DIFFICULTY = ["easy", "medium", "hard"];
+  if (spec.concept !== undefined && !CONCEPTS.includes(spec.concept))
+    bad(`concept "${spec.concept}" is not one of ${CONCEPTS.join(", ")}`);
+  if (spec.difficulty !== undefined && !DIFFICULTY.includes(spec.difficulty))
+    bad(`difficulty "${spec.difficulty}" is not one of ${DIFFICULTY.join(", ")}`);
+
   // cues (ADR 0014)
   //
   // Keyed by misconception tag, not by option id: a cue answers "what should
