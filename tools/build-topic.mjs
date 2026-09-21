@@ -31,7 +31,11 @@ export function specifiersIn(src) {
   const code = stripComments(src);
   const found = new Set();
   const patterns = [
-    /\b(?:import|export)\s[^;]*?\bfrom\s*["']([^"']+)["']/g,   // import x from "…", export {…} from "…"
+    // The class excludes quotes on purpose: a real import never has a string
+    // literal between the keyword and `from`, but an export of ordinary data
+    // can. `export const controls = [{ label: "drop from", unit: " m" }]`
+    // matched here and was reported as a bare specifier (P-77).
+    /\b(?:import|export)\s[^;"'`]*?\bfrom\s*["']([^"']+)["']/g,   // import x from "…", export {…} from "…"
     /\bimport\s*["']([^"']+)["']/g,                            // import "…"
     /\bimport\(\s*["']([^"']+)["']\s*\)/g,                     // import("…")
   ];

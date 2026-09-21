@@ -195,3 +195,26 @@ test("a font's licence travels with it", () => {
     assert.ok(licences.length > 0, `${dir} ships fonts with no licence text beside them`);
   }
 });
+
+test("a string containing the word from is not an import", () => {
+  // P-77. `label: "drop from"` in an exported array made the scanner read
+  // everything up to the next quote as a module specifier, and the build
+  // failed with a bare-specifier error pointing at nothing recognisable.
+  const src = 'export const controls = [\n' +
+              '  { key: "height", label: "drop from", min: 5, unit: " m" },\n' +
+              '];\n' +
+              'import { stepFall } from "../components/falling.mjs";\n';
+  assert.deepEqual(specifiersIn(src), ["../components/falling.mjs"]);
+});
+
+test("real imports and re-exports are still found", () => {
+  const src = [
+    'import a from "./a.mjs";',
+    'import { b, c } from "../b/c.mjs";',
+    'export { d } from "./d.mjs";',
+    'import "./side-effect.mjs";',
+    'const lazy = await import("./lazy.mjs");',
+  ].join("\n");
+  assert.deepEqual(specifiersIn(src).sort(),
+    ["../b/c.mjs", "./a.mjs", "./d.mjs", "./lazy.mjs", "./side-effect.mjs"]);
+});

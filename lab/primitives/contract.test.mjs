@@ -60,3 +60,35 @@ for (const [id, primitive] of Object.entries(PRIMITIVES)) {
     }
   });
 }
+
+/** A canvas context that records nothing and refuses nothing. */
+function stubCtx() {
+  const noop = () => {};
+  return new Proxy({}, {
+    get: (_, k) =>
+      k === "canvas" ? { width: 800, height: 600 }
+      : k === "measureText" ? () => ({ width: 40 })
+      : typeof k === "string" ? noop : undefined,
+    set: () => true,
+  });
+}
+
+for (const [id, primitive] of Object.entries(PRIMITIVES)) {
+  test(`${id}: draws without throwing, at every corner and before it starts`, () => {
+    // The black-canvas bug (P-27) was draw() throwing out of mountLab, which
+    // killed resize() and left the canvas 0x0 forever. It looks like nothing
+    // rendering rather than like an error, so it is worth covering directly —
+    // and nobody has yet watched free-fall render in a browser at all.
+    for (const params of sweep(primitive)) {
+      const p = resolveParams(primitive, params);
+      const view = { w: 800, h: 600 };
+      const fresh = primitive.setup(p);
+      assert.doesNotThrow(() => primitive.draw(stubCtx(), fresh, p, view, { revealed: false }),
+        `${id} threw drawing its initial state with ${JSON.stringify(params)}`);
+
+      const run = runHeadless(primitive, p);
+      assert.doesNotThrow(() => primitive.draw(stubCtx(), run.state, p, view, { revealed: true }),
+        `${id} threw drawing its finished state with ${JSON.stringify(params)}`);
+    }
+  });
+}

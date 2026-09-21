@@ -3,9 +3,10 @@
 import * as circularRelease from "./circular-release.mjs";
 import * as contactCollision from "./contact-collision.mjs";
 import * as twoPucks from "./two-pucks.mjs";
+import * as freeFall from "./free-fall.mjs";
 
 export const PRIMITIVES = Object.fromEntries(
-  [circularRelease, contactCollision, twoPucks].map((p) => [p.id, p]),
+  [circularRelease, contactCollision, twoPucks, freeFall].map((p) => [p.id, p]),
 );
 
 export function getPrimitive(id) {
