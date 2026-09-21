@@ -7,6 +7,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { validateScenario } from "./schema.mjs";
 import { checkAnswer } from "./run.mjs";
 import { getPrimitive, resolveParams } from "../primitives/index.mjs";
@@ -52,10 +53,20 @@ test("item ids are unique across the whole bank", () => {
   assert.equal(new Set(ids).size, ids.length, "duplicate item id");
 });
 
-test("no item claims to cover week 2", () => {
-  // Falling has no primitive yet (P-77). An item claiming that concept would
-  // be one nobody can run, which is worse than an acknowledged gap.
-  assert.equal(BY_WEEK[2], undefined, "week 2 has a primitive now — delete this test");
+test("every misconception tag is one the taxonomy already names", () => {
+  // spec/04 says the tags are drawn from the published catalogues and are not
+  // our invention. P-77 nearly added "bigger-falls-faster" beside the existing
+  // "heavier-falls-faster" — two tags for one belief, which would quietly
+  // split the per-learner distributions R-002 is tested on.
+  const doc = readFileSync(new URL("../../spec/04-data-model.md", import.meta.url), "utf8");
+  const known = new Set([...doc.matchAll(/^\|\s*`([a-z-]+)`\s*\|/gm)].map((m) => m[1]));
+  assert.ok(known.size >= 9, "the taxonomy table did not parse");
   for (const spec of BANK)
-    assert.notEqual(spec.concept, "falling", `${spec.id} claims falling, which cannot be simulated yet`);
+    for (const tag of new Set(Object.values(spec.errorTags ?? {})))
+      assert.ok(known.has(tag), `${spec.id} uses "${tag}", which spec/04-data-model.md does not name`);
+});
+
+test("week 2 is covered, now that falling can be simulated", () => {
+  assert.ok(BY_WEEK[2]?.length > 0, "week 2 has items");
+  for (const spec of BY_WEEK[2]) assert.equal(spec.primitive, "free-fall");
 });
