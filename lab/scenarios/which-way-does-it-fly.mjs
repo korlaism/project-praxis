@@ -2,6 +2,8 @@
 export default {
   schema: 1,
   id: "which-way-does-it-fly",
+  concept: "circular-motion",
+  difficulty: "easy",
   subject: "physics",
   primitive: "circular-release",
   params: { r: 1.2, omega: 2.4 },

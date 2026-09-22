@@ -24,3 +24,13 @@
 .hub-back:hover{border-color:var(--accent)}
 /* keep a scenario's question clear of the floating back link */
 .hub-in-scenario .lab-head{padding-right:96px}
+
+/* P-80 · fourteen items in one flat list is a wall, so they are grouped by the
+   concept they belong to, in the order the pilot teaches them. */
+.hub-concept{margin:0 0 22px}
+.hub-h3{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+        margin:0 0 8px;font-size:.82rem;font-weight:600;letter-spacing:.02em}
+.hub-concept-name{color:var(--ink)}
+.hub-concept-n{font:400 .7rem var(--mono);color:var(--ink-3)}
+.hub-card-d{font:400 .62rem var(--mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
+.hub-card-d.is-hard{color:var(--wrong)}

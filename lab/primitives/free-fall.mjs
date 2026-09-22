@@ -81,14 +81,17 @@ export function draw(ctx, s, p, view) {
   ctx.setLineDash([]);
 
   const lanes = [
-    { b: s.heavy, x: view.w * 0.36, tint: "#E8703A", name: `${p.heavy.toFixed(1)} kg`, r: 13 },
-    { b: s.light, x: view.w * 0.64, tint: "#4FB286", name: `${p.light.toFixed(1)} kg`, r: 9 },
+    { b: s.heavy, x: view.w * 0.36, tint: "#E8703A", name: `${p.heavy.toFixed(1)} kg` },
+    { b: s.light, x: view.w * 0.64, tint: "#4FB286", name: `${p.light.toFixed(1)} kg` },
   ];
+  // IDENTICAL on screen, because they are identical in the model. The first
+  // draft drew the heavy ball larger, which is a picture arguing for the
+  // misconception the item exists to test — the mass is in the label, where a
+  // learner has to read it rather than infer it from size.
+  const R = 11;
   for (const L of lanes) {
-    // Same size on screen, because they are the same size in the model. Only
-    // a sliver of difference, or the picture argues for the misconception.
     ctx.fillStyle = L.tint;
-    ctx.beginPath(); ctx.arc(L.x, Y(L.b.y), L.r, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(L.x, Y(L.b.y), R, 0, Math.PI * 2); ctx.fill();
     label(ctx, L.name, L.x - 18, topY - 8, L.tint);
     if (L.b.landed) label(ctx, `${L.b.t.toFixed(2)} s`, L.x - 18, floorY + 18, L.tint);
   }
