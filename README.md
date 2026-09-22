@@ -52,6 +52,7 @@ Step 2 is the load-bearing one. Everything else is in service of having an hones
 | [0013](decisions/0013-split-r005-transfer-is-exploratory.md) | Split R-005 — calibration improvement is a claim, transfer is exploratory | Accepted |
 | [0014](decisions/0014-the-reveal-cues-before-it-explains.md) | The reveal cues the correction before it explains it | Accepted |
 | [0015](decisions/0015-the-record-stays-where-the-learner-is.md) | The record stays where the learner is | Accepted |
+| [0016](decisions/0016-the-transfer-set-lives-in-a-private-repository.md) | The held-back transfer set lives in a private repository | Accepted |
 
 Ten accepted, one proposed. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
 
