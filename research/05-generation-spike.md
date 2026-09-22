@@ -79,3 +79,32 @@ Candidate 14 (`push 0.5, friction 0.1`) previously passed as `needs`. Kinetic fr
 So one of the original passes was false, and the corrected figure is **18/20 after repair, 0/20 escape rate**. The escape rate — the number the architecture actually turns on — is unchanged.
 
 Both remaining failures are now the same honest case: parameters that produce `outruns`, an outcome the scenario's option list does not offer. That is the scenario being unaskable with those options, not the simulation being wrong.
+
+
+## P-51 · The loop, measured (2026-09-22)
+
+`P-45` reported "one mechanical repair pass reached 95%". Building the loop properly and
+re-running the same twenty candidates gives a different and lower number.
+
+| | |
+|---|---|
+| Unaided | **13/20 (65%)** — unchanged |
+| After repair | **18/20 (90%)** |
+| Attempts needed | 1× for 13, **2× for 5** |
+| Stuck | 2, both `simulation produced "outruns", which is not one of the options` |
+| Answers changed by a repair | **0** |
+
+**Why 90% and not 95%.** The two stuck candidates produced an outcome nobody offered. Reaching
+95% means adding the missing option — writing a distractor nobody chose the wording of. The
+loop refuses to do that, and refusing is the right answer: a repair pass that invents content
+is a generator with extra steps.
+
+**Why five candidates needed two passes.** Correcting an answer exposes a misconception tag
+that now sits on the correct option, which the first pass could not see because the answer was
+still wrong. That is the case for a loop rather than a single pass, and it was the ticket's
+premise.
+
+**The number that actually matters is the last row.** A repaired answer makes an item
+self-consistent, never sensible — the question may no longer ask about the thing the new answer
+answers, and no check can see that. Zero today because every answer failure was refused rather
+than repaired. When a real generator is plugged in (`P-50`), that count is the review queue.

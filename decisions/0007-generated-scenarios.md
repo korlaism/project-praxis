@@ -13,6 +13,19 @@
 > edited after it: the escape rate was **0/20** — no incorrect scenario passed all the checks —
 > and one mechanical repair pass reached 95%. Whether that is sufficient to accept is the owner's
 > call, not a redefinition this document may make for itself.
+>
+> **`P-51`, 2026-09-22 — the 95% does not survive a conservative repairer.** Building the loop
+> properly and re-running the same twenty candidates gives **90%, not 95%**. The difference is
+> two candidates whose simulation produced an outcome **nobody offered as an option**: reaching
+> 95% means adding that option, which is writing a distractor nobody chose the wording of, so
+> the loop refuses it. The unaided figure — which is what the bar above is actually about — is
+> unchanged at 65%, so this ADR stays `Proposed` either way.
+>
+> Two numbers worth having from that run. Five candidates needed **two** passes rather than one,
+> because correcting an answer exposes a tag that then sits on it — which is why it is a loop.
+> And **zero** repairs changed a stated answer, so nothing needed a human to confirm the question
+> still matched it. That last count is the one to watch as the generator changes: a repaired
+> answer makes an item self-consistent, never sensible, and no check can tell the difference.
 
 ## Context
 
