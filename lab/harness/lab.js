@@ -207,6 +207,37 @@ export function mountLab(topic) {
     render();
   }
 
+  /**
+   * Advance the simulation by `seconds`, in fixed steps, with no animation
+   * frames at all. P-69.
+   *
+   * Two problems, one answer. A browser throttles a hidden tab to about half a
+   * frame per second, and dt is clamped to 1/30s per frame, so the run crawls
+   * at roughly a two-hundredth of real time — which made this page effectively
+   * unverifiable outside these tests, four tickets in a row. And a fixed step
+   * is reproducible, where wall-clock frames are not.
+   *
+   * It is a clock, not a bypass: the gate is still asked, so nothing advances
+   * before a commitment exists.
+   */
+  function advance(seconds, dt = 1 / 60) {
+    if (destroyed) return api;
+    const steps = Math.max(0, Math.round(seconds / dt));
+    for (let i = 0; i < steps; i++) {
+      if (destroyed) break;                  // a reveal can tear the lab down
+      tick(dt);
+    }
+    render();
+    return api;
+  }
+
+  // A tab you switch away from should not fall behind; it should stop. Left
+  // paused rather than resumed on return, so nothing moves without the
+  // learner, and the transport button says which state it is in.
+  function onVisibility() {
+    if (document.hidden && running) pause();
+  }
+
   // ---- render -----------------------------------------------------------
   function resize() {
     if (destroyed || wrapped) return;        // nothing of ours to size
@@ -333,11 +364,12 @@ export function mountLab(topic) {
     destroyed = true;
     removeEventListener("resize", resize);
     removeEventListener("keydown", onKey);
+    document.removeEventListener("visibilitychange", onVisibility);
     observer?.disconnect();
     root.remove();
   }
 
-  const api = { reveal, play, pause, destroy, get choice() { return gate.choice; },
+  const api = { reveal, play, pause, advance, destroy, get choice() { return gate.choice; },
                 get attempts() { return gate.attempts; },
                 get record() { return { ...gate.record, params: committedParams }; } };
 
@@ -353,6 +385,7 @@ export function mountLab(topic) {
   }
 
   softReset();
+  document.addEventListener("visibilitychange", onVisibility);
   addEventListener("resize", resize);
   resize();
   // The first rect can be wrong before fonts and layout settle; a ResizeObserver

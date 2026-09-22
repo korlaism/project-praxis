@@ -85,6 +85,30 @@ function home() {
   return () => page.remove();
 }
 
+/**
+ * With ?verify=1, let whoever opened the page drive the simulation. P-69.
+ *
+ * A browser throttles a hidden or unfocused tab to roughly half a frame per
+ * second, so watching a run reach its reveal takes minutes — which is why four
+ * tickets in a row were verified against a DOM stub and had to say so.
+ *
+ * Deliberately not on by default. It exposes no data and sends nothing (the
+ * record is already the learner's own, in their own browser), but a page
+ * should not carry a control surface nobody asked for, and it must not outlive
+ * the lab it drives.
+ */
+function instrument(lab) {
+  const asked = typeof location !== "undefined" && /(?:^|[?&])verify=1(?:&|$)/.test(location.search || "");
+  if (!asked) return () => {};
+  globalThis.praxisVerify = {
+    /** Fixed-step, no animation frames, gate still enforced. */
+    advance: (seconds) => (lab.advance(seconds), undefined),
+    record: () => lab.record,
+    attempts: () => lab.attempts,
+  };
+  return () => { delete globalThis.praxisVerify; };
+}
+
 function show(path) {
   if (path === shown) return;             // back/forward can announce the same move twice
   shown = path;
@@ -101,7 +125,8 @@ function show(path) {
     const lab = mountScenario(spec, { notebook });
     const back = navButton("hub-back", "/", "← Lab");
     document.body.append(back);
-    leave = () => { lab.destroy(); back.remove(); };
+    const unhook = instrument(lab);
+    leave = () => { unhook(); lab.destroy(); back.remove(); };
   } else if (path === "/record") {
     const view = renderRecord(document.body, { notebook, scenarios: SCENARIOS });
     const back = navButton("hub-back", "/", "← Lab");

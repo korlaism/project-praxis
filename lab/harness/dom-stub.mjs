@@ -98,7 +98,19 @@ export function installDom({ dpr = 1 } = {}) {
   const saved = {};
   const set = (k, v) => { saved[k] = g[k]; g[k] = v; };
 
-  set("document", { body, createElement: (t) => new StubEl(t), createElementNS: (_ns, t) => new StubEl(t) });
+  // The document gets its own listener table and a `hidden` flag, because a
+  // hidden tab is a real state the harness now reacts to (P-69) and there is
+  // no way to test that without being able to enter it.
+  const docListeners = new Map();
+  const doc = {
+    body,
+    hidden: false,
+    createElement: (t) => new StubEl(t),
+    createElementNS: (_ns, t) => new StubEl(t),
+    addEventListener: (type, fn) => { (docListeners.get(type) ?? docListeners.set(type, new Set()).get(type)).add(fn); },
+    removeEventListener: (type, fn) => { docListeners.get(type)?.delete(fn); },
+  };
+  set("document", doc);
   set("devicePixelRatio", dpr);
   set("innerWidth", 1000);
   set("innerHeight", 800);
@@ -109,7 +121,7 @@ export function installDom({ dpr = 1 } = {}) {
   set("addEventListener", (type, fn) => { (listeners.get(type) ?? listeners.set(type, new Set()).get(type)).add(fn); });
   set("removeEventListener", (type, fn) => { listeners.get(type)?.delete(fn); });
   set("ResizeObserver", class { observe() {} disconnect() {} });
-  const loc = { hash: "" };
+  const loc = { hash: "", search: "" };
   set("location", loc);
   set("history", { pushState(_s, _t, url) { loc.hash = String(url); } });
   set("scrollTo", () => {});
@@ -126,6 +138,10 @@ export function installDom({ dpr = 1 } = {}) {
       }
     },
     pendingFrames: () => frames.length,
+    /** Switch tabs away, and back. Real rAF stops in a hidden tab; this says so. */
+    hide() { doc.hidden = true; for (const fn of docListeners.get("visibilitychange") ?? []) fn({}); },
+    show() { doc.hidden = false; for (const fn of docListeners.get("visibilitychange") ?? []) fn({}); },
+    docListenerCount: (type) => docListeners.get(type)?.size ?? 0,
     listenerCount: (type) => listeners.get(type)?.size ?? 0,
     restore() { for (const k of Object.keys(saved)) g[k] = saved[k]; },
   };
