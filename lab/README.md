@@ -109,6 +109,30 @@ Artifact tool takes. `dist/` is build output and is never committed.
 
 ## Deployed
 
+## Verifying it in a browser
+
+A browser throttles a hidden or unfocused tab to roughly half a frame per second, and
+`dt` is clamped to `1/30`s per frame, so a run advances at about a two-hundredth of real
+time. Watching a reveal arrive takes minutes. Four tickets in a row were therefore
+verified against the DOM stub rather than the real page, and said so.
+
+Add `?verify=1` and the page exposes `window.praxisVerify`:
+
+```js
+document.getElementById("opt-together").click();   // commit, as a learner would
+window.praxisVerify.advance(2.1);                  // fixed steps, no animation frames
+window.praxisVerify.record();                      // { choice, observed, correct, attempt, retryOf }
+window.praxisVerify.attempts();                    // every earlier attempt, frozen
+```
+
+`advance()` is a clock, not a bypass: the gate is still asked, so nothing moves before a
+commitment exists — and that is worth checking first, because it is the guarantee
+everything else rests on. The hook is absent without the flag and is removed when the
+scenario is left.
+
+Switching tabs **pauses** rather than falling behind, and does not resume by itself: the
+transport button says which state it is in.
+
 **Public:** <https://korlaism.github.io/project-praxis/> — built and deployed from
 `main` by `.github/workflows/pages.yml`, tests first. This is the URL the channel
 links to.

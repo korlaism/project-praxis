@@ -407,3 +407,77 @@ test("the second attempt explains rather than cueing again", async () => {
   assert.match(verdictText(el), /Because\./, "cueing twice is nagging, not scaffolding");
   dom.restore();
 });
+
+/* ── A hidden tab, and a way to drive the run without waiting (P-69) ──────
+ *
+ * dt is clamped to 1/30s per frame, so a tab throttled to ~0.5fps advances the
+ * simulation about 200 times slower than real time rather than jumping. That
+ * is the right choice for the integrator and the wrong experience: switch
+ * tabs, come back, and the run is behind where you left it.
+ *
+ * It also made the lab unverifiable in a browser — reaching a reveal took
+ * around fifteen minutes — so four separate tickets fell back to these stubs
+ * instead of looking at the real page. advance() is the way out of both.
+ */
+
+test("switching away from the tab pauses, rather than drifting behind", async () => {
+  const { lab, dom, seen } = await mount();
+  dom.body.find((n) => n.id === "opt-yes").onclick();   // committing starts it
+  dom.tick(3);
+  const stepsWhenVisible = seen.steps;
+  assert.ok(stepsWhenVisible > 0, "it must be running before hiding proves anything");
+
+  dom.hide();
+  assert.equal(dom.pendingFrames(), 0, "a hidden tab must not leave a frame queued");
+  dom.tick(10);
+  assert.equal(seen.steps, stepsWhenVisible, "nothing may advance while the tab is hidden");
+  dom.restore();
+});
+
+test("coming back does not silently resume — the learner restarts it", async () => {
+  const { lab, dom, button } = await mount();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  dom.tick(2);
+  dom.hide();
+  dom.show();
+  assert.ok(button("Play"), "the transport offers Play, so the state is obvious");
+  dom.restore();
+});
+
+test("the visibility listener is removed on destroy", async () => {
+  const { lab, dom } = await mount();
+  assert.equal(dom.docListenerCount("visibilitychange"), 1);
+  lab.destroy();
+  assert.equal(dom.docListenerCount("visibilitychange"), 0, "a destroyed lab must not keep listening");
+  dom.restore();
+});
+
+test("advance() drives the run deterministically, with no animation frames", async () => {
+  const { lab, dom, seen } = await mount();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  const before = dom.pendingFrames();
+
+  lab.advance(1);
+  assert.equal(seen.steps, 60, "one second is sixty fixed steps, every time");
+  assert.equal(dom.pendingFrames(), before, "advance must not queue frames");
+
+  lab.advance(1);
+  assert.equal(seen.steps, 120, "and it accumulates");
+  dom.restore();
+});
+
+test("advance() respects the gate — it is a clock, not a bypass", async () => {
+  const { lab, dom, seen } = await mount();
+  lab.advance(5);
+  assert.equal(seen.steps, 0, "nothing may advance before a commitment exists");
+  dom.restore();
+});
+
+test("advance() works in a hidden tab, which is the point of it", async () => {
+  const { lab, dom, seen } = await mount();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  dom.hide();
+  lab.advance(0.5);
+  assert.equal(seen.steps, 30);
+  dom.restore();
+});
