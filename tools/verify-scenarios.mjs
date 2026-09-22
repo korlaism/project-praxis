@@ -3,11 +3,16 @@
  * Run candidate scenarios through every check in spec/07-generated-scenarios.md
  * and report how many pass unaided.
  *
- * Usage: node tools/verify-scenarios.mjs <module exporting an array of specs>
+ * Usage: node tools/verify-scenarios.mjs [--repair] <module exporting an array of specs>
+ *
+ * With --repair, each failing candidate goes round the generate-validate-repair
+ * loop (P-51) and the report says how many attempts each needed. That number is
+ * a better measure of generator quality than a single-pass rate.
  */
 import { validateScenario } from "../lab/scenario/schema.mjs";
 import { runHeadless } from "../lab/scenario/run.mjs";
 import { PRIMITIVES, resolveParams } from "../lab/primitives/index.mjs";
+import { repairLoop } from "../lab/scenario/repair.mjs";
 
 const CHECKS = ["schema", "primitive", "params", "completes", "invariants", "answer"];
 
@@ -69,7 +74,10 @@ export function verify(spec) {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  const mod = await import(new URL(process.argv[2], `file://${process.cwd()}/`).href);
+  const args = process.argv.slice(2);
+  const repairing = args.includes("--repair");
+  const target = args.find((a) => !a.startsWith("--"));
+  const mod = await import(new URL(target, `file://${process.cwd()}/`).href);
   const specs = mod.default;
   const rows = specs.map((s, i) => ({ i, s, ...verify(s) }));
   const clean = rows.filter((r) => Object.keys(r.fail).length === 0);
@@ -95,4 +103,31 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     b.n++; if (Object.keys(r.fail).length === 0) b.ok++;
   }
   console.log("  by primitive:", Object.entries(byPrim).map(([p, b]) => `${p} ${b.ok}/${b.n}`).join("  "));
+
+  // P-51 · the loop, not a single pass.
+  if (repairing) {
+  const loops = specs.map((s, i) => ({ i, ...repairLoop(s) }));
+  const fixed = loops.filter((l) => l.ok);
+  const answerChanged = loops.filter((l) => l.ok && l.changes.some((c) => c.startsWith("correct:")));
+
+  const attempts = {};
+  for (const l of fixed) attempts[l.attempts] = (attempts[l.attempts] ?? 0) + 1;
+
+  console.log(`\n  after repair:      ${fixed.length}/${specs.length}` +
+              ` (${((fixed.length / specs.length) * 100).toFixed(0)}%)`);
+  console.log("  attempts needed:  ",
+              Object.entries(attempts).map(([n, c]) => `${n}× for ${c}`).join(", ") || "none");
+
+  const stuck = loops.filter((l) => !l.ok);
+  for (const l of stuck)
+    console.log(`  STUCK ${String(l.spec.id ?? `#${l.i + 1}`).padEnd(20)} [${Object.keys(l.fail)[0]}] ${Object.values(l.fail)[0]}`);
+
+  // The number that decides whether any of this is trustworthy. A repaired
+  // answer makes an item self-consistent, never sensible: the question may no
+  // longer be asking about the thing the new answer answers, and no check can
+  // see that. These are the ones a human has to read.
+  console.log(`\n  NEEDS A HUMAN:     ${answerChanged.length} had their stated answer changed`);
+  for (const l of answerChanged)
+    console.log(`    ${String(l.spec.id ?? `#${l.i + 1}`).padEnd(20)} ${l.changes.filter((c) => c.startsWith("correct:"))[0]}`);
+  }
 }
