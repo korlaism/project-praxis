@@ -12,6 +12,7 @@ import { validateScenario } from "./schema.mjs";
 import { checkAnswer } from "./run.mjs";
 import { getPrimitive, resolveParams } from "../primitives/index.mjs";
 import BANK, { BY_WEEK } from "../scenarios/bank/index.mjs";
+import { SCENARIOS } from "../scenarios/index.mjs";
 
 test("every item validates against the schema", () => {
   for (const spec of BANK) {
@@ -69,4 +70,18 @@ test("every misconception tag is one the taxonomy already names", () => {
 test("week 2 is covered, now that falling can be simulated", () => {
   assert.ok(BY_WEEK[2]?.length > 0, "week 2 has items");
   for (const spec of BY_WEEK[2]) assert.equal(spec.primitive, "free-fall");
+});
+
+test("no held-back item is in this repository", () => {
+  // ADR 0016. R-022's transfer set IS the measurement for K-01, and this repo
+  // is public. One commit is enough to destroy it permanently: git history
+  // does not forget, and a published item cannot be unpublished from the
+  // people who already read it.
+  //
+  // The flag is checked against every scenario the registry knows, not just
+  // the bank, because the mistake this guards against is someone adding a
+  // transfer item wherever felt natural.
+  for (const spec of Object.values(SCENARIOS))
+    assert.notEqual(spec.heldBack, true,
+      `${spec.id} is a held-back transfer item and must not be in a public repository`);
 });

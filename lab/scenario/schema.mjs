@@ -112,6 +112,14 @@ export function validateScenario(spec) {
     }
   }
 
+  // R-022's held-back transfer set is the measurement for K-01, so it must
+  // never be published — this repository is public (P-65), and publishing it
+  // would destroy it exactly as publishing the FCI would. The flag exists so
+  // the same validator and the same answer check can run over the private set
+  // (ADR 0016), and so that an item arriving here by mistake is refusable.
+  if (spec.heldBack !== undefined && spec.heldBack !== true)
+    bad("heldBack is either absent or true — there is no half-held-back item");
+
   // R-023: an item is tagged with its concept and its difficulty. The intended
   // misconception is already carried per-option by errorTags. Difficulty is an
   // author's estimate until a cohort produces real numbers — it is recorded so
