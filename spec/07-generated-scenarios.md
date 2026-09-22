@@ -65,6 +65,18 @@ What AI does with notebook entries is bounded by [ADR 0002](../decisions/0002-ai
 
 The interesting capability falls out of persistence: *"You wrote in March that heavier things fall faster. Does this survive?"* That is the examiner role from the founding thesis, and it is the part AI is genuinely suited to.
 
+## The check that cannot be written
+
+Every check in this document asks whether an item is **self-consistent**: does the schema hold, does the run settle, is the stated answer what happened. None of them asks whether the item is **any good**, and there is one failure mode worth naming because it passes everything.
+
+**An item is broken if the misconception it baits produces the correct answer.**
+
+The case that found this: two pucks on a rough floor with nothing pushing either of them. The simulation says `both` — they slow and stop. A learner who believes *things naturally stop* also answers `both`, and is marked right. The item rewards the belief it was built to expose, and every automated check passes it, because nothing here is wrong.
+
+It cannot be machine-checked. Knowing that a distractor happens to coincide with the truth means knowing what the distractor is *for*, which is the authoring judgment the checks exist to free up, not replace. `P-51`'s repair loop is silent on it too — it can make an item self-consistent, never sensible.
+
+So it is a rule for whoever writes an item, stated where they will read it: **after choosing the correct answer, check what each wrong belief would predict. If one of them predicts the right answer, the parameters are wrong, not the wording.**
+
 ## Honest risks
 
 | Risk | Severity | Handling |

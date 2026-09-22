@@ -9,6 +9,83 @@
 export default [
   {
     schema: 1,
+    id: "equal-masses-with-air",
+    concept: "falling",
+    difficulty: "medium",
+    subject: "physics",
+    primitive: "free-fall",
+    params: { heavy: 2, light: 2, height: 20, air: 0.08 },
+    question: "Thick air, and this time the two balls have the SAME mass. Which lands first?",
+    note: "Identical balls, identical air — the previous item's air setting, unchanged.",
+    options: [
+      { id: "together", label: "Together — air makes no difference here" },
+      { id: "heavier",  label: "One of them, unpredictably — air makes falling messy" },
+    ],
+    correct: "together",
+    errorTags: { heavier: "boundary-ignored" },
+    cues: {
+      "boundary-ignored":
+        "Air slowed the lighter ball more in the last item. Ask what it has to work with when there is no lighter ball.",
+    },
+    explain:
+      "Air does not make falling random, and it does not punish falling — it punishes a DIFFERENCE. " +
+      "With the same mass and the same shape, both balls meet the same push at the same speed and stay level " +
+      "the whole way down. Air only separated them a moment ago because one of them was easier to slow.",
+  },
+  {
+    schema: 1,
+    id: "thin-air-short-drop",
+    concept: "falling",
+    difficulty: "hard",
+    subject: "physics",
+    primitive: "free-fall",
+    params: { heavy: 5, light: 0.5, height: 5, air: 0.005 },
+    question: "There IS air this time — just very little — and the drop is short. Which lands first?",
+    note: "Air 0.005, a twentieth of the last setting, from five metres rather than twenty.",
+    options: [
+      { id: "heavier",  label: "The heavy one — any air at all separates them" },
+      { id: "together", label: "Together — this isn't enough air, over this distance, to show" },
+    ],
+    correct: "together",
+    errorTags: { heavier: "boundary-ignored" },
+    cues: {
+      "boundary-ignored":
+        "Air resistance grows with speed, and speed takes distance to build. Watch the landing times, then try the same air from forty-five metres.",
+    },
+    explain:
+      "Air needs speed to bite, and speed needs distance. Over five metres neither ball gets near the speed " +
+      "where this much air matters, so they land together to the hundredth of a second. " +
+      "The rule is not 'air separates them' — it is 'enough air, for long enough, separates them'. " +
+      "Raise the drop to forty-five metres with this same air and the heavy one wins again.",
+  },
+  {
+    schema: 1,
+    id: "thin-air-long-drop",
+    concept: "falling",
+    difficulty: "hard",
+    subject: "physics",
+    primitive: "free-fall",
+    params: { heavy: 5, light: 0.5, height: 45, air: 0.005 },
+    question: "The same thin air as a moment ago, but now from as high as the lab goes. Still together?",
+    note: "Air 0.005 — unchanged. Only the height is different.",
+    options: [
+      { id: "together", label: "Yes — this little air never mattered" },
+      { id: "heavier",  label: "No — given enough fall, the heavy one pulls ahead" },
+    ],
+    correct: "heavier",
+    errorTags: { together: "boundary-ignored" },
+    cues: {
+      "boundary-ignored":
+        "Nothing about the air changed between these two items. Work out what did, and what that gives the air more of.",
+    },
+    explain:
+      "Same air, longer fall, different answer. The balls have time to build speed, and the faster they go " +
+      "the harder the air pushes back — so the difference that was invisible over five metres has room to show " +
+      "over forty-five. This is why 'do heavy things fall faster?' has no single answer until you say how far, " +
+      "through what.",
+  },
+  {
+    schema: 1,
     id: "two-balls-no-air",
     concept: "falling",
     difficulty: "easy",

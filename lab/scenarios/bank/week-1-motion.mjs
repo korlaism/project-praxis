@@ -8,6 +8,38 @@
 export default [
   {
     schema: 1,
+    id: "a-very-big-push",
+    concept: "motion-without-force",
+    difficulty: "medium",
+    subject: "physics",
+    primitive: "two-pucks",
+    params: { push: 2, friction: 0, u: 2 },
+    question: "The same slippery floor, but now the strongest push the lab has. Does a big push behave differently from a gentle one?",
+    note: "2 N — ten times the gentle push, on the same frictionless floor.",
+    options: [
+      { id: "runaway", label: "No — same story, just faster: it keeps gaining speed" },
+      { id: "needs",   label: "Yes — a big push drives it to a high steady speed and holds it there" },
+      { id: "both",    label: "Yes — a push that hard makes it skid and lose speed" },
+      { id: "same",    label: "Neither puck changes speed" },
+    ],
+    correct: "runaway",
+    errorTags: { needs: "motion-implies-force", both: "bigger-pushes-harder", same: "boundary-ignored" },
+    cues: {
+      "motion-implies-force":
+        "Compare this run with the gentle-push one. Look at whether the gaps between B's tape dots stop growing at some point, or only grow faster.",
+      "bigger-pushes-harder":
+        "Find what B could be skidding against. The friction figure at the bottom of the screen is the thing that would do it.",
+      "boundary-ignored":
+        "One puck has a 2 N push on it. Work out what a force does to something nothing else is touching.",
+    },
+    explain:
+      "Same story, steeper. A force sets how fast the speed CHANGES, so ten times the push means ten times " +
+      "the rate of gain — never a different kind of behaviour and never a speed it settles at. " +
+      "Gentle and strong differ in degree, which is exactly what you would expect if force changes motion, " +
+      "and not at all what you would expect if force maintained it.",
+  },
+  {
+    schema: 1,
     id: "nothing-pushing-either",
     concept: "motion-without-force",
     difficulty: "easy",

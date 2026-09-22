@@ -8,6 +8,37 @@
 export default [
   {
     schema: 1,
+    id: "rough-floor-strong-push",
+    concept: "friction-and-inertia",
+    difficulty: "medium",
+    subject: "physics",
+    primitive: "two-pucks",
+    params: { push: 2, friction: 0.3, u: 2 },
+    question: "The roughest floor the lab has, and the strongest push. Does the floor win this time?",
+    note: "Friction 0.30 against a 2 N push — both at their maximum.",
+    options: [
+      { id: "both",    label: "Yes — a floor this rough stops everything eventually" },
+      { id: "outruns", label: "No — B keeps gaining speed while A slows and stops" },
+      { id: "needs",   label: "They cancel out, so B holds a steady speed" },
+      { id: "same",    label: "Neither changes speed" },
+    ],
+    correct: "outruns",
+    errorTags: { both: "things-naturally-stop", needs: "force-is-stored", same: "boundary-ignored" },
+    cues: {
+      "things-naturally-stop":
+        "A rough floor is a bigger number, not a different kind of thing. Compare it with the push beside it and decide which is larger.",
+      "force-is-stored":
+        "Cancelling exactly would take the two to match. Check whether they do, rather than assuming a tie because both are large.",
+      "boundary-ignored":
+        "Both sliders are at their maximum, so neither is zero. Something is definitely happening to each puck.",
+    },
+    explain:
+      "The floor loses. Roughness is not a veto — it is one force, and this push is bigger than it, " +
+      "so B gains speed on the same floor that brings A to a stop. Every intuition of the form " +
+      "'X always wins' is the mistake here; what wins is whichever number is larger.",
+  },
+  {
+    schema: 1,
     id: "push-weaker-than-friction",
     concept: "friction-and-inertia",
     difficulty: "medium",
