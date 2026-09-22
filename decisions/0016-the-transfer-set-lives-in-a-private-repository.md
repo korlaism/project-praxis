@@ -1,7 +1,7 @@
 # ADR 0016 · The Held-Back Transfer Set Lives in a Private Repository
 
 **Date:** 2026-09-22 **Status:** Accepted **Tickets:** P-78 **Rests on:** judgment
-**Relates to:** `R-022`, `K-01`, [ADR 0011](0011-author-our-own-items.md), [ADR 0005](0005-park-the-pilot.md)
+**Relates to:** `R-022`, `K-01`, [ADR 0011](0011-author-our-own-items.md), [ADR 0005](0005-channel-first.md)
 
 ## Context
 
@@ -25,7 +25,7 @@ Four things follow.
 
 **The flag is in the public schema on purpose.** `heldBack` is validated here even though no item here may carry it. It costs one line, it lets the private set use an unmodified validator, and it makes an item that arrives in the wrong place refusable rather than merely unwelcome.
 
-**It does not exist until the pilot needs it.** [ADR 0005](0005-park-the-pilot.md) parks the pilot, and a private repository containing ten unauthored items is filing, not work. This ADR settles *where*, so that the first person to write one has somewhere to put it.
+**It does not exist until the pilot needs it.** [ADR 0005](0005-channel-first.md) parks the pilot, and a private repository containing ten unauthored items is filing, not work. This ADR settles *where*, so that the first person to write one has somewhere to put it.
 
 ## Alternatives rejected
 

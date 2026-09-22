@@ -54,7 +54,7 @@ Step 2 is the load-bearing one. Everything else is in service of having an hones
 | [0015](decisions/0015-the-record-stays-where-the-learner-is.md) | The record stays where the learner is | Accepted |
 | [0016](decisions/0016-the-transfer-set-lives-in-a-private-repository.md) | The held-back transfer set lives in a private repository | Accepted |
 
-Ten accepted, one proposed. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
+Fourteen accepted, one proposed, one superseded. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
 
 `0003` is the interesting one. It was accepted whole, then narrowed: only *difficulty is selected, not reduced* stands on judgment. Signature targeting, naming the signature back to the learner, and the 75–85% success band all depend on `R-002` and `R-003`, are still unproven, and are now explicitly deferred rather than decided. It also carries an unresolved conflict (`P-18`). `tools/check-docs.py` enforces this — an `Accepted` ADR resting on an unsettled claim fails the build.
 
