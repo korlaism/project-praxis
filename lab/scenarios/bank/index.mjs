@@ -5,6 +5,13 @@
  * Grouped by the weekly concept in spec/03-pilot-design.md. Week 2 — falling,
  * named there as the heaviest single misconception — arrived with the
  * free-fall primitive in P-77.
+ *
+ * Falling carries more items than the others because its air control genuinely
+ * changes the answer. Action-and-reaction and circular motion sit at three
+ * each and will stay there: their outcome is the same at every setting, which
+ * is the lesson, so further items would vary the wording and not the
+ * phenomenon. R-020's "five per week" assumed borrowed instruments with
+ * varied surface, which ADR 0011 gave up for a reason.
  */
 import week1 from "./week-1-motion.mjs";
 import week2 from "./week-2-falling.mjs";
