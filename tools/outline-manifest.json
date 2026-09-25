@@ -17,7 +17,7 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "30948f41a036b081"
+      "hash": "f53bebfb4b28f5bf"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
@@ -29,7 +29,7 @@
       "id": "80a66b80-2e08-4f47-9bb2-a20d2690fe40",
       "url": "/doc/phase-0-requirements-PBSyxXMsdz",
       "title": "Phase 1 Requirements",
-      "hash": "d08fb0da75b7d506"
+      "hash": "ba34df11b9c69da5"
     },
     "spec/03-pilot-design.md": {
       "id": "d07d1370-66b9-4895-bea5-631b904197a0",
@@ -233,7 +233,13 @@
       "id": "4295a560-e092-4930-abb1-5e5184c2e601",
       "url": "/doc/0016-the-transfer-set-lives-in-a-private-repository-dlzk8deJCb",
       "title": "0016 The Transfer Set Lives In A Private Repository",
-      "hash": "7cc192bf5cdda1ed"
+      "hash": "8748a85ca921cb8e"
+    },
+    "decisions/0017-desktop-first-with-a-gated-phone-landing.md": {
+      "id": "eabe3979-65ab-4a65-82f8-2c637f88d432",
+      "url": "/doc/0017-desktop-first-with-a-gated-phone-landing-iyplVDP7sm",
+      "title": "0017 Desktop First With A Gated Phone Landing",
+      "hash": "21b8d8dfbb2b0675"
     }
   }
 }
