@@ -31,6 +31,37 @@ def fail(msg):
 UNSETTLED = ("R-001", "R-002", "R-003", "R-004", "R-005", "R-035")
 
 
+def relative_links():
+    """Every relative markdown link, and whether it resolves.
+
+    Writing the product documentation turned up two links in ADR 0016 pointing
+    at decisions/0005-park-the-pilot.md, which has never existed — the file is
+    0005-channel-first.md. Nothing caught it: this checker compared ADR
+    statuses against the README and never followed a link. A decision record
+    whose cross-references rot is a decision record nobody can follow back.
+    """
+    import glob
+    broken = []
+    for path in ["README.md"] + sorted(
+        glob.glob(os.path.join(ROOT, "decisions", "*.md"))
+        + glob.glob(os.path.join(ROOT, "spec", "*.md"))
+        + glob.glob(os.path.join(ROOT, "research", "*.md"))
+        + glob.glob(os.path.join(ROOT, "lab", "**", "*.md"), recursive=True)
+    ):
+        full = path if os.path.isabs(path) else os.path.join(ROOT, path)
+        rel = os.path.relpath(full, ROOT)
+        text = open(full, encoding="utf-8").read()
+        for m in re.finditer(r"\[[^\]]*\]\(([^)\s#]+)(?:#[^)]*)?\)", text):
+            target = m.group(1)
+            if target.startswith(("http://", "https://", "mailto:")):
+                continue
+            resolved = os.path.normpath(os.path.join(os.path.dirname(full), target))
+            if not os.path.exists(resolved):
+                broken.append(f"{rel}: link to {target!r} does not resolve")
+    for b in broken:
+        fail(b)
+
+
 def adr_statuses():
     """Map ADR number -> (status, filename), skipping the template."""
     out = {}
@@ -98,6 +129,8 @@ def main():
         sys.exit(1)
     print(f"{len(adrs)} ADRs consistent with the README decision table.")
 
+
+relative_links()
 
 if __name__ == "__main__":
     main()
