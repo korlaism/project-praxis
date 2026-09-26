@@ -66,7 +66,14 @@ export function classify(s, p) {
 
 export function draw(ctx, s, p, view) {
   const pad = 30;
-  const floorY = view.h - pad;
+  // Two rows live under the floor: each ball's landing time, then the air and
+  // terminal readouts. Reserving the band keeps them apart at any canvas size
+  // (P-88) — they used to be four pixels apart, which only showed when the
+  // canvas got narrow enough for them to meet horizontally, as it does on the
+  // phone landing where the height is capped at 420.
+  const FOOT_Y = view.h - 10;            // the readouts
+  const TIME_Y = FOOT_Y - 22;            // the landing times, clear above them
+  const floorY = TIME_Y - 16;
   const topY = pad + 14;
   const Y = (y) => topY + (y / p.height) * (floorY - topY);
 
@@ -89,25 +96,45 @@ export function draw(ctx, s, p, view) {
   // misconception the item exists to test — the mass is in the label, where a
   // learner has to read it rather than infer it from size.
   const R = 11;
+  let massRight = 0;                     // where the rightmost mass label ends
   for (const L of lanes) {
     ctx.fillStyle = L.tint;
     ctx.beginPath(); ctx.arc(L.x, Y(L.b.y), R, 0, Math.PI * 2); ctx.fill();
     label(ctx, L.name, L.x - 18, topY - 8, L.tint);
-    if (L.b.landed) label(ctx, `${L.b.t.toFixed(2)} s`, L.x - 18, floorY + 18, L.tint);
+    massRight = Math.max(massRight, L.x - 18 + width(ctx, L.name));
+    if (L.b.landed) label(ctx, `${L.b.t.toFixed(2)} s`, L.x - 18, TIME_Y, L.tint);
   }
 
-  label(ctx, p.air === 0 ? "air: none — a vacuum" : `air: ${p.air.toFixed(3)}`,
-        pad, view.h - 8, p.air === 0 ? "#6E665C" : "#D65442");
+  const airText = p.air === 0 ? "air: none — a vacuum" : `air: ${p.air.toFixed(3)}`;
+  label(ctx, airText, pad, FOOT_Y, p.air === 0 ? "#6E665C" : "#D65442");
+
+  // Right-aligned off the measured width rather than a guessed offset, and
+  // dropped entirely when it would run into the air readout beside it. A
+  // number nobody can read is worse than a number nobody sees.
   if (p.air > 0) {
     const th = terminalSpeed(p.heavy, p.air), tl = terminalSpeed(p.light, p.air);
-    label(ctx, `terminal ${th.toFixed(1)} / ${tl.toFixed(1)} m/s`, view.w - 190, view.h - 8, "#6E665C");
+    const text = `terminal ${th.toFixed(1)} / ${tl.toFixed(1)} m/s`;
+    const x = view.w - pad - width(ctx, text);
+    if (x > pad + width(ctx, airText) + 12) label(ctx, text, x, FOOT_Y, "#6E665C");
   }
-  label(ctx, `t = ${s.t.toFixed(2)} s`, view.w - 90, topY - 8, "#6E665C");
+
+  // The clock shares the top row with the mass labels, and the masses win: on
+  // a narrow canvas they were running into each other (P-88). It is also the
+  // most expendable readout here — once the balls land, their times are on
+  // screen anyway.
+  const clock = `t = ${s.t.toFixed(2)} s`;
+  const clockX = view.w - pad - width(ctx, clock);
+  if (clockX > massRight + 10) label(ctx, clock, clockX, topY - 8, "#6E665C");
   if (p.air === 0) label(ctx, `both: ${freeFallTime(p.height).toFixed(2)} s`, pad, topY - 8, "#6E665C");
 }
 
 function line(ctx, x1, y1, x2, y2) {
   ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+}
+/** Measured in the same font the labels use, so alignment is not a guess. */
+function width(ctx, text) {
+  ctx.font = '12px "Spline Sans Mono", ui-monospace, monospace';
+  return ctx.measureText(text).width;
 }
 function label(ctx, text, x, y, colour) {
   ctx.fillStyle = colour;
