@@ -43,6 +43,10 @@ jobs:
       - name: Build
         run: node tools/build-topic.mjs lab/index.html
 
+      # The phone landing, at /go/ — where a Short's link lands (ADR 0017).
+      - name: Build the phone landing
+        run: node tools/build-topic.mjs lab/landing/index.html dist/index/go
+
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

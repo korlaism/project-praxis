@@ -136,16 +136,23 @@ export function buildBundle(entry, outDir) {
   // The page: strip what the publish skeleton supplies, and point every local
   // reference at the bundle root — "./x", never "x", never "../x".
   //
-  // The VIEWPORT stays (P-86). Everything else here is dropped because an
-  // artifact's publish skeleton provides it, and this bundle also ships to
-  // GitHub Pages and the dev server, which provide nothing at all. Without it
-  // a phone renders the lab at desktop width and scales it down to
-  // unreadable, which is what it did from the day the repo went public.
+  // The VIEWPORT and the CHARSET stay. Everything else here is dropped because
+  // an artifact's publish skeleton provides it — but this bundle also ships to
+  // GitHub Pages, to the dev server, and (ADR 0008) to anyone who self-hosts
+  // it, and a bundle other people will host has to describe itself.
   //
-  // Keeping it is safe in both places: the source tag is byte-identical to the
-  // skeleton's, `viewport-fit=cover` included, so an artifact simply carries
-  // the same declaration twice.
-  const keepMeta = (l) => /^\s*<meta\s+name="viewport"/i.test(l);
+  // Viewport (P-86): without it a phone renders the lab at desktop width and
+  // scales it down to unreadable.
+  //
+  // Charset (P-85): Pages sends `text/html; charset=utf-8` and our own nginx
+  // sent a bare `text/html`, so the same file rendered correctly in one place
+  // and as mojibake in the other. It stayed hidden for weeks because the lab's
+  // non-ASCII text lives in .mjs modules, which are always decoded as UTF-8 by
+  // spec; the landing put an em-dash in its <title> and the page went wrong.
+  //
+  // Keeping both is safe: the source tags are byte-identical to the skeleton's,
+  // so an artifact simply carries each declaration twice.
+  const keepMeta = (l) => /^\s*<meta\s+(name="viewport"|charset)/i.test(l);
   let html = readFileSync(entryAbs, "utf8")
     .split("\n")
     .filter((l) => !/^\s*<!doctype/i.test(l) && (keepMeta(l) || !/^\s*<meta\b/i.test(l)))

@@ -30,6 +30,12 @@ trap 'rm -rf "$WORK"' EXIT
 echo "==> building"
 rm -rf "$ROOT/dist/index"
 node "$ROOT/tools/build-topic.mjs" "$ROOT/lab/index.html" >/dev/null
+# The phone landing ships inside the lab's bundle at /go/ (P-85, ADR 0017), so
+# a Short's link is short and both surfaces share one origin — which is what
+# lets a prediction made on a phone appear in the same notebook (P-54).
+# It is a second bundle rather than a route: the lab is desktop-first and the
+# landing must not inherit its layout.
+node "$ROOT/tools/build-topic.mjs" "$ROOT/lab/landing/index.html" "$ROOT/dist/index/go" >/dev/null
 echo "    $(find "$ROOT/dist/index" -type f | wc -l | tr -d ' ') files, checked and publishable"
 
 # macOS tar otherwise ships AppleDouble files and xattr headers: 25 files

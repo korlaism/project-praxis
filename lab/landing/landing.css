@@ -1,0 +1,51 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later
+ *
+ * The phone surface (P-85, ADR 0017). Built for one thumb on a small screen:
+ * options are full-width rows big enough to hit without aiming, and nothing
+ * here has a slider, because the apparatus lives in the lab.
+ */
+:root{
+  --bg:#1B1815; --panel:#221E1A; --line:#332E28;
+  --ink:#F2EEE8; --ink-2:#A79E92; --ink-3:#6E665C;
+  --accent:#E8703A; --right:#4FB286; --wrong:#D65442;
+  --mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font:400 16px/1.5 "Familjen Grotesk",system-ui,-apple-system,sans-serif;
+     -webkit-text-size-adjust:100%}
+.pl{max-width:34rem;margin:0 auto;padding:20px 16px calc(28px + env(safe-area-inset-bottom,0px))}
+.pl-q{font-size:1.32rem;line-height:1.25;font-weight:600;margin:0 0 6px}
+.pl-note{margin:0 0 14px;color:var(--ink-2);font-size:.86rem}
+.pl-stage{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.pl-canvas{display:block;width:100%}
+.pl-ask{margin-top:18px}
+.pl-ask[hidden]{display:none!important}
+.pl-ask-h{margin:0 0 10px;font:600 .68rem/1 var(--mono);letter-spacing:.14em;
+          text-transform:uppercase;color:var(--accent)}
+/* Full-width and tall enough to hit with a thumb, not a cursor. */
+.pl-opt{display:block;width:100%;text-align:left;margin:0 0 8px;padding:14px 15px;
+        min-height:52px;background:var(--panel);color:var(--ink);border:1px solid var(--line);
+        border-radius:5px;font:inherit;font-size:.98rem;line-height:1.35;cursor:pointer}
+.pl-opt:active{border-color:var(--accent)}
+.pl-conf{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.pl-conf button{flex:1 1 auto;padding:9px 10px;min-height:40px;background:transparent;
+                color:var(--ink-2);border:1px solid var(--line);border-radius:4px;
+                font:400 .72rem var(--mono);cursor:pointer}
+.pl-conf button[aria-pressed="true"]{color:var(--ink);border-color:var(--accent)}
+.pl-conf-note{margin:8px 0 0;color:var(--ink-3);font-size:.76rem}
+.pl-verdict{margin-top:18px;padding:15px;background:var(--panel);
+            border:1px solid var(--line);border-left:3px solid var(--line);border-radius:5px;
+            font-size:.94rem;line-height:1.5}
+.pl-verdict[hidden]{display:none!important}
+.pl-verdict.is-right{border-left-color:var(--right)}
+.pl-verdict.is-wrong{border-left-color:var(--wrong)}
+.pl-verdict.is-right b{color:var(--right)}
+.pl-verdict.is-wrong b{color:var(--wrong)}
+.pl-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.pl-acts button,.pl-open{padding:11px 14px;min-height:44px;border-radius:4px;
+                         border:1px solid var(--line);background:transparent;color:var(--ink);
+                         font:inherit;font-size:.86rem;cursor:pointer;text-decoration:none;
+                         display:inline-flex;align-items:center}
+.pl-again,.pl-open{border-color:var(--accent);color:var(--accent)}
+.pl-open-note{margin:10px 0 0;color:var(--ink-3);font-size:.78rem}
