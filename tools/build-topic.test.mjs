@@ -68,12 +68,16 @@ for (const slug of TOPICS) {
   });
 }
 
-test("the entry page is artifact-ready: no doctype or meta, title kept", () => {
+test("the entry page is artifact-ready: no doctype, no charset, title kept", () => {
+  // Narrowed by P-86. This used to assert that NO meta survived, which was
+  // right while the only destination was an artifact. The bundle now also
+  // ships to Pages, so the viewport is kept deliberately and is asserted by
+  // its own test above; charset and the doctype are still the skeleton's.
   const out = fresh("entry-shape");
   buildBundle(join(ROOT, "lab/topics/which-way-does-it-fly.html"), out);
   const html = readFileSync(join(out, "index.html"), "utf8");
   assert.doesNotMatch(html, /<!doctype/i, "the publish skeleton supplies the doctype");
-  assert.doesNotMatch(html, /<meta\b/i, "the publish skeleton supplies the meta tags");
+  assert.doesNotMatch(html, /<meta\s+charset/i, "the publish skeleton supplies the charset");
   assert.match(html, /<title>Which way does it fly\?<\/title>/);
 });
 
@@ -217,4 +221,31 @@ test("real imports and re-exports are still found", () => {
   ].join("\n");
   assert.deepEqual(specifiersIn(src).sort(),
     ["../b/c.mjs", "./a.mjs", "./d.mjs", "./lazy.mjs", "./side-effect.mjs"]);
+});
+
+test("the built page declares a viewport, because Pages supplies nothing", () => {
+  // P-86. The build stripped every meta tag, which is right for an artifact:
+  // its publish skeleton supplies charset and viewport itself. The same bundle
+  // also ships to GitHub Pages and the dev server, which supply nothing — so
+  // the public lab had no viewport at all and a phone rendered it at desktop
+  // width, scaled down to unreadable.
+  //
+  // The source pages all carried the tag, which is exactly why nobody saw it:
+  // this asserts on the BUILT output.
+  const out = fresh("viewport");
+  buildBundle(join(ROOT, "lab/index.html"), out);
+  const html = readFileSync(join(out, "index.html"), "utf8");
+  assert.match(html, /<meta\s+name="viewport"[^>]*width=device-width/i,
+    "the built page must declare a viewport");
+  assert.match(html, /viewport-fit=cover/i,
+    "matching the artifact skeleton exactly, so a duplicate tag there is harmless");
+});
+
+test("every built topic page declares a viewport, not just the hub", () => {
+  for (const slug of TOPICS) {
+    const out = fresh(`viewport-${slug}`);
+    buildBundle(join(ROOT, "lab/topics", `${slug}.html`), out);
+    assert.match(readFileSync(join(out, "index.html"), "utf8"), /<meta\s+name="viewport"/i,
+      `${slug} has no viewport`);
+  }
 });
