@@ -57,6 +57,23 @@ function fate(lane, u0) {
   return "held";
 }
 
+/**
+ * `needs` is the balanced case: the pushed puck holds its speed while the
+ * other slows. It is reachable only when the push exactly cancels friction,
+ * `push === friction · MASS · G`, which no pair on the slider grid satisfies —
+ * but a scenario's params are not restricted to the grid, so an authored item
+ * can sit on it. P-79 recorded it as unreachable, having searched the grid and
+ * generalised from it; see lab/primitives/two-pucks.test.mjs.
+ *
+ * The tolerance in `fate` stays tight on purpose. Widening it so a near-miss
+ * counted as a tie would have the verdict say the speed held while the readout
+ * beside it shows the speed changing — `R-021` forbids exactly that.
+ *
+ * No item is authored on this outcome, and that is deliberate rather than
+ * pending: a learner who believes a force maintains motion predicts `needs`
+ * here and is marked right. See "the check that cannot be written" in
+ * spec/07-generated-scenarios.md.
+ */
 export function classify(s, p) {
   if (!s.done) return null;                       // an unfinished run decides nothing
   const a = fate(s.a, s.u0), b = fate(s.b, s.u0);
