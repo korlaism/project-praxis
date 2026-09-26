@@ -32,7 +32,7 @@ These are the reason the phase exists. Each maps to a kill criterion.
 | `R-013` | One-tap confusion logging, available at every step, never blocking. | Must cost under two seconds or it will not be used. |
 | `R-014` | Every prediction, reveal, reconciliation and confusion entry is stored with a timestamp and the item id. | The dataset *is* the deliverable. A **retry** under ADR 0014 is stored as its own record linked to the original — never as an edit of it. |
 | `R-015` | No AI-generated text is ever written into a learner's own notebook fields. | See ADR 0002. |
-| `R-016` | The instrument works on a low-end shared Android phone over intermittent 3G. | *Guess* at the constraint — must be confirmed against the actual pilot cohort's devices before build. |
+| `R-016` | The instrument works on a low-end shared Android phone over intermittent 3G. | *Guess* at the constraint — **still unconfirmed** against the actual pilot cohort's devices. **Amended by [ADR 0017](../decisions/0017-desktop-first-with-a-gated-phone-landing.md):** it no longer describes the lab, which is desktop-first. The channel's traffic lands on a phone-readable page that **keeps the gate**. The requirement stands for the Phase 1 cohort and must be checked before they build. |
 
 ## 3. Content
 
