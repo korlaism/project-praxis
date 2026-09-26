@@ -135,9 +135,20 @@ export function buildBundle(entry, outDir) {
 
   // The page: strip what the publish skeleton supplies, and point every local
   // reference at the bundle root — "./x", never "x", never "../x".
+  //
+  // The VIEWPORT stays (P-86). Everything else here is dropped because an
+  // artifact's publish skeleton provides it, and this bundle also ships to
+  // GitHub Pages and the dev server, which provide nothing at all. Without it
+  // a phone renders the lab at desktop width and scales it down to
+  // unreadable, which is what it did from the day the repo went public.
+  //
+  // Keeping it is safe in both places: the source tag is byte-identical to the
+  // skeleton's, `viewport-fit=cover` included, so an artifact simply carries
+  // the same declaration twice.
+  const keepMeta = (l) => /^\s*<meta\s+name="viewport"/i.test(l);
   let html = readFileSync(entryAbs, "utf8")
     .split("\n")
-    .filter((l) => !/^\s*<!doctype/i.test(l) && !/^\s*<meta\b/i.test(l))
+    .filter((l) => !/^\s*<!doctype/i.test(l) && (keepMeta(l) || !/^\s*<meta\b/i.test(l)))
     .join("\n");
   for (const ref of [...stylesheetsIn(html), ...specifiersIn(html)]) {
     if (isExternal(ref)) continue;
