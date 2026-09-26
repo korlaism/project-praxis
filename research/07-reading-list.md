@@ -68,3 +68,16 @@ The full register of everything cited is [Resources Index](06-resources.md). Thi
 `R-005` is narrowed to the improvement claim and keeps `K-04`. Transfer became `R-035`, exploratory, because none of these tested it — ADR 0013.
 
 **Access, as at `P-71`:** all three full texts are closed — no open-access copy, and the publishers refuse. The abstracts are read verbatim from ERIC and APA PsycNet, which is as far as anyone gets without a library or an email to the authors. Researchers usually send a PDF when asked, and **one question is worth the email**: in Kleider-Tesler et al., did calibration feedback fail outright, or merely do less well than scaffolding? ADR 0014 defers a real product decision on the answer.
+
+
+## A lead, not a source
+
+**"A cornerstone of adaptivity — a meta-analysis of the expertise reversal effect"** turned up while
+working `P-18`. Only its title and that it exists are known: it has not been opened, its authors and
+journal are unconfirmed, and nothing in this repository rests on it. Recorded here so the next person
+looking at ADR 0018 knows there is probably a meta-analysis to read, and knows equally that **nobody
+here has read it.**
+
+If it says what its title suggests — that expertise reversal is the basis for adaptivity rather than an
+objection to it — it strengthens ADR 0018's reading rather than upsetting it. That is a reason to check,
+not a reason to assume.

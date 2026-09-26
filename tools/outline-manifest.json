@@ -17,7 +17,7 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "f53bebfb4b28f5bf"
+      "hash": "a7da7ddf2696933d"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
@@ -59,7 +59,7 @@
       "id": "b71451bb-e16d-430a-a09d-303793e90bdd",
       "url": "/doc/domain-map-reading-path-YVUg5m2a3B",
       "title": "Domain Map & Reading Path",
-      "hash": "db65dfc4c8710ef5"
+      "hash": "dd5e49979e62408f"
     },
     "research/01-the-economics-flip.md": {
       "id": "8a1b723b-fd81-44b6-8bca-59cbcfec75c1",
@@ -71,13 +71,13 @@
       "id": "1320b0e1-e5b9-4b67-9af0-09f69d3623cc",
       "url": "/doc/02-misconceptions-diagnostic-instruments-nGtCaObfF4",
       "title": "02 \u00b7 Misconceptions & Diagnostic Instruments",
-      "hash": "10f7b62f8705a2e3"
+      "hash": "c3a87fef50af7c86"
     },
     "research/03-personalisation-axes.md": {
       "id": "ff1c0a8d-c54e-4389-ba3c-53b60bcb1a80",
       "url": "/doc/03-personalisation-axes-the-shared-context-tension-yQaP3NSyDn",
       "title": "03 \u00b7 Personalisation Axes & The Shared-Context Tension",
-      "hash": "ca2ff0832ad8739f"
+      "hash": "da91a7c1faa49518"
     },
     "research/99-bibliography.md": {
       "id": "dc86b44f-c668-4722-a017-067ca8090ff0",
@@ -107,7 +107,7 @@
       "id": "0237b5fd-41be-4834-a65c-16cbb77c07b8",
       "url": "/doc/adr-0003-bait-error-signatures-do-not-reduce-difficulty-p3zhr0U2EI",
       "title": "ADR 0003 \u00b7 Bait Error Signatures, Do Not Reduce Difficulty",
-      "hash": "d0dfb47e09504f88"
+      "hash": "4f3b824ebd4320ad"
     },
     "decisions/0004-teacher-mediated-cohort.md": {
       "id": "54804f5d-3223-4f7e-9850-f97067095f94",
@@ -137,7 +137,7 @@
       "id": "65f6a779-bcf4-43f4-aacc-c78cffed2c2f",
       "url": "/doc/generated-scenarios-architecture-and-feasibility-nYMWWBsPP7",
       "title": "Generated Scenarios \u2014 Architecture and Feasibility",
-      "hash": "6079ddbb3516ba2d"
+      "hash": "99ea550a5d081d7f"
     },
     "decisions/0006-the-notebook-is-the-product.md": {
       "id": "22ac73fe-9dc2-4c59-8425-5083827bb4ab",
@@ -167,7 +167,7 @@
       "id": "12c50507-7678-4e95-9728-7f82b6617a90",
       "url": "/doc/reading-list-for-you-NmgCZZvYyx",
       "title": "Reading List \u2b50 For You",
-      "hash": "476f881377b5a416"
+      "hash": "eec964edda17fbb6"
     },
     "spec/08-open-source-and-hosted.md": {
       "id": "7ce18caf-bf29-42be-a929-1c1e031d7e5e",
@@ -240,6 +240,12 @@
       "url": "/doc/0017-desktop-first-with-a-gated-phone-landing-iyplVDP7sm",
       "title": "0017 Desktop First With A Gated Phone Landing",
       "hash": "21b8d8dfbb2b0675"
+    },
+    "decisions/0018-expertise-reversal-applies-to-the-cue.md": {
+      "id": "040d79bf-4815-46da-a5ed-c0942cd91429",
+      "url": "/doc/0018-expertise-reversal-applies-to-the-cue-L6KaMIrv9E",
+      "title": "0018 Expertise Reversal Applies To The Cue",
+      "hash": "56afcd2f530dad5f"
     }
   }
 }

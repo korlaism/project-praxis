@@ -10,6 +10,15 @@
 >
 > A known conflict also stands unresolved: expertise reversal cuts against signature baiting,
 > and Phase 1 does not test it (`P-18`).
+>
+> **`P-18`, 2026-09-26 — the conflict is real and was filed against the wrong thing.**
+> [ADR 0018](0018-expertise-reversal-applies-to-the-cue.md) works through the mechanism:
+> expertise reversal runs on redundancy, so it bites on **guidance presented alongside the
+> task**, not on which item a learner is given. The accepted direction here — select
+> difficulty rather than reduce it — is not in tension with it and is arguably an instance of
+> what it recommends. Where the effect does apply is the **cue** introduced later by
+> [ADR 0014](0014-the-reveal-cues-before-it-explains.md). Left standing below rather than
+> edited, because a conflict recorded and then reasoned about is worth being able to follow.
 
 ## Context
 
@@ -59,6 +68,8 @@ Keep the signature internal and use it only for selection. Rejected because nami
 **Makes harder later.** Any claim that the product is gentle or encouraging. The marketing surface of this decision is genuinely difficult and should not be solved by quietly softening the mechanic.
 
 **Unresolved conflict.** The **expertise reversal effect** — guidance that helps novices harms experts — cuts against this directly. Signature baiting may be right for a struggling learner and counterproductive for a strong one. Phase 1 does not test this, and it is recorded as a known gap rather than left to surface in Phase 2.
+
+*Resolved by [ADR 0018](0018-expertise-reversal-applies-to-the-cue.md): the effect applies to the cue, not to the bait. The risk to a strong learner from baiting is a **stale signature**, which is `R-002`'s problem and already has `K-02` pointed at it.*
 
 ## Revisit when
 
