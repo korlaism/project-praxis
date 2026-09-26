@@ -68,16 +68,18 @@ for (const slug of TOPICS) {
   });
 }
 
-test("the entry page is artifact-ready: no doctype, no charset, title kept", () => {
-  // Narrowed by P-86. This used to assert that NO meta survived, which was
-  // right while the only destination was an artifact. The bundle now also
-  // ships to Pages, so the viewport is kept deliberately and is asserted by
-  // its own test above; charset and the doctype are still the skeleton's.
+test("the entry page is artifact-ready: no doctype, title kept", () => {
+  // Narrowed twice. It began asserting that NO meta survived, which was right
+  // while an artifact was the only destination. P-86 kept the viewport. P-85
+  // kept the charset, after a page with an em-dash in its title rendered as
+  // mojibake on a host that does not send the header — a bundle ADR 0008
+  // invites other people to host has to describe its own encoding.
+  // The doctype is still the skeleton's alone.
   const out = fresh("entry-shape");
   buildBundle(join(ROOT, "lab/topics/which-way-does-it-fly.html"), out);
   const html = readFileSync(join(out, "index.html"), "utf8");
   assert.doesNotMatch(html, /<!doctype/i, "the publish skeleton supplies the doctype");
-  assert.doesNotMatch(html, /<meta\s+charset/i, "the publish skeleton supplies the charset");
+  assert.match(html, /<meta\s+charset="utf-8">/i, "the bundle must declare its own encoding");
   assert.match(html, /<title>Which way does it fly\?<\/title>/);
 });
 

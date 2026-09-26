@@ -109,6 +109,19 @@ Artifact tool takes. `dist/` is build output and is never committed.
 
 ## Deployed
 
+## The phone landing
+
+`/go/#/s/<scenario-id>` is where a YouTube Short's link arrives (ADR 0017). It is a
+second bundle, not a route and not a smaller lab: no sliders, no re-running with changed
+numbers. What it keeps is the gate — you predict and say how sure you are before anything
+happens — and what plays afterwards is a **recording** taken once at a fixed step, so the
+outcome is the same run on every device rather than whatever the local frame rate produced.
+
+It shares an origin with the lab, so a prediction made on a phone lands in the same
+notebook, and it carries the same `?verify=1` hook.
+
+Built by `deploy-lab.sh` and by the Pages workflow into `dist/index/go`.
+
 ## Verifying it in a browser
 
 A browser throttles a hidden or unfocused tab to roughly half a frame per second, and
