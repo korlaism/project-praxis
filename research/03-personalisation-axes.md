@@ -60,4 +60,4 @@ Phase 1 implements **none** of this. Personalisation is the thesis, and the pilo
 
 This is worth restating because it is the most likely place to waste a year: the personalisation engine is the interesting thing to build and it is worthless if `R-002` is false. Build the measurement first.
 
-**Open question not addressed by Phase 1:** expertise reversal. If guidance that helps novices harms experts, error-signature baiting may be right for a struggling learner and counterproductive for a strong one. Named here so it is a known gap rather than a Phase 2 surprise.
+**Expertise reversal — answered, and not where it was filed (`P-18`, ADR 0018).** The effect runs on redundancy, so it applies to guidance presented alongside the task rather than to which item a learner is given. Signature baiting is selection and is not the target; the **cue** from ADR 0014 is. Phase 1 still does not test it — this cohort is near-uniform novices — but it now records whether the cue was used (`P-89`), which is what makes the question answerable later.

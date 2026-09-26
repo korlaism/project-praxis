@@ -33,6 +33,6 @@ Verification changed their standing relative to one another. `R-003` gained supp
 
 **`R-002` is now the riskiest of the three**, by elimination rather than by new evidence: it is the one nothing has been found for, either way.
 
-**Known gap we have not addressed.** Expertise reversal cuts directly against error-signature baiting. Phase 1 does not test it. See [03 · Personalisation Axes](03-personalisation-axes.md).
+**Known gap, now reasoned through (`P-18`, ADR 0018).** Expertise reversal applies to the **cue**, not to error-signature baiting: the effect works by redundancy and so bites on guidance presented alongside the task, while baiting is selection. Phase 1 still does not test it — near-uniform novices — but it records the datum that would. See [03 · Personalisation Axes](03-personalisation-axes.md).
 
 **Largest unexamined risk.** Not pedagogy — distribution. We have done no work on who buys this, what an Indian school's actual constraints are, or what a teacher's week has room for. The pedagogy could be perfect and the project still dead. `P-08`.

@@ -65,7 +65,13 @@ Our position, to be defended or abandoned under `P-06`:
 * Kapur's productive failure addresses exactly this sequence and finds failure-then-instruction superior. Our loop is that sequence.
 * The consequence is a hard design constraint: **steps 3 and 4 — reveal and reconcile — are mandatory and must be good.** A loop that stops at "you were wrong" is precisely what Kirschner et al. correctly criticise.
 
-Also genuinely unresolved: **expertise reversal cuts against our own personalisation thesis.** If guidance that helps a novice harms an expert, then baiting error signatures (`R-003`) may be right for a struggling learner and actively counterproductive for a strong one. Phase 1 does not test this. It should be a named open question, not a surprise in Phase 2.
+**Expertise reversal, reasoned through (`P-18`, ADR 0018).** The effect works by **redundancy**: a learner who already holds the schema must reconcile the external explanation against the internal one, and that costs working memory the novice was spending on the explanation itself. So it bites on **guidance presented alongside the task** — worked examples are the canonical case.
+
+That splits our pieces apart. Baiting an error signature is **selection**, and adds no external account to reconcile; the risk to a strong learner there is a *stale* signature wasting their time, which is `R-002`'s stability claim and already has `K-02` aimed at it. Holding a success-rate band rather than lowering difficulty is, if anything, an instance of what the effect recommends — adjust as knowledge grows.
+
+Where it does apply is the **cue** (ADR 0014): a hint aimed at the misconception behind a wrong answer, shown automatically before any explanation. For someone who already knows why they slipped, that is the redundant external account exactly. The study ADR 0014 rests on carries the interaction in its own result — scaffolded correction worked *"especially for poor comprehenders"*.
+
+Phase 1 still does not test it, and should not: 11–15 year olds on force and motion are near-uniform novices, which is the population where the effect does not show. What Phase 1 owes it is the **datum** — whether the cue was shown and what the learner did with it (`P-89`).
 
 ## Things we are citing that we should be careful about
 
