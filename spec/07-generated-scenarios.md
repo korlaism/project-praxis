@@ -77,6 +77,12 @@ It cannot be machine-checked. Knowing that a distractor happens to coincide with
 
 So it is a rule for whoever writes an item, stated where they will read it: **after choosing the correct answer, check what each wrong belief would predict. If one of them predicts the right answer, the parameters are wrong, not the wording.**
 
+**And sometimes there is no wording that saves it.** `P-79` went looking for the balanced case in `two-pucks` — the push tuned to cancel friction exactly, so the pushed puck holds its speed while the other slows. It is the most valuable configuration in the whole concept, because it is the one situation where *a force keeps it moving* is visibly true, which is precisely why the belief is so hard to shift.
+
+It cannot be an item. Whatever the question asks, a learner holding the misconception predicts that the pushed puck keeps its speed, and is marked right. Saying so in the note does not help: with the balance stated, the correct reasoner and the mistaken one give the same answer for different reasons, and the gate only records the answer.
+
+The architecture is the constraint. Options are outcomes, so an item can ask *what happens* and never *why*. The balanced case belongs in an explanation, or in a learner's own experimenting, and the primitive can still produce it for both. It does not belong in the bank.
+
 ## Honest risks
 
 | Risk | Severity | Handling |
