@@ -20,26 +20,97 @@ const isRelative = (s) => s.startsWith("./") || s.startsWith("../") || s.startsW
 const isBare = (s) => !isExternal(s) && !isRelative(s);
 
 /** Remove comments without touching "//" inside strings such as URLs. */
-function stripComments(src) {
-  return src
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/^[ \t]*\/\/.*$/gm, "");
+/**
+ * Blank out everything in a JavaScript source that is not code, keeping every
+ * offset. P-81.
+ *
+ * The scanner this replaces matched patterns against the raw file with
+ * comments crudely stripped, and it was wrong twice in a week: it read
+ * `label: "drop from"` inside an exported array as an import (P-77), and its
+ * comment stripper only removed comments that STARTED a line, so anything
+ * after code on the same line was still scanned.
+ *
+ * This is not a parser and does not pretend to be one. It is a single pass
+ * that knows where a comment, a string, a template and a regex literal begin
+ * and end — which is all that separates "code that imports something" from
+ * "text that mentions importing something".
+ *
+ * Comments, templates and regexes become spaces entirely. A string keeps its
+ * two quote characters and loses its interior, so `from "./x.mjs"` still looks
+ * like an import while `"import ./x.mjs"` no longer does. The specifier itself
+ * is then read out of the ORIGINAL source by offset.
+ *
+ * Known limit, stated rather than discovered later: an `import()` written
+ * inside a template expression is invisible here. Nothing in this repository
+ * does that, and a static import cannot be written that way at all.
+ */
+export function maskNonCode(src) {
+  const out = src.split("");
+  const blank = (from, to) => { for (let i = from; i < to && i < out.length; i++) if (out[i] !== "\n") out[i] = " "; };
+  // A slash starts a regex only where a value may begin. Standard heuristic,
+  // and enough for the plain modules this bundles.
+  const REGEX_OK = new Set(["(", ",", "=", ":", "[", "!", "&", "|", "?", "{", "}", ";", "+", "-", "*", "%", "<", ">", "~", "^"]);
+
+  let i = 0, lastSignificant = "";
+  while (i < src.length) {
+    const c = src[i], next = src[i + 1];
+
+    if (c === "/" && next === "/") {
+      let j = src.indexOf("\n", i); if (j === -1) j = src.length;
+      blank(i, j); i = j; continue;
+    }
+    if (c === "/" && next === "*") {
+      let j = src.indexOf("*/", i + 2); j = j === -1 ? src.length : j + 2;
+      blank(i, j); i = j; continue;
+    }
+    if (c === '"' || c === "'") {
+      let j = i + 1;
+      while (j < src.length && src[j] !== c) { if (src[j] === "\\") j++; j++; }
+      blank(i + 1, j);                       // interior only: the quotes stay
+      i = Math.min(j + 1, src.length); lastSignificant = c; continue;
+    }
+    if (c === "`") {
+      let j = i + 1;
+      while (j < src.length && src[j] !== "`") { if (src[j] === "\\") j++; j++; }
+      blank(i, Math.min(j + 1, src.length));  // the whole template, delimiters too
+      i = Math.min(j + 1, src.length); lastSignificant = "`"; continue;
+    }
+    if (c === "/" && (lastSignificant === "" || REGEX_OK.has(lastSignificant))) {
+      let j = i + 1, klass = false;
+      while (j < src.length) {
+        const d = src[j];
+        if (d === "\\") { j += 2; continue; }
+        if (d === "[") klass = true;
+        else if (d === "]") klass = false;
+        else if (d === "/" && !klass) break;
+        else if (d === "\n") break;          // not a regex after all
+        j++;
+      }
+      if (src[j] === "/") { blank(i, j + 1); i = j + 1; lastSignificant = "/"; continue; }
+    }
+    if (!/\s/.test(c)) lastSignificant = c;
+    i++;
+  }
+  return out.join("");
 }
 
 /** Every module specifier a source imports or re-exports from. */
 export function specifiersIn(src) {
-  const code = stripComments(src);
+  const masked = maskNonCode(src);
   const found = new Set();
   const patterns = [
-    // The class excludes quotes on purpose: a real import never has a string
-    // literal between the keyword and `from`, but an export of ordinary data
-    // can. `export const controls = [{ label: "drop from", unit: " m" }]`
-    // matched here and was reported as a bare specifier (P-77).
-    /\b(?:import|export)\s[^;"'`]*?\bfrom\s*["']([^"']+)["']/g,   // import x from "…", export {…} from "…"
-    /\bimport\s*["']([^"']+)["']/g,                            // import "…"
-    /\bimport\(\s*["']([^"']+)["']\s*\)/g,                     // import("…")
+    /\b(?:import|export)\s[^;"'`]*?\bfrom\s*(["'])([^"']*)\1/dg,   // import x from "…", export {…} from "…"
+    /\bimport\s*(["'])([^"']*)\1/dg,                                 // import "…"
+    /\bimport\(\s*(["'])([^"']*)\1\s*\)/dg,                          // import("…")
   ];
-  for (const re of patterns) for (const m of code.matchAll(re)) found.add(m[1]);
+  for (const re of patterns) {
+    for (const m of masked.matchAll(re)) {
+      // Matched against the masked copy; read the specifier out of the real one.
+      const [start, end] = m.indices[2];
+      const spec = src.slice(start, end);
+      if (spec) found.add(spec);
+    }
+  }
   return [...found];
 }
 
