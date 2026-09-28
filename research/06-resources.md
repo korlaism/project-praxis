@@ -76,11 +76,15 @@ Variable woff2, latin and latin-ext subsets only: 89 KB for both families across
 
 Short list, deliberately. The lab has **no npm dependencies and no build step**; every primitive is written here so the equations stay visible (ADR 0007).
 
-| Status | What | Licence | Where |
-|---|---|---|---|
-| U | Familjen Grotesk (Google Fonts) | SIL OFL 1.1 — to verify | The lab and record interface |
-| U | Spline Sans Mono (Google Fonts) | SIL OFL 1.1 — to verify | Readouts, labels and figures |
-| V | Node.js test runner | — | `node --test`, the only test tooling |
+`R-040`: nothing ships without a verified, dated licence, and `tools/check-docs.py` fails the build if this table says otherwise. `R-041`: the **Read from** column is the point of the table — a summary is not verification.
+
+| Status | What | Licence | Checked | Read from | Where |
+|---|---|---|---|---|---|
+| V | Familjen Grotesk, by Familjen STHLM AB | SIL OFL 1.1 | 2026-09-20 | `google/fonts` METADATA.pb, `license: "OFL"`, and the OFL.txt shipped beside the files | The lab, the landing and the record |
+| V | Spline Sans Mono, by Eben Sorkin and Mirko Velimirović | SIL OFL 1.1 | 2026-09-20 | Same | Readouts, labels and figures |
+| V | Node.js test runner | Part of Node.js (MIT) | 2026-09-19 | Node's own LICENSE | `node --test`, the only test tooling |
+
+These two rows used to read "SIL OFL 1.1 — to verify" while §1c recorded the same fonts as verified. Two records of one fact, drifting apart — which is the failure `R-040` is about, seen from the inside.
 
 ## 3 · Software considered and not used
 

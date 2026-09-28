@@ -53,7 +53,18 @@ These are the reason the phase exists. Each maps to a kill criterion.
 | `R-033` | Guardian consent obtained in writing before any data is collected; no learner data leaves the pilot dataset. | Non-negotiable. Minors. [ADR 0015](../decisions/0015-the-record-stays-where-the-learner-is.md) turns this into a property rather than a promise: nothing is collected, and `lab/notebook/privacy.test.mjs` fails the build if that changes. |
 | `R-034` | A weekly 30-minute session where a learner presents a **mistake**, not a success. | The culture-setting move and the cheapest source of social stake. |
 
-## 5. Explicit non-requirements for Phase 1
+## 5a. What we publish
+
+The repository is public (`P-65`) and ADR 0008 invites anyone to self-host the bundle, so what we ship carries obligations to people we will never meet. Nothing in this document covered that until `P-67`, which is how a licence could be recorded wrongly, justify [ADR 0009](../decisions/0009-wrap-phet-where-it-exists.md), and go unchallenged until someone downloaded the file.
+
+| # | Requirement | Notes |
+|---|-------------|-------|
+| `R-040` | Every third-party component we ship — code, font, asset, dataset or simulation — has a licence verified against **both** builds, recorded with the date it was checked. | Both, because ADR 0008 commits to an open self-hosted build **and** a paid hosted one, and NonCommercial clears the first and not the second. Enforced: `tools/check-docs.py` fails if anything in the runtime table is unverified or undated. |
+| `R-041` | Verification means reading the licence in the component's own files or its source repository. | **A summary, a search result, or the prose of a licensing page is not verification.** This is the rule that was missing. PhET's page describes CC BY in the past tense, for its *historical* collection; the file itself says NonCommercial. No check can enforce this one — see below. |
+
+**`R-041` cannot be tested, and saying so is part of it.** A machine can see that a licence is recorded and dated; it cannot see whether the person who recorded it opened the file or trusted a paraphrase. The failure it guards against looks exactly like success until something is downloaded. It is a rule for whoever adds the dependency, and the only enforcement is that the resources index asks where the licence was read from.
+
+## 5. Explicit non-requirements for Phase 1## 5. Explicit non-requirements for Phase 1
 
 Named so they do not creep in:
 
