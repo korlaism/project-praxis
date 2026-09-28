@@ -55,6 +55,24 @@ export function urlsIn(css) {
     .filter((u) => u && !/^data:/i.test(u));
 }
 
+/**
+ * Entries a page loads with <script src>. P-56.
+ *
+ * The bundler followed imports and stylesheets and had no notion of <script>,
+ * so a page loading its code this way bundled without it — and checkBundle did
+ * not look either, so the bundle passed its own check and shipped broken. Our
+ * own pages use an inline `import "./x.js"`, which is the only reason this
+ * never bit.
+ */
+export function scriptsIn(html) {
+  const out = [];
+  for (const tag of html.match(/<script\b[^>]*>/gi) ?? []) {
+    const src = tag.match(/\bsrc\s*=\s*["']([^"']+)["']/i)?.[1];
+    if (src) out.push(src);
+  }
+  return out;
+}
+
 function stylesheetsIn(html) {
   const out = [];
   for (const tag of html.match(/<link\b[^>]*>/gi) ?? []) {
@@ -94,7 +112,7 @@ function collect(entry) {
     if (!existsSync(file)) throw new Error(`referenced file does not exist: ${file}`);
     seen.add(file);
     const src = readFileSync(file, "utf8");
-    const refs = isHtml(file) ? [...stylesheetsIn(src), ...specifiersIn(src)]
+    const refs = isHtml(file) ? [...stylesheetsIn(src), ...scriptsIn(src), ...specifiersIn(src)]
                : /\.css$/i.test(file) ? urlsIn(src)
                : specifiersIn(src);
     for (const ref of refs) {
@@ -157,7 +175,7 @@ export function buildBundle(entry, outDir) {
     .split("\n")
     .filter((l) => !/^\s*<!doctype/i.test(l) && (keepMeta(l) || !/^\s*<meta\b/i.test(l)))
     .join("\n");
-  for (const ref of [...stylesheetsIn(html), ...specifiersIn(html)]) {
+  for (const ref of [...stylesheetsIn(html), ...scriptsIn(html), ...specifiersIn(html)]) {
     if (isExternal(ref)) continue;
     const rel = "./" + relative(root, resolve(dirname(entryAbs), ref)).split(sep).join("/");
     for (const q of ['"', "'"]) html = html.split(q + ref + q).join(q + rel + q);
@@ -189,6 +207,7 @@ export function checkBundle(dir) {
     const where = relative(top, file);
     const refs = [
       ...(isHtml(file) ? stylesheetsIn(src).map((r) => ["stylesheet", r]) : []),
+      ...(isHtml(file) ? scriptsIn(src).map((r) => ["script", r]) : []),
       ...specifiersIn(src).map((r) => ["import", r]),
     ];
     for (const [kind, ref] of refs) {
