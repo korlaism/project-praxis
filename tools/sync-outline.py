@@ -82,6 +82,45 @@ def relink(text, src_rel, docs):
     return re.sub(r"`([A-Za-z0-9_./-]+\.md)`", bare, text)
 
 
+TITLE_MAX = 100  # Outline rejects longer titles.
+
+
+def clamp_title(title):
+    """Keep a title inside Outline's limit, breaking on a word where it can.
+
+    Praxis derives titles from filenames, so this bites less often than in
+    Project Kaithi, where they come from an H1 — but a long filename is still a
+    rejected document, and a rejected document halfway through a run is what
+    the rest of this is about.
+    """
+    if len(title) <= TITLE_MAX:
+        return title
+    cut = title[:TITLE_MAX - 1]
+    return (cut[:cut.rfind(" ")] if " " in cut else cut).rstrip(" ,;:-") + "…"
+
+
+def save_manifest(man):
+    """Write the manifest atomically, so an interrupted run cannot truncate it."""
+    tmp = MANIFEST + ".tmp"
+    with open(tmp, "w") as f:
+        json.dump(man, f, indent=2)
+    os.replace(tmp, MANIFEST)
+
+
+def existing_titles(coll):
+    """Titles already in a collection, so an orphaned document is adopted, not duplicated.
+
+    A sync that fails after creating a document but before writing the manifest
+    leaves that document in Outline and unknown to us. Looking first means the
+    next run adopts it instead of making a second copy — the failure Project
+    Kaithi actually hit (K-13), ported here by P-24.
+    """
+    out = {}
+    for d in api("documents.list", {"collectionId": coll, "limit": 100}).get("data", []):
+        out.setdefault(d["title"], {"id": d["id"], "url": d["url"]})
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true", help="show what would change, push nothing")
@@ -97,6 +136,7 @@ def main():
 
     # Create any local file not yet in the manifest.
     known = set(docs)
+    seen = {}  # collectionId -> {title: {id, url}}, fetched lazily
     for rel in sorted(man["autodiscover"]):
         for fn in sorted(os.listdir(os.path.join(ROOT, rel) if rel else ROOT)):
             if not fn.endswith(".md"):
@@ -105,13 +145,22 @@ def main():
             if key in known or not os.path.isfile(os.path.join(ROOT, key)):
                 continue
             coll = man["collections"][rel or "."]
-            title = fn[:-3].replace("-", " ").replace("_", " ").title()
-            print(f"  + NEW  {key}  ->  {title}")
+            title = clamp_title(fn[:-3].replace("-", " ").replace("_", " ").title())
             if args.dry_run:
+                print(f"  + NEW  {key}  ->  {title}")
                 continue
-            d = api("documents.create", {"title": title, "text": body(os.path.join(ROOT, key)),
-                                         "collectionId": coll, "publish": True})["data"]
+            if coll not in seen:
+                seen[coll] = existing_titles(coll)
+            if title in seen[coll]:
+                d = seen[coll][title]
+                print(f"  + ADOPT {key}  ->  {title} (already in Outline)")
+            else:
+                print(f"  + NEW  {key}  ->  {title}")
+                d = api("documents.create", {"title": title, "text": body(os.path.join(ROOT, key)),
+                                             "collectionId": coll, "publish": True})["data"]
             docs[key] = {"id": d["id"], "url": d["url"], "title": title, "hash": ""}
+            # Save immediately: a later failure must not lose this document.
+            save_manifest(man)
 
     changed = unchanged = 0
     for rel, meta in docs.items():
@@ -131,12 +180,14 @@ def main():
             meta["hash"] = h
 
     if not args.dry_run:
-        with open(MANIFEST, "w") as f:
-            json.dump(man, f, indent=2)
+        save_manifest(man)
 
     verb = "would change" if args.dry_run else "synced"
     print(f"\n{changed} {verb}, {unchanged} unchanged.")
-    print(f"{URL}{docs['README.md']['url']}")
+    # A fresh manifest with --dry-run creates nothing, so this used to raise
+    # KeyError on the last line of a run that had otherwise worked (P-24).
+    if "README.md" in docs:
+        print(f"{URL}{docs['README.md']['url']}")
 
 
 if __name__ == "__main__":
