@@ -42,3 +42,14 @@ python3 tools/sync-outline.py --dry-run
 ## On working with minors
 
 Guardian consent in writing before any data collection, without exception (`R-033`). Pseudonymous ids throughout. The error record is not shown to peers or parents. If a choice arises between a cleaner dataset and a child's dignity, it is not a choice.
+
+## Adding something of someone else's
+
+`R-040` and `R-041`. Before anything third-party enters the bundle — a font, a library, an asset, a simulation:
+
+1. **Open its licence.** In its own files, or its source repository. Not a summary, not a search result, not the prose of a licensing page. PhET's page describes CC BY in the past tense for its *historical* collection; the file says NonCommercial, and [ADR 0009](../decisions/0009-wrap-phet-where-it-exists.md) was accepted on the page.
+2. **Check it against both builds.** ADR 0008 commits to an open self-hosted build *and* a paid hosted one. NonCommercial clears the first and not the second, and that difference has already cost one decision.
+3. **Record it in research/06** with the date and where you read it. `tools/check-docs.py` fails the build if a shipped dependency is unverified or undated.
+4. **Ship the licence text with it** if the licence says so, as the OFL does. A bundle is a redistribution, and `tools/build-topic.test.mjs` fails if fonts travel without theirs.
+
+The one that cannot be automated is the first. A recorded licence looks the same whether it was read or assumed, right up until someone downloads the file.

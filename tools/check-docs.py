@@ -31,6 +31,46 @@ def fail(msg):
 UNSETTLED = ("R-001", "R-002", "R-003", "R-004", "R-005", "R-035")
 
 
+def runtime_licences():
+    """R-040: nothing we ship carries an unverified or undated licence.
+
+    The table under "Software we depend on at runtime" in research/06 is the
+    list of other people's work inside our bundle. It sat for weeks saying the
+    two fonts were "SIL OFL 1.1 — to verify" while a section above recorded the
+    same fonts as verified: two records of one fact, drifting apart, which is
+    the failure R-040 exists to stop.
+
+    R-041 — that verification means reading the licence rather than a summary —
+    cannot be checked here and is not pretended at. All this sees is whether
+    someone wrote a status, a licence, a date and a source.
+    """
+    path = os.path.join(ROOT, "research", "06-resources.md")
+    text = open(path, encoding="utf-8").read()
+    m = re.search(r"^## 2 · Software we depend on at runtime\s*$(.*?)^## ", text, re.M | re.S)
+    if not m:
+        fail("research/06-resources.md: no 'Software we depend on at runtime' section to check")
+        return
+    rows = [r for r in re.findall(r"^\|(?!\s*[-: ]+\|)(.+)\|\s*$", m.group(1), re.M)]
+    if len(rows) < 2:
+        fail("research/06-resources.md: the runtime table has no rows")
+        return
+    for row in rows[1:]:                     # skip the header row
+        cells = [c.strip() for c in row.split("|")]
+        if len(cells) < 5:
+            fail(f"research/06 runtime table: a row has too few columns — {row.strip()[:60]!r}")
+            continue
+        status, what, licence, checked, readfrom = cells[0], cells[1], cells[2], cells[3], cells[4]
+        if status != "V":
+            fail(f"research/06: '{what}' ships with status {status!r} — R-040 wants every "
+                 f"shipped dependency verified, not planned")
+        if not licence or "verify" in licence.lower():
+            fail(f"research/06: '{what}' has no settled licence ({licence!r}) — R-040")
+        if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", checked):
+            fail(f"research/06: '{what}' has no date it was checked ({checked!r}) — R-040")
+        if not readfrom:
+            fail(f"research/06: '{what}' does not say where its licence was read from — R-041")
+
+
 def relative_links():
     """Every relative markdown link, and whether it resolves.
 
@@ -128,6 +168,9 @@ def main():
             print(f"  ✗ {f}")
         sys.exit(1)
     print(f"{len(adrs)} ADRs consistent with the README decision table.")
+
+
+runtime_licences()
 
 
 relative_links()
