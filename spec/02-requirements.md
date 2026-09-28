@@ -11,14 +11,14 @@ A claim marked **Exploratory** is one the phase measures but does not test: it m
 
 ## 1. The falsifiable claims
 
-These are the reason the phase exists. Each maps to a kill criterion.
+These are the reason the phase exists. **Each names a kill criterion, or is marked with why it has none** — `Exploratory` (measured, but nothing kills on it) or `Deferred` (Phase 1 neither tests nor measures it). Both marks mean the same two things: no decision may rest on the claim, and no criterion fires on it. [ADR 0019](../decisions/0019-claims-without-a-kill-criterion.md); enforced by `tools/claims.test.mjs`.
 
 | # | Requirement | Source | Kill |
 |---|-------------|--------|------|
 | `R-001` | Commit-before-reveal (prediction + confidence) beats matched content without it on **delayed** transfer retention at two weeks, by ≥1.3× normalised gain. | Predict-observe-explain; testing effect; generation effect — see research/02 | K-01 |
 | `R-002` | Per-learner errors cluster into ≤6 stable, nameable signatures with internal consistency above chance reassignment. | *Guess.* Misconception catalogues establish that errors are systematic **across** learners; per-learner stability is our extrapolation. | K-02 |
-| `R-003` | Deliberately baiting a learner's named signature beats routing around it. | *Guess.* Hypercorrection effect is suggestive, not sufficient. | — |
-| `R-004` | Logged confusion is resolved more often than unlogged confusion. | Self-explanation and metacognitive monitoring literature | — |
+| `R-003` | **Deferred.** Deliberately baiting a learner's named signature beats routing around it. | *Guess.* Hypercorrection is suggestive, not sufficient, and is demonstrated in children. **Phase 1 neither tests nor measures this**: ADR 0003 defers the mechanism until `R-002` survives. Still the personalisation thesis, and still the most commercially interesting claim here — marked for when it is tested, not for whether it is true. | — |
+| `R-004` | **Deferred.** Logged confusion is resolved more often than unlogged confusion. | Self-explanation and metacognitive monitoring literature. **Phase 1 neither tests nor measures this**, because one-tap confusion logging (`R-013`) is not built. The fix is to build it and give this a criterion. | — |
 | `R-005` | Calibration (Brier) improves measurably in six weeks in ages 11–15. | Weak, and in-band. DiGiacomo & Chen (2016), grades 6–7, *n*=30, randomised with a delayed-treatment control: significantly higher **predictive/postdictive calibration accuracy**. Gutierrez de Blume (2022), 56 effect sizes, 7,667 participants, *g* = −.565, and **intervention duration did not moderate** — the nearest thing the "six weeks" half has to support. `P-71` found the age-moderator reading weaker than `P-07` recorded. See research/06. | K-04 |
 | `R-035` | **Exploratory.** Improved calibration transfers beyond force and motion. | *Nothing found, in any age band.* Split out of `R-005` by [ADR 0013](../decisions/0013-split-r005-transfer-is-exploratory.md) because the evidence for the two halves is not the same evidence. Measured and reported; **no decision may rest on it** and no kill criterion fires on it. | — |
 
