@@ -305,3 +305,64 @@ test("a remote <script src> is left alone", () => {
   const out = fresh("script-src-remote-out");
   assert.doesNotThrow(() => buildBundle(join(dir, "page.html"), out));
 });
+
+/* ── The scanner reads code, not text that looks like code (P-81) ─────────
+ *
+ * specifiersIn matched patterns against the whole file with comments crudely
+ * stripped. It has been wrong twice: it read `label: "drop from"` inside an
+ * exported array as an import (P-77), and it had no notion of <script src>
+ * at all (P-56). Two failures in one component in a week is a pattern.
+ *
+ * These are the cases a scanner that does not know where a string ends gets
+ * wrong. Each one is a real shape that appears in ordinary source.
+ */
+
+const only = (src) => specifiersIn(src).sort();
+
+test("a string that looks exactly like an import is not one", () => {
+  assert.deepEqual(only('const s = \'import "./ghost.mjs"\';\n'), []);
+  assert.deepEqual(only('const s = "import x from \'./ghost.mjs\'";\n'), []);
+});
+
+test("a trailing line comment is not code", () => {
+  // stripComments only removed comments that START a line, so anything after
+  // code on the same line was still scanned.
+  assert.deepEqual(only('const a = 1; // import "./ghost.mjs"\n'), []);
+});
+
+test("a template literal is not code", () => {
+  assert.deepEqual(only('const t = `import "./ghost.mjs"`;\n'), []);
+  assert.deepEqual(only('const t = `a ${b} import "./ghost.mjs"`;\n'), []);
+});
+
+test("an apostrophe inside a string does not swallow the rest of the file", () => {
+  // The failure mode that makes a naive scanner dangerous: one unbalanced
+  // quote and everything after it is misread.
+  const src = 'const s = "it\'s fine";\nimport x from "./real.mjs";\n';
+  assert.deepEqual(only(src), ["./real.mjs"]);
+});
+
+test("a regex literal containing a quote does not start a string", () => {
+  const src = 'const q = /["\']/;\nimport x from "./real.mjs";\n';
+  assert.deepEqual(only(src), ["./real.mjs"]);
+});
+
+test("the real forms are all still found", () => {
+  const src = [
+    'import a from "./a.mjs";',
+    "import { b,\n  c } from '../b/c.mjs';",
+    'export * from "./star.mjs";',
+    'export { d } from "./d.mjs";',
+    'import "./side.mjs";',
+    'const lazy = await import("./lazy.mjs");',
+  ].join("\n");
+  assert.deepEqual(only(src),
+    ["../b/c.mjs", "./a.mjs", "./d.mjs", "./lazy.mjs", "./side.mjs", "./star.mjs"]);
+});
+
+test("the word from inside exported data is still not an import", () => {
+  // P-77, kept: this is the one that actually broke a build.
+  const src = 'export const controls = [\n  { key: "h", label: "drop from", unit: " m" },\n];\n' +
+              'import { stepFall } from "../components/falling.mjs";\n';
+  assert.deepEqual(only(src), ["../components/falling.mjs"]);
+});
