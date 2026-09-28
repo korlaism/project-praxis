@@ -12,7 +12,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, statSync, readdirSync } from "node:fs";
 import { join, dirname, relative } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { buildBundle, checkBundle, specifiersIn } from "./build-topic.mjs";
+import { buildBundle, checkBundle, specifiersIn, scriptsIn } from "./build-topic.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const SCRATCH = join(ROOT, "dist", ".test");
@@ -250,4 +250,58 @@ test("every built topic page declares a viewport, not just the hub", () => {
     assert.match(readFileSync(join(out, "index.html"), "utf8"), /<meta\s+name="viewport"/i,
       `${slug} has no viewport`);
   }
+});
+
+/* ── <script src> (P-56) ──────────────────────────────────────────────────
+ *
+ * The bundler followed import statements and stylesheet links and had no
+ * notion of <script> at all. A page loading its entry that way bundled
+ * WITHOUT that code, and checkBundle did not look either — so the bundle
+ * passed its own check and shipped broken. Exactly the silent failure P-35
+ * exists to prevent, one tag along.
+ *
+ * Our pages sidestep it with an inline `import "./hub/app.js"`, which is why
+ * this never bit.
+ */
+
+/** A page that loads its entry the other way, plus the graph behind it. */
+function srcFixture(name) {
+  const dir = fresh(`src-${name}`);
+  writeFileSync(join(dir, "page.html"),
+    '<meta charset="utf-8">\n<title>Loaded by src</title>\n' +
+    '<link rel="stylesheet" href="./page.css">\n' +
+    '<script type="module" src="./app.mjs"></script>\n');
+  writeFileSync(join(dir, "page.css"), "body{margin:0}\n");
+  writeFileSync(join(dir, "app.mjs"), 'import { two } from "./dep.mjs";\nexport default two;\n');
+  writeFileSync(join(dir, "dep.mjs"), "export const two = 2;\n");
+  return dir;
+}
+
+test("a page that loads its entry with <script src> carries that code", () => {
+  const src = srcFixture("carries");
+  const out = fresh("script-src-out");
+  const { files } = buildBundle(join(src, "page.html"), out);
+  assert.ok(files.includes("app.mjs"), `app.mjs is missing from [${files.join(", ")}]`);
+  assert.ok(files.includes("dep.mjs"), "the module the entry imports is missing too");
+  assert.ok(existsSync(join(out, "app.mjs")));
+});
+
+test("checkBundle refuses a bundle whose <script src> is not there", () => {
+  // The half that made this dangerous: without it a broken bundle reports
+  // itself publishable.
+  const src = srcFixture("refuses");
+  const out = fresh("script-src-missing");
+  buildBundle(join(src, "page.html"), out);
+  rmSync(join(out, "app.mjs"));
+  const errors = checkBundle(out);
+  assert.ok(errors.some((e) => /app\.mjs/.test(e)),
+    `expected a complaint about app.mjs, got [${errors.join("; ")}]`);
+});
+
+test("a remote <script src> is left alone", () => {
+  const dir = fresh("src-remote");
+  writeFileSync(join(dir, "page.html"),
+    '<title>Remote</title>\n<script type="module" src="https://example.com/x.js"></script>\n');
+  const out = fresh("script-src-remote-out");
+  assert.doesNotThrow(() => buildBundle(join(dir, "page.html"), out));
 });
