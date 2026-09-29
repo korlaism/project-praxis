@@ -42,3 +42,43 @@ export function checkAnswer(spec, primitive, params) {
     seconds: run.seconds,
   };
 }
+
+
+/**
+ * Every outcome a primitive can actually reach across its control grid.
+ *
+ * P-50 asks for generated scenarios to be split by whether the parameters
+ * decide the answer, and this is what decides that. Two of our four primitives
+ * return the same outcome at every setting — every cut string flies along the
+ * tangent, every collision is equal — which is the lesson, and which also
+ * means a generator can be right about them without deriving anything. Scoring
+ * those together with the ones where the answer must be worked out reads much
+ * better than the generator deserves.
+ *
+ * Low, middle and high per control, as the primitive contract sweeps.
+ */
+export function reachableOutcomes(primitive, { dt = 1 / 60, maxSeconds = 120 } = {}) {
+  let combos = [{}];
+  for (const c of primitive.controls) {
+    const mid = Math.round(((c.min + c.max) / 2) / c.step) * c.step;
+    const values = [...new Set([c.min, mid, c.max])];
+    combos = combos.flatMap((base) => values.map((v) => ({ ...base, [c.key]: v })));
+  }
+  const seen = new Set();
+  for (const params of combos) {
+    const p = {};
+    for (const c of primitive.controls) p[c.key] = c.default;
+    Object.assign(p, params);
+    const run = runHeadless(primitive, p, { dt, maxSeconds });
+    if (run.finished) {
+      const o = primitive.classify(run.state, p);
+      if (o !== null) seen.add(o);
+    }
+  }
+  return seen;
+}
+
+/** True when no setting of the controls changes the answer. */
+export function isParameterIndependent(primitive) {
+  return reachableOutcomes(primitive).size <= 1;
+}

@@ -26,6 +26,26 @@
 > And **zero** repairs changed a stated answer, so nothing needed a human to confirm the question
 > still matched it. That last count is the one to watch as the generator changes: a repaired
 > answer makes an item self-consistent, never sensible, and no check can tell the difference.
+>
+> **`P-50`, 2026-09-29 — the 65% is two numbers averaged, and one of them is 30%.**
+> Two of the four primitives answer the same at **every** setting of their controls: every cut
+> string flies along the tangent, every collision is equal. That is the lesson those items teach,
+> and it also means a generator can be right about them without deriving anything. Splitting
+> P-45's same twenty candidates on that line:
+>
+> | | |
+> |---|---|
+> | Where the answer cannot vary | **10/10 (100%)** |
+> | Where it must be derived | **3/10 (30%)** |
+>
+> The bar above says roughly 90% unaided. Against the half of the corpus that actually tests
+> whether a generator can work out what will happen, the spike returned **30%**, and the
+> headline 65% was the average of a trivial task and a hard one. `reachableOutcomes()` in
+> `lab/scenario/run.mjs` decides the split mechanically, so it cannot be argued about.
+>
+> This makes the ADR's own criterion *more* demanding rather than less, and it stays `Proposed`
+> by a wider margin than anyone thought. The fresh-model run P-50 was written for is still
+> unrun — see the ticket for why.
 
 ## Context
 

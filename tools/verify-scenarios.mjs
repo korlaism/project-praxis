@@ -12,6 +12,7 @@
 import { validateScenario } from "../lab/scenario/schema.mjs";
 import { runHeadless } from "../lab/scenario/run.mjs";
 import { PRIMITIVES, resolveParams } from "../lab/primitives/index.mjs";
+import { isParameterIndependent } from "../lab/scenario/run.mjs";
 import { repairLoop } from "../lab/scenario/repair.mjs";
 
 const CHECKS = ["schema", "primitive", "params", "completes", "invariants", "answer"];
@@ -103,6 +104,21 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     b.n++; if (Object.keys(r.fail).length === 0) b.ok++;
   }
   console.log("  by primitive:", Object.entries(byPrim).map(([p, b]) => `${p} ${b.ok}/${b.n}`).join("  "));
+
+  // P-50. Two of our primitives answer the same at every setting, so a
+  // generator can be right about them without deriving anything. Reporting one
+  // rate over all four reads much better than the generator deserves.
+  const split = { fixed: { n: 0, ok: 0 }, derived: { n: 0, ok: 0 } };
+  for (const r of rows) {
+    const prim = PRIMITIVES[r.s.primitive];
+    if (!prim) continue;
+    const bucket = isParameterIndependent(prim) ? split.fixed : split.derived;
+    bucket.n++;
+    if (Object.keys(r.fail).length === 0) bucket.ok++;
+  }
+  const pct = (b) => (b.n ? `${b.ok}/${b.n} (${((b.ok / b.n) * 100).toFixed(0)}%)` : "none");
+  console.log(`\n  where the answer cannot vary:  ${pct(split.fixed)}`);
+  console.log(`  where it must be derived:      ${pct(split.derived)}`);
 
   // P-51 · the loop, not a single pass.
   if (repairing) {

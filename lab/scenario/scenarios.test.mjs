@@ -10,7 +10,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { validateScenario } from "./schema.mjs";
-import { runHeadless, checkAnswer } from "./run.mjs";
+import { runHeadless, checkAnswer, reachableOutcomes, isParameterIndependent } from "./run.mjs";
 import { PRIMITIVES, getPrimitive, resolveParams } from "../primitives/index.mjs";
 
 import whichWay from "../scenarios/which-way-does-it-fly.mjs";
@@ -133,4 +133,21 @@ test("a cue never quotes the answer it is supposed to withhold", () => {
         `${spec.id} cue for "${tag}" is too short to point at anything`);
     }
   }
+});
+
+/* ── Which primitives can a generator be right about by accident (P-50) ─── */
+
+test("two primitives answer the same at every setting, and two do not", () => {
+  // Not a preference — a fact about the physics, and the reason a single
+  // pass rate over all four flatters a generator. Every cut string flies
+  // along the tangent and every collision is equal; the pucks and the falling
+  // balls have to be worked out.
+  const independent = Object.entries(PRIMITIVES)
+    .filter(([, p]) => isParameterIndependent(p)).map(([id]) => id).sort();
+  assert.deepEqual(independent, ["circular-release", "contact-collision"]);
+
+  assert.deepEqual([...reachableOutcomes(PRIMITIVES["circular-release"])], ["tangent"]);
+  assert.deepEqual([...reachableOutcomes(PRIMITIVES["contact-collision"])], ["equal"]);
+  assert.ok(reachableOutcomes(PRIMITIVES["two-pucks"]).size >= 3);
+  assert.ok(reachableOutcomes(PRIMITIVES["free-fall"]).size === 2);
 });

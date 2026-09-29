@@ -108,3 +108,32 @@ premise.
 self-consistent, never sensible — the question may no longer ask about the thing the new answer
 answers, and no check can see that. Zero today because every answer failure was refused rather
 than repaired. When a real generator is plugged in (`P-50`), that count is the review queue.
+
+
+## P-50 · The split that changes how the number reads (2026-09-29)
+
+Two of the four primitives are **parameter-independent**: no setting of their controls changes
+the answer. `circular-release` always produces `tangent`; `contact-collision` always produces
+`equal`. That is exactly the lesson those concepts teach — and it means a generator writing an
+item for them can be right without working anything out.
+
+Splitting P-45's twenty candidates on that line:
+
+| | |
+|---|---|
+| Unaided, all twenty | 13/20 (65%) |
+| Where the answer cannot vary | **10/10 (100%)** |
+| Where it must be derived | **3/10 (30%)** |
+
+The split is computed by `reachableOutcomes()`, which sweeps each primitive's control grid and
+collects what comes out, so nothing here rests on judgement about which primitives are "easy".
+
+**What it means.** The generator was perfect at the half of the task where being right requires
+nothing, and failed seven times out of ten where it requires deriving an outcome from
+parameters. A single pass rate over all four primitives will always read better than the
+generator deserves, and every future spike should report both lines.
+
+**The fresh-model run is still unrun.** `OPENAI_API_KEY` is present and authenticates, but its
+project has access to `text-embedding-ada-002` only: every chat model returns 403. The harness
+is built and inspectable — `node tools/generate-spike.mjs --prompt` prints exactly what would
+be sent, and nothing else leaves the machine.
