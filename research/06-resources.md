@@ -37,7 +37,7 @@ For what is actually worth reading, and in what order, see [Reading List](07-rea
 
 | V | Gutierrez de Blume — *Calibrating calibration: a meta-analysis of learning strategy instruction interventions to improve metacognitive monitoring accuracy*, **Journal of Educational Psychology 114(4), 681–700, 2022** (DOI 10.1037/edu0000674) | 56 effect sizes, 7,667 participants, *g* = −.565 [−.639, −.491]. **Duration did not moderate.** The "adult samples" line is a compound clause, not an age moderator — see the correction below. Abstract read from APA PsycNet; full text closed |
 | V | DiGiacomo & Chen — *Enhancing self-regulatory skills through an intervention embedded in a middle school mathematics curriculum*, **Psychology in the Schools 53(6), 601–616, 2016** | The only in-band study found: 30 sixth- and seventh-graders randomly assigned to treatment or **delayed-treatment control**; significantly higher maths performance **and predictive/postdictive calibration accuracy**. Abstract read verbatim from ERIC; full text closed |
-| V | Kleider-Tesler, Prior & Katzir — *The role of calibration of comprehension in adolescence: from theory to online training*, **Journal of Cognitive Education and Psychology 18(2), 190–211, 2019** (DOI 10.1891/1945-8959.18.2.190) | Ninety 10th-graders, three sessions. Condition (c) is *"feedback on performance with scaffolding (a cue for correcting wrong answers)"* and was **the most effective**, especially for poor comprehenders. Abstract read verbatim from ERIC; full text closed. **Whether calibration feedback was null or merely smaller is still unknown** — `P-71` |
+| V | Kleider-Tesler, Prior & Katzir — *The role of calibration of comprehension in adolescence: from theory to online training*, **Journal of Cognitive Education and Psychology 18(2), 190–211, 2019** (DOI 10.1891/1945-8959.18.2.190) | Ninety 10th-graders, three sessions. Condition (c) is *"feedback on performance with scaffolding (a cue for correcting wrong answers)"* and was **the most effective**, especially for poor comprehenders. Abstract read verbatim from ERIC; **full text still closed after a second attempt** (`P-71`). Cited elsewhere as 18**(3)**; Crossref gives 18(2) and is the publisher's own deposit. |
 
 **The gap, re-searched, and the earlier entry was incomplete in both directions.** `P-06` recorded `R-005` as "worse than no evidence". `P-07` found in-band evidence that is positive though thin, and a meta-analysis that supports the field while moderating against our age band. It also found that the transfer half of `R-005` has nothing behind it at **any** age — no study above tested transfer to another topic — which is why ADR 0013 split it out as `R-035`, exploratory.
 
@@ -60,6 +60,22 @@ So the standard is now *publisher abstract*, which is well above the secondary s
 **A near-miss worth recording.** A search summary during `P-71` attributed the meta-analysis to three authors — "Gutierrez de Blume, Soares & Snyder". Crossref and APA both give a **single author**. The citation `P-07` recorded was right and the summary was wrong; had it gone the other way it would have entered the record as a verified fact.
 
 **A name collision, so nobody merges them later.** Alexander, P. A. (2013), *"Calibration: what is it and why it matters? An introduction to the special issue on Calibrating Calibration"*, **Learning and Instruction** — a different piece, in a different journal, sharing the phrase.
+
+### The calibration-feedback question, still open (`P-71`)
+
+ADR 0014 defers a real decision on it: whether the Brier score keeps its place in the product. The question is whether Kleider-Tesler's *"feedback on performance and on calibration"* condition was **null** or merely **smaller** than scaffolding.
+
+**Two secondary statements say null.** Both surfaced in search summaries and neither has been read in its source:
+
+> another study with adolescents demonstrated no improvement in comprehension monitoring with calibration feedback (Kleider-Tesler, et al., 2019)
+
+> only the group receiving scaffolding feedback showed significant improvement in calibration following training, compared to the performance and calibration feedback groups
+
+**They are not enough, and `R-041` is why.** A summary is not verification, and these are summaries of papers nobody here has opened. Recorded so the next person starts ahead rather than level, and **not** recorded as the answer.
+
+**Routes tried and closed:** the publisher (403), the University of Haifa's research portal (403), Semantic Scholar (no open-access copy), ERIC (abstract only, already held), and two citing papers — the open-access one cites this study only for the good-versus-poor comprehender difference.
+
+**The best remaining route is not the one the ticket named.** The first author's doctoral thesis exists, at Haifa, under the title *"The effect of different types of feedback on comprehension and calibration among middle school students with and without reading comprehension difficulties."* A thesis usually reports every condition in full, and a university library can usually produce one. That is a better first ask than an email.
 
 ## 1c · Fonts we ship
 

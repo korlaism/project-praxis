@@ -53,3 +53,17 @@ Guardian consent in writing before any data collection, without exception (`R-03
 4. **Ship the licence text with it** if the licence says so, as the OFL does. A bundle is a redistribution, and `tools/build-topic.test.mjs` fails if fonts travel without theirs.
 
 The one that cannot be automated is the first. A recorded licence looks the same whether it was read or assumed, right up until someone downloads the file.
+
+## Searching for our own claims
+
+This repository is public, and its pull requests and documents are indexed. While working `P-71`
+a web search for a finding this project relies on returned, among its results, **this project's
+own pull request asserting that finding**.
+
+So a search can now hand our own claims back as though they were somebody else's. It looks
+exactly like corroboration and is worth nothing, and it gets more likely the more we publish.
+
+When checking a claim: **read the result's source before counting it.** If the source is this
+repository, this project's Outline, or an artifact we published, it is our own voice and
+corroborates nothing. `R-041` already says a summary is not verification; this is the sharper
+case, where the summary is a summary of us.
