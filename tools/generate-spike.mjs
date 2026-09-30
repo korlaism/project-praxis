@@ -17,7 +17,18 @@
  *
  * Usage:
  *   node tools/generate-spike.mjs --prompt            # print what would be sent
- *   node tools/generate-spike.mjs --model gpt-4o      # generate (needs OPENAI_API_KEY)
+ *   node tools/generate-spike.mjs --model gpt-4o      # generate
+ *
+ * The provider is a seam, not an assumption (P-59): it speaks the OpenAI chat
+ * completions shape, which most providers now offer, and both the endpoint and
+ * the key come from the environment.
+ *
+ *   PRAXIS_MODEL_URL   default https://api.openai.com/v1/chat/completions
+ *   PRAXIS_MODEL_KEY   falls back to OPENAI_API_KEY
+ *
+ * That matters here and not only in principle: the key on this machine is
+ * scoped to embeddings, so every chat model returns 403. Any other compatible
+ * endpoint — another vendor, a local server — runs the spike unchanged.
  *
  * What leaves this machine is the prompt below and nothing else. Every part of
  * it is already public in this repository.
@@ -82,9 +93,10 @@ export function buildPrompt() {
 }
 
 async function generate(model, prompt) {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) throw new Error("OPENAI_API_KEY is not set — this is the spike's whole blocker");
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+  const url = process.env.PRAXIS_MODEL_URL ?? "https://api.openai.com/v1/chat/completions";
+  const key = process.env.PRAXIS_MODEL_KEY ?? process.env.OPENAI_API_KEY;
+  if (!key) throw new Error("no model key — set PRAXIS_MODEL_KEY or OPENAI_API_KEY");
+  const res = await fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
     body: JSON.stringify({
@@ -93,7 +105,7 @@ async function generate(model, prompt) {
       response_format: { type: "json_object" },
     }),
   });
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}: ${(await res.text()).slice(0, 400)}`);
+  if (!res.ok) throw new Error(`${res.status} ${res.statusText} from ${url}: ${(await res.text()).slice(0, 400)}`);
   const body = await res.json();
   return { text: body.choices[0].message.content, usage: body.usage };
 }

@@ -15,12 +15,17 @@
 import { mountScenario } from "../scenario/mount.js";
 import { renderRecord } from "../record/view.js";
 import { openNotebook } from "../notebook/store.mjs";
-import { SCENARIOS } from "../scenarios/index.mjs";
+import { SCENARIOS as SHIPPED } from "../scenarios/index.mjs";
 import { homeModel } from "./home.mjs";
 
 let notebook = null;
 let leave = null;
 let shown = null;
+// The scenarios this instance lists. A seam rather than an assumption (P-59):
+// the notebook backend and the mount were already injectable, and this was not,
+// so a school or a hosted tenant could not bring its own items without editing
+// the source. Defaults to what ships.
+let SCENARIOS = SHIPPED;
 
 function el(tag, cls, ...kids) {
   const n = document.createElement(tag);
@@ -141,8 +146,9 @@ function show(path) {
  * Start the lab. Importing this module has no side effects — the page calls
  * this — so the module graph can be loaded (and checked) without a browser.
  */
-export function startHub({ store = openNotebook() } = {}) {
+export function startHub({ store = openNotebook(), scenarios } = {}) {
   notebook = store;
+  if (scenarios) SCENARIOS = scenarios;
   addEventListener("popstate", () => show(currentPath()));
   addEventListener("hashchange", () => show(currentPath()));
   show(currentPath());
