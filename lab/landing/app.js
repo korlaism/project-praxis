@@ -217,9 +217,10 @@ export function mountLanding(spec, { root = document.body, notebook } = {}) {
   };
 }
 
-export function startLanding({ store } = {}) {
+export function startLanding({ store, scenarios = SCENARIOS } = {}) {
   const notebook = store ?? openNotebook();
-  const spec = scenarioFromHash(location.hash) ?? Object.values(SCENARIOS)[0];
+  // Same seam as the hub (P-59): whoever runs this brings their own items.
+  const spec = scenarioFromHash(location.hash, scenarios) ?? Object.values(scenarios)[0];
   const view = mountLanding(spec, { notebook });
 
   // The same verification hook the lab carries (P-69), for the same reason:

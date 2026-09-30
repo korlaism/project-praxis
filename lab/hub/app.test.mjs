@@ -16,14 +16,19 @@ import { SCENARIOS } from "../scenarios/index.mjs";
 import { installDom } from "../harness/dom-stub.mjs";
 import { openNotebook, memoryBackend } from "../notebook/store.mjs";
 
-async function start({ search = "" } = {}) {
+async function start({ search = "", scenarios } = {}) {
   const dom = installDom();
   if (search) location.search = search;      // set before the hub reads it
   const { startHub } = await import("./app.js?" + Math.random());
-  startHub({ store: openNotebook({ backend: memoryBackend() }) });
+  startHub({ store: openNotebook({ backend: memoryBackend() }), scenarios });
   const one = (cls) => dom.body.find((n) => n.className?.split?.(" ").includes(cls));
   const all = (cls) => dom.body.findAll((n) => n.className?.split?.(" ").includes(cls));
-  return { dom, one, all };
+  const text = () => {
+    const out = [];
+    (function walk(n) { if (n.textContent) out.push(n.textContent); n.children?.forEach(walk); })(dom.body);
+    return out.join(" ");
+  };
+  return { dom, one, all, text };
 }
 
 test("the front page lists every scenario as a button, not a link", async () => {
@@ -131,5 +136,37 @@ test("the hook goes away when the scenario does", async () => {
   assert.ok(globalThis.praxisVerify);
   one("hub-back").onclick();
   assert.equal(globalThis.praxisVerify, undefined, "it must not outlive the lab it drives");
+  dom.restore();
+});
+
+/* ── The scenario source is a seam, not an assumption (P-59) ──────────────
+ *
+ * "Everything customisable" was recorded as direction in P-59, and the
+ * notebook backend and the mount already honoured it. The scenario list did
+ * not: it was a static import, so a school or a hosted tenant could not supply
+ * its own items without editing the source.
+ */
+
+test("the hub lists whatever scenarios it is given", async () => {
+  const mine = {
+    "only-one": {
+      schema: 1, id: "only-one", concept: "falling", difficulty: "easy",
+      subject: "physics", primitive: "free-fall",
+      params: { heavy: 5, light: 0.5, height: 20, air: 0 },
+      question: "A scenario from somewhere else entirely",
+      options: [{ id: "together", label: "Together" }, { id: "heavier", label: "The heavy one" }],
+      correct: "together", errorTags: { heavier: "heavier-falls-faster" },
+      explain: "Because.",
+    },
+  };
+  const { dom, all, text } = await start({ scenarios: mine });
+  assert.equal(all("hub-card").length, 1, "the hub used its own list instead of the one given");
+  assert.match(text(), /A scenario from somewhere else entirely/);
+  dom.restore();
+});
+
+test("given none, it says so rather than throwing", async () => {
+  const { dom, all } = await start({ scenarios: {} });
+  assert.equal(all("hub-card").length, 0);
   dom.restore();
 });

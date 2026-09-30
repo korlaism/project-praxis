@@ -18,11 +18,15 @@ Some of these are accidentally already true, which is a good sign the architectu
 
 | Seam | Today | What is needed |
 |---|---|---|
-| **Storage** | `openNotebook({ backend })` — already injectable, already tested against a memory backend | Adapters: browser-local (default), self-hosted, hosted |
-| **Scenarios** | Data, not code (ADR 0007), loaded from a registry | A scenario source that can be a folder, a server, or a generator |
-| **Model provider** | None yet; generation is `P-51` | A generator interface: request in, **validated** spec out. The provider is the learner's or the host's choice |
-| **Identity** | None — nothing takes an account | Optional, and off by default. The lab must keep working with no account at all |
+| **Storage** | `openNotebook({ backend })` — injectable, tested against a memory backend | Adapters: browser-local (default), self-hosted, hosted |
+| **Scenarios** | Data, not code (ADR 0007), and **the list is now injectable**: `startHub({ scenarios })`, `startLanding({ scenarios })`, defaulting to what ships | A source that can be a folder, a server, or a generator. The seam exists; the sources do not |
+| **Model provider** | Nothing in the product uses a model. The generation spike speaks the OpenAI chat shape with **endpoint and key from the environment** (`PRAXIS_MODEL_URL`, `PRAXIS_MODEL_KEY`) | A generator interface: request in, **validated** spec out. The provider is the learner's or the host's choice |
+| **Identity** | None — nothing takes an account, and ADR 0015 makes that a decision rather than an omission | Optional, and off by default. The lab must keep working with no account at all |
 | **Deployment** | A static bundle (`P-35`) | Unchanged, and that is the point: the open build should stay a folder of files anyone can serve |
+
+**Audited `P-59`, 2026-09-30.** Three of these were already true and two were aspiration written as fact. The notebook backend and the mount did take their dependencies; **the scenario list was a static import**, so nobody could bring their own items without editing the source, and **the only model call in the repository hardcoded one vendor's URL**. Both are now seams, with tests for the first and the environment for the second.
+
+The gap that remains is honest and worth naming: a seam is not a source. Nothing yet loads scenarios from a folder or a server, and nothing loads a model at all. What changed is that doing so no longer means editing the application.
 
 ## What is not customisable
 

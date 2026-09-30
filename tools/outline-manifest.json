@@ -17,7 +17,7 @@
       "id": "cf6e50a0-ea0e-4c79-8ee8-3ff321ce9c2d",
       "url": "/doc/start-here-project-praxis-Gz6KPxM2QB",
       "title": "Start Here \u2014 Project Praxis",
-      "hash": "a7da7ddf2696933d"
+      "hash": "597baded6f9b030c"
     },
     "spec/01-problem-statement.md": {
       "id": "8fdbd553-a9a0-4c21-9430-6e435c6dc92e",
@@ -29,7 +29,7 @@
       "id": "80a66b80-2e08-4f47-9bb2-a20d2690fe40",
       "url": "/doc/phase-0-requirements-PBSyxXMsdz",
       "title": "Phase 1 Requirements",
-      "hash": "44b57e214d7d5508"
+      "hash": "d2c794612b64dd24"
     },
     "spec/03-pilot-design.md": {
       "id": "d07d1370-66b9-4895-bea5-631b904197a0",
@@ -53,7 +53,7 @@
       "id": "c92948cf-7677-43fb-a016-9c92505c751a",
       "url": "/doc/working-agreement-BACM7HFwcI",
       "title": "Working Agreement",
-      "hash": "54bf895012f31de4"
+      "hash": "c3f3bc060eb4a7c9"
     },
     "research/00-domain-map.md": {
       "id": "b71451bb-e16d-430a-a09d-303793e90bdd",
@@ -149,19 +149,19 @@
       "id": "6ad16ff6-6ac9-4ebe-acba-8e8273336d61",
       "url": "/doc/adr-0007-scenarios-are-generated-from-verified-primitives-U6u55gCXo2",
       "title": "ADR 0007 \u00b7 Scenarios Are Generated From Verified Primitives",
-      "hash": "5ce6b00c103bba3d"
+      "hash": "4334dfd7363a4a57"
     },
     "research/05-generation-spike.md": {
       "id": "9b398888-d58c-4b33-a13a-5d7af1cb9679",
       "url": "/doc/05-generation-spike-twenty-scenarios-through-the-checks-x75beVOPMR",
       "title": "05 \u00b7 Generation Spike \u2014 Twenty Scenarios Through the Checks",
-      "hash": "d96224c4babb142b"
+      "hash": "9808171c166a94f7"
     },
     "research/06-resources.md": {
       "id": "e4dfa100-57f8-4e47-acc5-18dd90056482",
       "url": "/doc/resources-index-kfJcZXwJWn",
       "title": "Resources Index",
-      "hash": "828559290c8399c1"
+      "hash": "f634fa26017af866"
     },
     "research/07-reading-list.md": {
       "id": "12c50507-7678-4e95-9728-7f82b6617a90",
@@ -173,7 +173,7 @@
       "id": "7ce18caf-bf29-42be-a929-1c1e031d7e5e",
       "url": "/doc/open-source-with-a-paid-hosted-version-3azsBcGC2Q",
       "title": "Open Source, With a Paid Hosted Version",
-      "hash": "086d02ab56c87ef8"
+      "hash": "8e5beed6c782f521"
     },
     "decisions/0008-licence-split.md": {
       "id": "9c0e29ae-3ffc-47a8-b509-a50d31b3dd14",
@@ -246,6 +246,12 @@
       "url": "/doc/0018-expertise-reversal-applies-to-the-cue-L6KaMIrv9E",
       "title": "0018 Expertise Reversal Applies To The Cue",
       "hash": "56afcd2f530dad5f"
+    },
+    "decisions/0019-claims-without-a-kill-criterion.md": {
+      "id": "04ffd18b-3529-4d93-a283-261eee4f1b36",
+      "url": "/doc/0019-claims-without-a-kill-criterion-6O1f7hGCe7",
+      "title": "0019 Claims Without A Kill Criterion",
+      "hash": "a7cab6b926a7f11c"
     }
   }
 }
