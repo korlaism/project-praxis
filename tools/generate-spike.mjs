@@ -33,7 +33,7 @@
  * What leaves this machine is the prompt below and nothing else. Every part of
  * it is already public in this repository.
  */
-import { writeFileSync } from "node:fs";
+import { writeFileSync, readFileSync } from "node:fs";
 import { PRIMITIVES } from "../lab/primitives/index.mjs";
 
 const TAGS = [
@@ -92,22 +92,73 @@ export function buildPrompt() {
   ].join("\n");
 }
 
+/**
+ * Pull the array of scenarios out of whatever the model returned.
+ *
+ * Deliberately forgiving about SHAPE and not at all about CONTENT: a model
+ * that wraps its answer in a markdown fence or an envelope object has not made
+ * a mistake worth failing the run over, and every actual claim it makes is
+ * about to be checked anyway. Nothing here repairs a scenario — that is P-51's
+ * job, and it is reported separately so the unaided number stays honest.
+ */
+const looksLikeScenario = (x) =>
+  x && typeof x === "object" && !Array.isArray(x) &&
+  ("primitive" in x || "question" in x || "correct" in x);
+
+export function extractScenarios(text) {
+  let body = text.trim();
+  const fence = body.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fence) body = fence[1].trim();
+  const start = body.search(/[[{]/);
+  if (start > 0) body = body.slice(start);
+  const parsed = JSON.parse(body);
+
+  // Find the array of SCENARIOS, not merely the first array in the reply.
+  // Asking for response_format json_object forces a top-level object, so the
+  // array is always nested — and "first array found" picked the `options` of
+  // scenario one, which looked like four successful scenarios and was nothing
+  // of the kind.
+  const found = [];
+  (function walk(node, depth) {
+    if (depth > 6 || !node || typeof node !== "object") return;
+    if (Array.isArray(node)) {
+      if (node.length && node.every(looksLikeScenario)) found.push(node);
+      for (const v of node) walk(v, depth + 1);
+      return;
+    }
+    for (const v of Object.values(node)) walk(v, depth + 1);
+  })(parsed, 0);
+
+  if (found.length) return found.sort((a, b) => b.length - a.length)[0];
+
+  // A dict of scenarios, keyed "0", "1", "2"… json_object mode cannot return a
+  // bare array, so a model asked for twenty often numbers them instead. There
+  // is no array anywhere in that reply and the walk above finds nothing.
+  const values = Object.values(parsed ?? {});
+  if (values.length > 1 && values.every(looksLikeScenario)) return values;
+
+  if (looksLikeScenario(parsed)) return [parsed];              // a single one, unwrapped
+  throw new Error(`no scenarios in the reply: ${body.slice(0, 300)}`);
+}
+
 async function generate(model, prompt) {
   const url = process.env.PRAXIS_MODEL_URL ?? "https://api.openai.com/v1/chat/completions";
   const key = process.env.PRAXIS_MODEL_KEY ?? process.env.OPENAI_API_KEY;
   if (!key) throw new Error("no model key — set PRAXIS_MODEL_KEY or OPENAI_API_KEY");
-  const res = await fetch(url, {
+  const call = (extra) => fetch(url, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model,
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" },
-    }),
+    body: JSON.stringify({ model, messages: [{ role: "user", content: prompt }], ...extra }),
   });
+
+  // Ask for JSON where the provider understands the request, and carry on
+  // where it does not: a local server's OpenAI-compatible endpoint often
+  // rejects response_format, and that is not a reason to abandon the run.
+  let res = await call({ response_format: { type: "json_object" } });
+  if (!res.ok && res.status === 400) res = await call({});
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} from ${url}: ${(await res.text()).slice(0, 400)}`);
   const body = await res.json();
-  return { text: body.choices[0].message.content, usage: body.usage };
+  return { text: body.choices?.[0]?.message?.content ?? "", usage: body.usage };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -118,9 +169,18 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(0);
   }
   const model = args[args.indexOf("--model") + 1] ?? "gpt-4o";
-  const { text, usage } = await generate(model, prompt);
-  const parsed = JSON.parse(text);
-  const specs = Array.isArray(parsed) ? parsed : (parsed.scenarios ?? parsed.items ?? Object.values(parsed)[0]);
+
+  // --from re-reads a reply already saved, so a parsing fix costs nothing to
+  // re-apply and the sample stays the one the model actually produced.
+  const from = args.includes("--from") ? args[args.indexOf("--from") + 1] : null;
+  const { text, usage } = from
+    ? { text: readFileSync(from, "utf8"), usage: null }
+    : await generate(model, prompt);
+  // Keep what the model actually said. The first run of this parsed the wrong
+  // array and there was nothing left to look at afterwards.
+  const rawPath = `lab/scenarios/candidates/batch-02-${model}.raw.json`;
+  if (!from) writeFileSync(rawPath, text);
+  const specs = extractScenarios(text);
   const out = `lab/scenarios/candidates/batch-02-${model}.mjs`;
   writeFileSync(out, "// SPDX-License-Identifier: MIT\n" +
     `// Generated by ${model} from the contract alone (P-50). Not edited.\n` +
