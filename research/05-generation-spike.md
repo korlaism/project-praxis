@@ -137,3 +137,49 @@ generator deserves, and every future spike should report both lines.
 project has access to `text-embedding-ada-002` only: every chat model returns 403. The harness
 is built and inspectable — `node tools/generate-spike.mjs --prompt` prints exactly what would
 be sent, and nothing else leaves the machine.
+
+
+## P-50 · A model that has not seen the primitives (2026-10-02)
+
+Run against **qwen2.5:7b**, locally through Ollama, given the contract and nothing else: the
+schema rules, each primitive's controls, and its declared outcomes. No source, and deliberately
+not the list of *reachable* outcomes, which for two primitives is the answer key.
+
+| | |
+|---|---|
+| Scenarios returned | 20 |
+| **Unaided pass rate** | **0/20 (0%)** |
+| Omitted `schema: 1` | 20/20 |
+| Invented option ids (`together_outcome` for `together`) | 20/20 |
+| Params outside a control's range | 3/20 |
+| Stated answer matching the simulation | 0/20 |
+
+**Forgiving the invented ids entirely** — which the real system must never do, because an option
+id that is not an outcome cannot be scored — 8/20 answers match:
+
+| | generous | in-house (`P-45`) |
+|---|---|---|
+| Where the answer cannot vary | 6/10 (60%) | 10/10 (100%) |
+| Where it must be derived | 2/10 (20%) | 3/10 (30%) |
+| `two-pucks` | **0/5** | 3/10 |
+
+### What this does and does not establish
+
+**A 7B local model cannot do this task.** Not marginally — it failed every item on format alone,
+and on the two primitives whose answer is the same at every setting it still only reached 60%
+after being forgiven. That is a floor, as intended, and it is a low one.
+
+**It says nothing about a frontier model.** The question ADR 0007 turns on is unchanged.
+
+**It is partly a measure of the prompt, and that is a flaw in this harness.** The contract is
+described in prose with no worked example. Every format failure — the missing `schema` field,
+the invented ids — is the kind a single example object would likely have prevented. Until that
+is tried, the 0/20 cannot be attributed cleanly to the model.
+
+**The repair loop would not rescue it.** `P-51` refuses to invent an option, and 20/20 candidates
+need exactly that. The one failure mode the loop handles well — a tag on the correct answer —
+did not appear at all, because the model emitted empty `errorTags` throughout.
+
+**The most interesting number is `two-pucks` at 0/5.** It is the primitive with the richest
+outcome space, where the answer genuinely depends on comparing a push against friction. Nothing
+about the contract tells a model how to do that arithmetic, and it did not.
