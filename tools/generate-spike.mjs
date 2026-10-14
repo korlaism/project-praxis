@@ -42,8 +42,10 @@ const TAGS = [
   "special-case-reasoning", "sign-or-direction", "boundary-ignored",
 ];
 
-export function buildPrompt() {
-  const primitives = Object.values(PRIMITIVES).map((p) => ({
+export function buildPrompt(count = 20, only = null) {
+  const primitives = Object.values(PRIMITIVES)
+    .filter((p) => !only || p.id === only)
+    .map((p) => ({
     primitive: p.id,
     controls: p.controls.map((c) => ({ key: c.key, min: c.min, max: c.max, step: c.step, unit: (c.unit ?? "").trim() })),
     outcomes: Object.fromEntries(p.outcomes.map((o) => [o, p.outcomeText[o]])),
@@ -58,7 +60,7 @@ export function buildPrompt() {
     "",
     "## The contract",
     "",
-    "Emit a JSON array of exactly 20 objects. Each object:",
+    `Emit a JSON array of exactly ${count} ${count === 1 ? "object" : "objects"}. Each object:`,
     "",
     '  schema      1',
     '  id          a short kebab-case id, unique across the twenty',
@@ -88,7 +90,47 @@ export function buildPrompt() {
     JSON.stringify(primitives, null, 2),
     "```",
     "",
-    "Spread the twenty across all four primitives. Return the JSON array and nothing else.",
+    "## One worked example, for shape only",
+    "",
+    "The primitive below is **invented** and is not available to you. It is here to show the",
+    "exact shape of an object — nothing about its physics transfers, and no answer in it is a",
+    "hint about any real primitive.",
+    "",
+    "```json",
+    JSON.stringify([{
+      schema: 1,
+      id: "a-kettle-on-a-hob",
+      subject: "physics",
+      primitive: "example-only-not-real",
+      params: { heat: 2.5, water: 0.8 },
+      question: "The hob is on full. What does the water do first?",
+      note: "One line of framing, optional.",
+      options: [
+        { id: "boils", label: "It boils" },
+        { id: "steams", label: "It steams without boiling" },
+        { id: "nothing", label: "Nothing happens" },
+      ],
+      correct: "boils",
+      errorTags: { steams: "boundary-ignored", nothing: "special-case-reasoning" },
+      explain: "Why the outcome happens, in a sentence or two.",
+    }], null, 2),
+    "```",
+    "",
+    `That array holds **one** object only to keep the example short. **Yours holds ${count}.**`,
+    "The example showed the shape of an item, not how many to write.",
+    "",
+    "Note what that example does, because items are rejected for getting these wrong:",
+    "",
+    "  - `schema` is present and is the number 1",
+    "  - every option id is an **outcome id of the primitive, spelled exactly** — not a variant",
+    "    of it. If an outcome is `together`, the option id is `together`, never `together_outcome`",
+    "  - `correct` is one of those option ids",
+    "  - `errorTags` names only WRONG options, and the correct one never appears there",
+    "  - `params` gives a value for every control, inside its range",
+    "",
+    only
+      ? `Write ${count === 1 ? "it" : `all ${count}`} for the primitive **${only}**. Return the JSON array and nothing else.`
+      : `Spread the ${count} across the four primitives. Return the JSON array and nothing else.`,
   ].join("\n");
 }
 
@@ -173,17 +215,72 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // --from re-reads a reply already saved, so a parsing fix costs nothing to
   // re-apply and the sample stays the one the model actually produced.
   const from = args.includes("--from") ? args[args.indexOf("--from") + 1] : null;
-  const { text, usage } = from
-    ? { text: readFileSync(from, "utf8"), usage: null }
-    : await generate(model, prompt);
+  const want = Number(args.includes("--count") ? args[args.indexOf("--count") + 1] : 20);
+  // A small model asked for twenty objects in one reply returns one, whatever
+  // the instruction says. Asking in batches is a harness detail, not a change
+  // to what is being measured: it still composes each item from the contract
+  // alone, and every item still faces the same checks.
+  const batch = Number(args.includes("--batch") ? args[args.indexOf("--batch") + 1] : 5);
+
+  // Naming one primitive per call. Left to itself this model returns a single
+  // scenario per reply and the same primitive every time — seven calls gave
+  // four items, all circular-release, so the half of the corpus where the
+  // answer must be derived went entirely unmeasured. Naming the primitive
+  // makes the task no easier: the contract, the controls and the outcome list
+  // are unchanged, and there is still no answer key.
+  const perPrimitive = Number(args.includes("--per-primitive")
+    ? args[args.indexOf("--per-primitive") + 1] : 0);
+
+  let specs = [];
+  let raw = "";
+  if (from) {
+    raw = readFileSync(from, "utf8");
+    specs = extractScenarios(raw);
+  } else if (perPrimitive) {
+    const seen = new Set();
+    for (const id of Object.keys(PRIMITIVES)) {
+      for (let i = 0; i < perPrimitive; i++) {
+        let got = [];
+        try {
+          const { text } = await generate(model, buildPrompt(1, id));
+          raw += (raw ? "\n---\n" : "") + text;
+          got = extractScenarios(text);
+        } catch (err) { console.error(`  ${id} ${i + 1}: ${err.message.slice(0, 80)}`); continue; }
+        for (const s of got) {
+          const key = `${s.primitive}:${s.id}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          specs.push(s);
+        }
+      }
+      console.error(`  ${id}: ${specs.filter((s) => s.primitive === id).length} unique`);
+    }
+  } else {
+    const seen = new Set();
+    for (let call = 1; specs.length < want && call <= Math.ceil(want / batch) + 2; call++) {
+      const ask = Math.min(batch, want - specs.length);
+      const { text } = await generate(model, buildPrompt(ask));
+      raw += (raw ? "\n---\n" : "") + text;
+      let got = [];
+      try { got = extractScenarios(text); }
+      catch (err) { console.error(`  call ${call}: ${err.message.slice(0, 90)}`); continue; }
+      for (const s of got) {
+        const id = String(s.id ?? `item-${specs.length}`);
+        if (seen.has(id)) continue;            // a repeat is not a new sample
+        seen.add(id);
+        specs.push(s);
+      }
+      console.error(`  call ${call}: asked ${ask}, got ${got.length}, total ${specs.length}`);
+    }
+  }
+  const usage = null;
   // Keep what the model actually said. The first run of this parsed the wrong
   // array and there was nothing left to look at afterwards.
-  const rawPath = `lab/scenarios/candidates/batch-02-${model}.raw.json`;
-  if (!from) writeFileSync(rawPath, text);
-  const specs = extractScenarios(text);
+
+  if (!from) writeFileSync(`lab/scenarios/candidates/batch-02-${model}.raw.json`, raw);
   const out = `lab/scenarios/candidates/batch-02-${model}.mjs`;
   writeFileSync(out, "// SPDX-License-Identifier: MIT\n" +
     `// Generated by ${model} from the contract alone (P-50). Not edited.\n` +
     `export default ${JSON.stringify(specs, null, 2)};\n`);
-  console.error(`${specs.length} scenarios -> ${out}  (${usage?.total_tokens ?? "?"} tokens)`);
+  console.error(`${specs.length} scenarios -> ${out}`);
 }

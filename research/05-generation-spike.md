@@ -183,3 +183,53 @@ did not appear at all, because the model emitted empty `errorTags` throughout.
 **The most interesting number is `two-pucks` at 0/5.** It is the primitive with the richest
 outcome space, where the answer genuinely depends on comparing a push against friction. Nothing
 about the contract tells a model how to do that arithmetic, and it did not.
+
+
+## P-50 · The run that measured something (2026-10-14)
+
+The first attempt scored 0/20 and measured the prompt as much as the model. Three harness
+corrections later — a worked example, one primitive named per call, and duplicate ids
+discarded — qwen2.5:7b produced **13 unique scenarios from 20 calls**.
+
+| | |
+|---|---|
+| **Unaided pass rate** | **5/13 (38%)** |
+| Format failures (schema, ids, params) | **none** |
+| Answer-check failures | 8/13 |
+
+| | qwen2.5:7b | in-house (`P-45`) |
+|---|---|---|
+| Where the answer cannot vary | **5/6 (83%)** | 10/10 (100%) |
+| **Where it must be derived** | **0/7 (0%)** | 3/10 (30%) |
+
+Per primitive: `circular-release` 2/2 · `contact-collision` 3/4 · `two-pucks` **0/4** · `free-fall` **0/3**.
+
+### The finding
+
+**A worked example removed every format failure.** No missing `schema`, no invented option ids,
+no out-of-range params — the three that accounted for the entire first run. Whatever else is
+true, the contract is teachable.
+
+**The model cannot derive an outcome. Zero for seven.** It is competent where the answer is a
+fixed property of the phenomenon — a cut string flies along the tangent, a collision is equal —
+and it fails every single time the answer depends on comparing a push against friction, or a
+mass against air resistance. That is the half of the corpus the whole architecture exists to
+generate, and on it this model scores nothing.
+
+### What the harness conceded, so the comparison is read correctly
+
+Three changes were made to get any measurement at all, and each makes the task **easier** than
+the one `P-45`'s in-house batch faced:
+
+1. **A worked example.** `P-45` had none.
+2. **One primitive named per call.** Left to itself the model wrote `circular-release` seven
+   times out of seven — the parameter-independent one — and the derived half went unmeasured.
+3. **One scenario per call.** It returns a single object however many are requested.
+
+So 38% is generous, and 0/7 is the honest figure under generous conditions.
+
+### What it does not settle
+
+Nothing about a frontier model. ADR 0007's bar is ~90% unaided and both measured generators are
+far below it, but a 7B model failing to compare two numbers is weak evidence about what a large
+one would do. That run still needs a key.

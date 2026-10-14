@@ -77,3 +77,18 @@ test("scenarios numbered as object keys are found", () => {
   ));
   assert.equal(extractScenarios(reply).length, 3);
 });
+
+test("the worked example teaches shape without leaking an answer", () => {
+  const p = buildPrompt();
+  assert.match(p, /One worked example/, "the example is missing");
+  assert.match(p, /"schema": 1/, "the example does not show the schema field");
+  assert.match(p, /together_outcome/, "the example does not warn about id variants");
+  // The example must use an INVENTED primitive: using a real one would hand
+  // over a correct answer for it, and two of the four always answer the same.
+  assert.match(p, /example-only-not-real/, "the example should name a primitive that does not exist");
+  for (const real of ["circular-release", "contact-collision", "two-pucks", "free-fall"]) {
+    const example = p.slice(p.indexOf("One worked example"));
+    assert.ok(!example.includes(`"primitive": "${real}"`),
+      `the example uses ${real}, which gives away an answer for it`);
+  }
+});

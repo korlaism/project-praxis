@@ -46,6 +46,14 @@
 > This makes the ADR's own criterion *more* demanding rather than less, and it stays `Proposed`
 > by a wider margin than anyone thought. The fresh-model run P-50 was written for is still
 > unrun — see the ticket for why.
+>
+> **`P-50`, 2026-10-14 — it has now been run, against a small local model.** qwen2.5:7b, given
+> the contract alone: **5/13 (38%) unaided**, and **0/7 where the answer must be derived**. A
+> worked example removed every format failure, so what is left is the reasoning, and the
+> reasoning is absent: it is right where the answer is a fixed property of the phenomenon and
+> wrong every time it has to compare a push against friction. Three harness concessions made
+> the task easier than `P-45`'s, so 38% is a generous reading. A frontier model remains
+> unmeasured and is what this ADR still turns on.
 
 ## Context
 
