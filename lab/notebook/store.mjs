@@ -53,6 +53,19 @@ export const CUE_RESPONSES = ["retried", "watched", "explained", "left"];
  */
 export const MIN_RECONCILIATION = 12;
 
+/**
+ * What a confusion entry is allowed to be about (R-013).
+ *
+ * Kept separate from KEPT, and checked separately in privacy.test.mjs: a
+ * second record type that reused the card's whitelist would be a second shape
+ * nobody had looked at. spec/04 calls this log "deliberately almost empty".
+ *
+ * The opposite rule to a reconciliation applies to `text` — it is optional on
+ * purpose, because a tap with no words is still the signal, and a field that
+ * costs more than two seconds will not be filled at all.
+ */
+const CONFUSION_KEPT = ["subject", "scenario", "card", "text"];
+
 /** An in-memory stand-in for localStorage, for tests and as a last resort. */
 export function memoryBackend() {
   const m = new Map();
@@ -88,7 +101,10 @@ function defaultId() {
 }
 
 const isNotebook = (d) => d && d.version === VERSION && d.subjects && typeof d.subjects === "object";
-const blank = () => ({ version: VERSION, subjects: {} });
+// A notebook written before the confusion log existed has no `confusions`
+// key. That is a notebook we understand, not a corrupt one — treating it as
+// unreadable would set a learner's whole record aside and start them fresh.
+const blank = () => ({ version: VERSION, subjects: {}, confusions: [] });
 
 /**
  * Open the notebook.
@@ -107,6 +123,7 @@ export function openNotebook({ backend, now = Date.now, newId = defaultId, event
   let persistent = !!store;
   let memory = blank();          // the whole notebook, when there is no storage at all
   let unsaved = [];              // cards this session could not write, kept visible and retried
+  let unsavedLog = [];           // the same, for confusion entries
 
   /** Keep unreadable bytes recoverable — once, however often they are read. */
   function setAside(raw) {
@@ -144,7 +161,15 @@ export function openNotebook({ backend, now = Date.now, newId = defaultId, event
       const list = (data.subjects[c.subject] ??= []);
       if (!list.some((x) => x.id === c.id)) list.push(c);
     }
+    data.confusions ??= [];
+    for (const e of unsavedLog)
+      if (!data.confusions.some((x) => x.id === e.id)) data.confusions.push(e);
     return data;
+  }
+
+  /** The entry with this id, wherever it is. */
+  function findConfusion(data, id) {
+    return data.confusions.find((e) => e.id === id) ?? null;
   }
 
   function save(data) {
@@ -152,6 +177,7 @@ export function openNotebook({ backend, now = Date.now, newId = defaultId, event
     try {
       store.setItem(STORAGE_KEY, JSON.stringify(data));
       unsaved = [];
+      unsavedLog = [];
       return { persisted: true };
     } catch (e) {
       const full = e && (e.name === "QuotaExceededError" || /quota|full/i.test(String(e.message)));
@@ -253,6 +279,71 @@ export function openNotebook({ backend, now = Date.now, newId = defaultId, event
       return { ok: true, card, ...save(data) };
     },
 
+    /* ---- the confusion log (R-013) ------------------------------------
+     *
+     * One tap. Nothing is required after it, nothing is validated, and the
+     * item in view is optional — spec/04 says "card or item in view when
+     * logged, IF ANY". The only expensive thing here would be a rule, and a
+     * rule is what makes a two-second field cost more than two seconds.
+     */
+    logConfusion(about = {}) {
+      const entry = { id: newId(), loggedAt: now(), resolvedAt: null };
+      for (const k of CONFUSION_KEPT) {
+        const v = about[k];
+        if (typeof v === "string" ? v.trim() : v) entry[k] = typeof v === "string" ? v.trim() : v;
+      }
+
+      const data = current();
+      data.confusions.push(entry);
+      const result = save(data);
+      if (!result.persisted && store) unsavedLog.push(entry);
+      return { ok: true, entry, ...result };
+    },
+
+    /**
+     * Say more, having already tapped. Written once, like everything else the
+     * learner writes — but unlike a reconciliation there is no floor, because
+     * here the words were never the point.
+     */
+    addConfusionWords(id, text) {
+      const words = typeof text === "string" ? text.trim() : "";
+      if (!words) return { ok: false, errors: ["there are no words there"] };
+
+      const data = current();
+      const entry = findConfusion(data, id);
+      if (!entry) return { ok: false, errors: ["no confusion with that id"] };
+      if (entry.text !== undefined) return { ok: false, errors: ["that one already has words"] };
+
+      entry.text = words;
+      return { ok: true, entry, ...save(data) };
+    },
+
+    /**
+     * Closed by the learner, and only ever by the learner (R-004). spec/04 is
+     * explicit that a teacher deciding it is resolved does not make it so, and
+     * neither does the learner having since seen the answer.
+     */
+    resolveConfusion(id) {
+      const data = current();
+      const entry = findConfusion(data, id);
+      if (!entry) return { ok: false, errors: ["no confusion with that id"] };
+      if (entry.resolvedAt !== null) return { ok: false, errors: ["that one is already settled"] };
+
+      entry.resolvedAt = now();
+      return { ok: true, entry, ...save(data) };
+    },
+
+    confusions(subject) {
+      const all = current().confusions;
+      return (subject ? all.filter((e) => e.subject === subject) : all).slice();
+    },
+
+    /** The open confusion about this item, if the learner already has one. */
+    openConfusion(scenario) {
+      return current().confusions.find((e) => e.scenario === scenario && e.resolvedAt === null)
+        ?? null;
+    },
+
     cards(subject) {
       return (current().subjects[subject] ?? []).slice();
     },
@@ -264,14 +355,21 @@ export function openNotebook({ backend, now = Date.now, newId = defaultId, event
 
     /** Everything, so the learner can take it with them. */
     export() {
-      return { version: VERSION, exportedAt: now(), subjects: current().subjects };
+      const data = current();
+      return { version: VERSION, exportedAt: now(), subjects: data.subjects,
+               confusions: data.confusions };
     },
 
     /** The learner's call, one subject at a time. */
     forget(subject) {
       const data = current();
       delete data.subjects[subject];
+      // The log goes with them. A learner who destroys a subject and finds
+      // their own words about it still sitting in another list has not been
+      // given what the button said.
+      data.confusions = data.confusions.filter((e) => e.subject !== subject);
       unsaved = unsaved.filter((c) => c.subject !== subject);
+      unsavedLog = unsavedLog.filter((e) => e.subject !== subject);
       save(data);
     },
 

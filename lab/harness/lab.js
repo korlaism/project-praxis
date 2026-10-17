@@ -232,6 +232,78 @@ export function mountLab(topic) {
     show();
     wrap.append(input, out);
   }
+  /* ---- "I'm stuck" (R-013) ---------------------------------------------
+   *
+   * In the foot, so it is on screen at every step — before the commit, while
+   * it runs, and after the reveal. Confusion does not wait for a convenient
+   * moment, and the moment before committing is the likeliest one of all.
+   *
+   * One tap logs it. Everything after that is optional: spec/04 calls this
+   * log "deliberately almost empty", and a field that costs more than two
+   * seconds will not be filled.
+   */
+  let confusionEl = null, stuckBtn = null, wordsBox = null, addBtn = null, sortedBtn = null;
+  let wordsSaid = false;
+  const confusion = topic.confusion;
+  if (confusion) {
+    confusionEl = el("div", "lab-confusion", foot);
+    stuckBtn = button(confusionEl, "I'm stuck", () => {
+      if (!run(() => confusion.log())) return;
+      wordsSaid = false;
+      renderConfusion();
+    });
+    wordsBox = document.createElement("input");
+    wordsBox.type = "text";
+    wordsBox.id = "lab-confusion-words";
+    wordsBox.className = "lab-confusion-words";
+    // A placeholder here, and deliberately none on the reconciliation box. The
+    // difference is what it invites: this one NAMES the field and proposes no
+    // content, where a sentence stem in the reconciliation would be our
+    // grammar shaping their reasoning (R-015, ADR 0002). It is also never a
+    // value — it vanishes on the first keystroke and is never submitted.
+    wordsBox.setAttribute("placeholder", "what's confusing? (optional)");
+    wordsBox.setAttribute("aria-label", "What is confusing? (optional)");
+    confusionEl.appendChild(wordsBox);
+    addBtn = button(confusionEl, "Add", () => {
+      if (!wordsBox.value.trim()) return;
+      if (!run(() => confusion.words(wordsBox.value))) return;
+      wordsSaid = true;
+      renderConfusion();
+    });
+    sortedBtn = button(confusionEl, "Sorted it", () => {
+      if (!run(() => confusion.resolve())) return;
+      wordsBox.value = "";
+      wordsSaid = false;
+      renderConfusion();
+    });
+  }
+
+  /** Call the notebook without letting it take the page down. */
+  function run(fn) {
+    try {
+      return fn() ?? true;
+    } catch (err) {
+      console.error("the notebook refused a confusion:", err);
+      return false;
+    }
+  }
+
+  /**
+   * Show the one control that applies. Nothing here touches the gate, the
+   * loop or the verdict — being stuck is not an event in the simulation.
+   */
+  function renderConfusion() {
+    if (!confusionEl) return;
+    const open = !!confusion.isOpen?.();
+    stuckBtn.hidden = open;
+    sortedBtn.hidden = !open;
+    // The words are offered once the tap exists to attach them to, and the
+    // offer goes away once they have been said. It is never a prerequisite.
+    const canSay = open && !wordsSaid && typeof confusion.words === "function";
+    wordsBox.hidden = !canSay;
+    addBtn.hidden = !canSay;
+  }
+
   const clock = el("div", "lab-clock", foot);
 
   // ---- loop -------------------------------------------------------------
@@ -377,6 +449,9 @@ export function mountLab(topic) {
 
   /** Everything that is the same whether we drew it or embedded it. */
   function renderChrome() {
+    // Not renderConfusion(): being stuck is not an event in the simulation, so
+    // nothing the loop does can change it. Every handler that CAN renders for
+    // itself, and a per-frame redraw here was untested and untestable weight.
     gateEl.hidden = gate.canRun;
     againBtn.disabled = !gate.canRun;
     if (showBtn) showBtn.disabled = !gate.canRun || gate.state === "revealed";
@@ -490,6 +565,7 @@ export function mountLab(topic) {
   }
 
   softReset();
+  renderConfusion();
   document.addEventListener("visibilitychange", onVisibility);
   addEventListener("resize", resize);
   resize();

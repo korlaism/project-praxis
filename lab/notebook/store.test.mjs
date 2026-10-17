@@ -488,3 +488,141 @@ test("a reconciliation that cannot be written says so rather than claiming succe
   assert.equal(r.persisted, false);
   assert.ok(r.warning);
 });
+
+/* ── R-013: one-tap confusion logging ───────────────────────────────────────
+ *
+ * The opposite rule to R-012's floor, and deliberately so. spec/04 calls the
+ * log "deliberately almost empty" and says a tap with no words is still the
+ * signal. A field that costs more than two seconds will not be filled.
+ */
+
+test("a tap with no words is a complete entry", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const r = nb.logConfusion({ subject: "physics", scenario: "truck-and-fly" });
+  assert.equal(r.ok, true, r.errors?.join(", "));
+  const [e] = nb.confusions();
+  assert.equal(e.scenario, "truck-and-fly");
+  assert.equal(e.text, undefined, "words are optional — their absence is not a failure");
+  assert.equal(typeof e.loggedAt, "number", "R-014: timestamped");
+  assert.equal(e.resolvedAt, null, "a new confusion is open");
+});
+
+test("a confusion can carry words if the learner has any", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  nb.logConfusion({ subject: "physics", scenario: "truck-and-fly", text: "why are they equal?" });
+  assert.equal(nb.confusions()[0].text, "why are they equal?");
+});
+
+test("words can be added after the tap, which is the point of the tap", () => {
+  // One tap, then the learner decides whether to say more. Requiring the words
+  // first is what makes a log cost more than two seconds.
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { entry } = nb.logConfusion({ subject: "physics", scenario: "truck-and-fly" });
+  assert.equal(nb.addConfusionWords(entry.id, "  the fly bit  ").ok, true);
+  assert.equal(nb.confusions()[0].text, "the fly bit");
+});
+
+test("empty words are not an entry's words", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { entry } = nb.logConfusion({ subject: "physics", scenario: "truck-and-fly" });
+  assert.equal(nb.addConfusionWords(entry.id, "   ").ok, false);
+  assert.equal(nb.confusions()[0].text, undefined);
+});
+
+test("words are written once, like every other thing the learner writes", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { entry } = nb.logConfusion({ subject: "physics", scenario: "truck-and-fly" });
+  nb.addConfusionWords(entry.id, "the fly bit");
+  assert.equal(nb.addConfusionWords(entry.id, "actually nothing").ok, false);
+  assert.equal(nb.confusions()[0].text, "the fly bit");
+});
+
+test("a confusion is resolved when the learner says so", () => {
+  // R-004, and spec/04 is explicit: set when the learner says so, not when a
+  // teacher decides. Nothing else in the codebase may set it.
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { entry } = nb.logConfusion({ subject: "physics", scenario: "truck-and-fly" });
+  assert.equal(nb.resolveConfusion(entry.id).ok, true);
+  const [e] = nb.confusions();
+  assert.equal(typeof e.resolvedAt, "number");
+  assert.ok(e.resolvedAt > e.loggedAt);
+});
+
+test("a confusion cannot be resolved twice, or resolved from nowhere", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { entry } = nb.logConfusion({ subject: "physics", scenario: "truck-and-fly" });
+  nb.resolveConfusion(entry.id);
+  assert.equal(nb.resolveConfusion(entry.id).ok, false);
+  assert.equal(nb.resolveConfusion("no-such-entry").ok, false);
+});
+
+test("open confusions can be found for the item in view", () => {
+  // What the lab needs on mount: is this learner already stuck on this one?
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const a = nb.logConfusion({ subject: "physics", scenario: "truck-and-fly" }).entry;
+  nb.logConfusion({ subject: "physics", scenario: "what-keeps-it-moving" });
+  assert.equal(nb.openConfusion("truck-and-fly")?.id, a.id);
+  nb.resolveConfusion(a.id);
+  assert.equal(nb.openConfusion("truck-and-fly"), null, "a resolved one is not open");
+});
+
+test("a confusion logged with nothing in view is still a confusion", () => {
+  // spec/04: context is "Card or item in view when logged, IF ANY".
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  assert.equal(nb.logConfusion().ok, true);
+  assert.equal(nb.confusions().length, 1);
+});
+
+test("confusion entries outlive the tab", () => {
+  const backend = memoryBackend();
+  openNotebook({ backend, now, newId }).logConfusion({ subject: "physics", scenario: "s" });
+  assert.equal(openNotebook({ backend, now, newId }).confusions().length, 1);
+});
+
+test("a notebook written before the log existed still opens", () => {
+  // Older notebooks have no confusions key. Treating that as unreadable would
+  // set a learner's whole record aside and start them fresh.
+  const backend = memoryBackend();
+  const nb = openNotebook({ backend, now, newId });
+  nb.record(card());
+  const raw = JSON.parse(backend.getItem(STORAGE_KEY));
+  delete raw.confusions;
+  backend.setItem(STORAGE_KEY, JSON.stringify(raw));
+  const reopened = openNotebook({ backend, now, newId });
+  assert.equal(reopened.cards("physics").length, 1, "the cards must survive");
+  assert.deepEqual(reopened.confusions(), []);
+  assert.equal(reopened.logConfusion({ subject: "physics", scenario: "s" }).ok, true);
+});
+
+test("confusions can be read for one subject at a time", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  nb.logConfusion({ subject: "physics", scenario: "a" });
+  nb.logConfusion({ subject: "maths", scenario: "b" });
+  assert.deepEqual(nb.confusions("maths").map((e) => e.scenario), ["b"]);
+});
+
+test("forgetting a subject forgets what confused them in it", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  nb.logConfusion({ subject: "physics", scenario: "a", text: "the whole thing" });
+  nb.logConfusion({ subject: "maths", scenario: "b" });
+  nb.forget("physics");
+  assert.equal(JSON.stringify(nb.export()).includes("the whole thing"), false,
+    "forget left the learner's words behind in the confusion log");
+  assert.deepEqual(nb.confusions().map((e) => e.subject), ["maths"]);
+});
+
+test("the export carries the confusion log", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  nb.logConfusion({ subject: "physics", scenario: "a" });
+  assert.equal(nb.export().confusions.length, 1, "R-014: the dataset is the deliverable");
+});
+
+test("a confusion that cannot be written says so rather than claiming success", () => {
+  const backend = memoryBackend();
+  const nb = openNotebook({ backend, now, newId });
+  backend.setItem = () => { const e = new Error("full"); e.name = "QuotaExceededError"; throw e; };
+  const r = nb.logConfusion({ subject: "physics", scenario: "a" });
+  assert.equal(r.persisted, false);
+  assert.ok(r.warning);
+  assert.equal(nb.confusions().length, 1, "and it stays visible until the tab closes");
+});

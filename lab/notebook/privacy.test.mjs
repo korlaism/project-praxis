@@ -85,6 +85,26 @@ test("a notebook card carries nothing that identifies a person", () => {
     `new card fields must be justified against P-44 before they ship: ${unexpected.join(", ")}`);
 });
 
+test("a confusion entry carries nothing that identifies a person either", () => {
+  // The card whitelist above guards one shape. A second record type reusing
+  // that test would have been a second shape nobody looked at — which is
+  // precisely how a whitelist fails open. R-013 added this log; this is its
+  // own gate, and anything new in it is justified here, in front of someone.
+  const src = readFileSync(new URL("./store.mjs", import.meta.url), "utf8");
+  const kept = src.match(/const CONFUSION_KEPT = \[([\s\S]*?)\];/)[1];
+  const fields = [...kept.matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+
+  // "text" is a child's own words about what is confusing them, and it is
+  // optional on purpose — spec/04 says a tap with no words is still the
+  // signal. Everything else points at what was on screen, not at who was
+  // looking. No learner id: there is no account, and the whole log lives on
+  // the one device, where forget() takes it with the subject.
+  const ABOUT_THE_CONFUSION = new Set(["subject", "scenario", "card", "text"]);
+  const unexpected = fields.filter((f) => !ABOUT_THE_CONFUSION.has(f));
+  assert.deepEqual(unexpected, [],
+    `new confusion fields must be justified against P-44 before they ship: ${unexpected.join(", ")}`);
+});
+
 test("a learner's own words never reach the URL", async () => {
   // The classic accident: prose in a query string or a fragment, where it
   // lands in history, in a shared link and in every screen recording. The lab

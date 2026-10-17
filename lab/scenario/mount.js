@@ -87,7 +87,39 @@ function mountWrapped(spec, notebook) {
  */
 function filer(spec, notebook, outcomeSource) {
   let cardId = null;
+  // R-013. Opened at mount from what the notebook already holds: come back to
+  // the thing that stumped you last week and the lab should know it did.
+  let openId = spec.id ? notebook.openConfusion(spec.id)?.id ?? null : null;
   return {
+    /**
+     * One tap, at any point, blocking nothing (R-013). The card in view goes
+     * on the entry when there is one — spec/04 wants whatever was in front of
+     * the learner, and after a reveal that is the card, not just the item.
+     */
+    confusion: {
+      isOpen: () => openId !== null,
+      log() {
+        const r = notebook.logConfusion({
+          subject: spec.subject, scenario: spec.id, card: cardId,
+        });
+        if (r.warning) console.warn(r.warning);
+        openId = r.entry.id;
+        return r;
+      },
+      words(text) {
+        if (!openId) return { ok: false, errors: ["nothing is open to say that about"] };
+        const r = notebook.addConfusionWords(openId, text);
+        if (r.warning) console.warn(r.warning);
+        return r;
+      },
+      resolve() {
+        if (!openId) return { ok: false, errors: ["nothing is open to settle"] };
+        const r = notebook.resolveConfusion(openId);
+        if (r.ok) openId = null;
+        if (r.warning) console.warn(r.warning);
+        return r;
+      },
+    },
     onReveal(record) {
       if (!spec.id || !spec.subject) return;          // a draft scenario has nowhere to file
       const r = notebook.record({

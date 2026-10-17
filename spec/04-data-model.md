@@ -44,11 +44,13 @@ Deliberately almost empty. A field that costs more than two seconds will not be 
 | Field | Type | Notes |
 |-------|------|-------|
 | `entry_id` | id | |
-| `learner_id` | id | |
+| `learner_id` | id | Phase 1 only. The built log has none — there is no account, and it never leaves the device |
 | `logged_at` | timestamp | |
-| `context` | id | Card or item in view when logged, if any |
+| ~~`context`~~ `scenario`, `card` | id, both optional | Split when it was built (`P-93`): the item in view always, and the card too once a reveal has produced one. Strictly more than `context` carried, and both are optional — a tap with nothing in view is still an entry |
 | `text` | text, optional | **Optional on purpose.** A tap with no words is still the signal. |
 | `resolved_at` | timestamp, nullable | Set when the learner says so — not when a teacher decides — `R-004` |
+
+The log is built and lives beside the cards in the same browser-local notebook. `forget(subject)` takes its entries with the subject's cards, and `export()` carries it — `R-014`.
 
 The optionality matters. The value of this object is not its content; it is that confusion becomes a legitimate, countable, addressable thing instead of a private feeling. Requiring an articulation defeats it, because the learners who most need it are exactly the ones who cannot yet say what they do not understand.
 
