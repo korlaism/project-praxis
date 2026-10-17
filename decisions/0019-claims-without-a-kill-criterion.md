@@ -44,4 +44,4 @@ Tidier, and it loses the thing worth keeping: these are claims, they are falsifi
 ## Revisit when
 
 * `R-002` survives Phase 1. `R-003`'s mechanism becomes testable and it should take a real criterion rather than keep its mark.
-* `R-013` is built. `R-004` becomes measurable in the same run and should do the same.
+* ~~`R-013` is built. `R-004` becomes measurable in the same run and should do the same.~~ **Fired, and answered differently — [ADR 0021](0021-logged-confusion-is-measured-not-killable.md).** `R-013` was built in `P-93` and `R-004` moved from `Deferred` to `Exploratory`, but it took **no criterion**: logging is voluntary, so the comparison is self-selected, and the unlogged half leaves no trace to count. This ADR's own standard — *a criterion that cannot fire honestly is worse than none* — is the reason.

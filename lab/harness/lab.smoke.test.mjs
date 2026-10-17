@@ -408,6 +408,138 @@ test("the second attempt explains rather than cueing again", async () => {
   dom.restore();
 });
 
+/* ── One-tap confusion logging (R-013, P-93) ─────────────────────────────
+ *
+ * Available at every step, never blocking, and cheap enough to use. spec/04:
+ * "A field that costs more than two seconds will not be filled." The testable
+ * form of that is one tap and nothing required afterwards.
+ */
+
+/** Mount with somewhere for confusion to go, and watch what reaches it. */
+async function withConfusion(over = {}) {
+  const log = [];
+  let open = over.openAtMount ?? false;
+  const confusion = {
+    isOpen: () => open,
+    log: () => { open = true; log.push({ what: "logged" }); return { ok: true }; },
+    words: (text) => { log.push({ what: "words", text }); return { ok: true }; },
+    resolve: () => { open = false; log.push({ what: "resolved" }); return { ok: true }; },
+    ...(over.confusion ?? {}),
+  };
+  const m = await mount({ confusion, ...over });
+  // Hidden is not offered. These return the control only when a learner could
+  // actually see it, which is what "available at every step" is about.
+  const shown = (label) => { const b = m.button(label); return b && !b.hidden ? b : null; };
+  return { ...m, log, shown, stuck: () => shown("I'm stuck"), sorted: () => shown("Sorted it") };
+}
+
+test("the control is there before a commit, during the run, and after the reveal", async () => {
+  // "Available at every step" is the requirement. Confusion does not wait for
+  // a convenient moment, and the step before committing is the likeliest one.
+  const { lab, dom, stuck, shown } = await withConfusion();
+  assert.ok(stuck(), "missing before the commit — the likeliest moment of all");
+  assert.equal(stuck().disabled, false, "present but disabled is not available");
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  dom.tick(3);
+  assert.ok(stuck() && !stuck().disabled, "missing while it runs");
+  lab.reveal("yes");
+  assert.ok(shown("I'm stuck") && !shown("I'm stuck").disabled, "missing after the reveal");
+  dom.restore();
+});
+
+test("one tap is the whole interaction", async () => {
+  const { dom, stuck, log } = await withConfusion();
+  stuck().onclick();
+  assert.deepEqual(log, [{ what: "logged" }], "a tap must be enough on its own");
+  dom.restore();
+});
+
+test("logging blocks nothing and reveals nothing", async () => {
+  // A control that pauses the simulation is one nobody taps twice — and one
+  // that disclosed anything would be a hole straight through R-010.
+  const { lab, dom, stuck } = await withConfusion();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  dom.tick(3);
+  const before = lab.record;
+  stuck().onclick();
+  assert.equal(lab.record.observed, before.observed, "something was revealed by asking for help");
+  assert.ok(dom.pendingFrames() > 0, "the simulation stopped when the learner said they were stuck");
+  dom.tick(3);
+  assert.equal(lab.record.observed, null, "still nothing revealed");
+  dom.restore();
+});
+
+test("words are offered after the tap, never demanded before it", async () => {
+  const { dom, stuck, log, shown } = await withConfusion();
+  const box = dom.body.find((n) => n.id === "lab-confusion-words");
+  assert.equal(box.hidden, true, "nothing to fill in before the tap");
+  stuck().onclick();
+  assert.equal(box.hidden, false, "no way to say more after the tap");
+  box.value = "why are they the same?";
+  shown("Add").onclick();
+  assert.deepEqual(log, [{ what: "logged" }, { what: "words", text: "why are they the same?" }]);
+  dom.restore();
+});
+
+test("the words box says what it is for, and proposes nothing", async () => {
+  // Not a naked box — nobody fills in a rectangle. But not a sentence stem
+  // either: naming the field is a question, a stem is half an answer, and the
+  // second one is our grammar inside the learner's own words (R-015).
+  const { dom, stuck } = await withConfusion();
+  stuck().onclick();
+  const box = dom.body.find((n) => n.id === "lab-confusion-words");
+  const hint = box.getAttribute("placeholder");
+  assert.ok(hint, "an unlabelled box is a box nobody fills in");
+  assert.ok(hint.includes("?"), `the hint must ask, not start the answer: "${hint}"`);
+  assert.equal(box.value ?? "", "", "and it is never a value");
+  dom.restore();
+});
+
+test("the learner is the only one who says it is sorted", async () => {
+  const { lab, dom, stuck, sorted, log } = await withConfusion();
+  stuck().onclick();
+  assert.ok(sorted(), "no way to close a confusion the learner has settled");
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  assert.deepEqual(log, [{ what: "logged" }], "seeing the answer is not the learner saying so");
+  sorted().onclick();
+  assert.deepEqual(log.at(-1), { what: "resolved" });
+  dom.restore();
+});
+
+test("a confusion already open when the scenario loads is picked up, not duplicated", async () => {
+  // Come back to the thing that stumped you and the lab should know.
+  const { dom, stuck, sorted } = await withConfusion({ openAtMount: true });
+  assert.ok(!stuck(), "it would log a second entry for the same open confusion");
+  assert.ok(sorted(), "and no way to close the one already there");
+  dom.restore();
+});
+
+test("once it is sorted, the learner can get stuck again", async () => {
+  const { dom, stuck, sorted, log } = await withConfusion();
+  stuck().onclick();
+  sorted().onclick();
+  assert.ok(stuck(), "a resolved confusion must not be the end of the matter");
+  stuck().onclick();
+  assert.deepEqual(log.map((e) => e.what), ["logged", "resolved", "logged"]);
+  dom.restore();
+});
+
+test("a scenario with nowhere to log confusion does not offer to", async () => {
+  const { dom, el, button } = await mount();                 // no confusion hooks
+  assert.ok(!el("lab-confusion"), "a draft scenario has no notebook behind the button");
+  assert.ok(!button("I'm stuck"));
+  dom.restore();
+});
+
+test("a notebook that throws on a confusion does not take the page down", async () => {
+  const { dom, stuck } = await withConfusion({
+    confusion: { log: () => { throw new Error("storage is on fire"); } },
+  });
+  assert.doesNotThrow(() => stuck().onclick());
+  dom.restore();
+});
+
 /* ── The learner writes the gap in their own words (R-012, P-92) ─────────
  *
  * ADR 0014 fixes where it goes: after the cue and the retry, with the

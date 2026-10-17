@@ -228,3 +228,62 @@ test("a retry's note goes on the retry, not on the first attempt", async () => {
   assert.equal(cards[1].retryOf, 0, "and the second card still points at the first");
   dom.restore();
 });
+
+/* ── R-013: one tap, at any point, into the same notebook (P-93) ────────── */
+
+test("getting stuck before committing logs the item, and reveals nothing", async () => {
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const notebook = openNotebook({ backend: memoryBackend() });
+
+  const lab = mountScenario(truckFly, { notebook });
+  dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "I'm stuck").onclick();
+
+  const [e] = notebook.confusions();
+  assert.equal(e.scenario, "truck-and-fly");
+  assert.equal(e.subject, "physics");
+  assert.equal(e.card, undefined, "nothing has been revealed, so there is no card to point at");
+  assert.equal(e.resolvedAt, null);
+  assert.equal(lab.record.observed, null, "asking for help must never disclose the outcome");
+  dom.restore();
+});
+
+test("getting stuck after a reveal points at the card that was in view", async () => {
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const notebook = openNotebook({ backend: memoryBackend() });
+
+  mountScenario(truckFly, { notebook });
+  dom.body.find((n) => n.id === "opt-truck").onclick();
+  dom.tick(2000);
+  dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "I'm stuck").onclick();
+  dom.body.find((n) => n.id === "lab-confusion-words").value = "why are they equal?";
+  dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "Add").onclick();
+
+  const [e] = notebook.confusions();
+  assert.equal(e.card, notebook.cards("physics")[0].id, "the entry does not know what was on screen");
+  assert.equal(e.text, "why are they equal?");
+  dom.restore();
+});
+
+test("a confusion left open is waiting when the learner comes back", async () => {
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const backend = memoryBackend();
+
+  const first = mountScenario(truckFly, { notebook: openNotebook({ backend }) });
+  dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "I'm stuck").onclick();
+  first.destroy();
+
+  mountScenario(truckFly, { notebook: openNotebook({ backend }) });
+  const stuck = dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "I'm stuck");
+  const sorted = dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "Sorted it");
+  assert.equal(stuck.hidden, true, "it would log a second entry for the same open confusion");
+  assert.equal(sorted.hidden, false, "no way to close the one already there");
+
+  sorted.onclick();
+  const entries = openNotebook({ backend }).confusions();
+  assert.equal(entries.length, 1, "coming back must not duplicate the entry");
+  assert.ok(entries[0].resolvedAt, "and settling it must stick");
+  dom.restore();
+});

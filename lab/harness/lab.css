@@ -104,6 +104,20 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
 .lab-param input{accent-color:var(--accent);width:120px}
 .lab-param output{font-family:var(--mono);font-size:.78rem;color:var(--ink);
   min-width:3.6em;font-variant-numeric:tabular-nums}
+/* R-013: one tap, at every step. Quiet on purpose — a loud "I'm stuck"
+   button is a button nobody presses in front of anyone. */
+.lab-confusion{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.lab-confusion button{font-family:var(--font);font-size:.82rem;padding:7px 12px;
+  background:transparent;color:var(--ink-2);border:1px dashed var(--line);
+  border-radius:2px;cursor:pointer}
+.lab-confusion button:hover{color:var(--ink);border-color:var(--accent)}
+.lab-confusion button[hidden]{display:none!important}
+.lab-confusion-words{font-family:var(--font);font-size:.82rem;padding:6px 10px;
+  color:var(--ink);background:var(--bg);border:1px solid var(--line);
+  border-radius:2px;width:min(220px,40vw)}
+.lab-confusion-words:focus{outline:none;border-color:var(--accent)}
+.lab-confusion-words[hidden]{display:none!important}
+
 .lab-clock{font-family:var(--mono);font-size:.78rem;color:var(--ink-3);
   font-variant-numeric:tabular-nums}
 
