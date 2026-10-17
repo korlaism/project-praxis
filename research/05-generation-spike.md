@@ -234,6 +234,20 @@ Nothing about a frontier model. ADR 0007's bar is ~90% unaided and both measured
 far below it, but a 7B model failing to compare two numbers is weak evidence about what a large
 one would do. That run still needs a key.
 
+### The frontier run was attempted on 2026-10-17 and could not start
+
+`P-90` is blocked, not forgotten. The only model credential on this machine is an
+`OPENAI_API_KEY` whose project has access to `text-embedding-ada-002` and nothing else —
+`gpt-4o-mini` and `gpt-4.1-mini` both answer `403 … does not have access to model`. No chat
+completion is possible with it, so no measurement was taken and **nothing in this file changes**.
+
+What the attempt did produce is `P-94`. The ticket for `P-90` says *"the harness is ready and the
+provider is a seam"*, and the seam was fine while the loop around it was not: the default batch
+path called the provider with no `try`/`catch`, so a single `429` or `500` part-way through ended
+the process, and the transcript was only written after the loop — losing every reply already paid
+for. Against a local ollama that cost a retry; against a paid endpoint it costs money, twice. It
+is fixed, and the run is now one command whenever a key with chat access appears.
+
 ### The measurement base, after `P-91`
 
 Both primitives the spike scored 0/7 on are mechanics, which leaves the finding ambiguous: is a
