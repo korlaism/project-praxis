@@ -12,6 +12,8 @@ const CONCEPT_ORDER = [
   ["action-and-reaction",  "Action and reaction"],
   ["circular-motion",      "Circular motion"],
   ["friction-and-inertia", "Friction and inertia"],
+  ["straight-lines",       "Straight lines"],
+  ["quadratics",           "Quadratics"],
 ];
 const TITLE = new Map(CONCEPT_ORDER);
 const RANK = new Map(CONCEPT_ORDER.map(([id], i) => [id, i]));

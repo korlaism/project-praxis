@@ -233,3 +233,22 @@ So 38% is generous, and 0/7 is the honest figure under generous conditions.
 Nothing about a frontier model. ADR 0007's bar is ~90% unaided and both measured generators are
 far below it, but a 7B model failing to compare two numbers is weak evidence about what a large
 one would do. That run still needs a key.
+
+### The measurement base, after `P-91`
+
+Both primitives the spike scored 0/7 on are mechanics, which leaves the finding ambiguous: is a
+generator bad at deriving an answer, or bad at pucks? `P-91` adds two maths primitives — `line-pair`
+and `quadratic-roots` — chosen so that **every outcome is reachable and the controls decide the
+answer**. Three outcomes each, no setting that makes the question vacuous:
+
+| Primitive | Outcomes | Decided by |
+|---|---|---|
+| `line-pair` | one-point / parallel / same-line | whether `m1 = m2`, then whether `c1 = c2` |
+| `quadratic-roots` | two / one / none | the sign of `b² − 4ac` |
+
+Six primitives now, four of them on the derived side. The next run of the spike therefore measures
+the hard half in two subjects rather than one, and a per-subject split will say whether 0/7 was
+about mechanics or about derivation.
+
+This changes nothing about what has been measured. No generator has been run against the maths
+primitives; the figures above stand exactly as they are until `P-90` or a repeat of `P-50` is run.

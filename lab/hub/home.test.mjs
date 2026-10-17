@@ -7,11 +7,18 @@ import { openNotebook, memoryBackend } from "../notebook/store.mjs";
 
 const nb = () => openNotebook({ backend: memoryBackend() });
 
+/** By name, never by position: maths sorts before physics (P-91). */
+const subject = (m, name = "physics") => {
+  const s = m.subjects.find((x) => x.subject === name);
+  assert.ok(s, `no ${name} subject in [${m.subjects.map((x) => x.subject)}]`);
+  return s;
+};
+
 test("scenarios are grouped by subject, every one of them listed", () => {
   const m = homeModel(nb(), SCENARIOS);
   const listed = m.subjects.flatMap((s) => s.scenarios.map((x) => x.id)).sort();
   assert.deepEqual(listed, Object.keys(SCENARIOS).sort());
-  assert.deepEqual(m.subjects.map((s) => s.subject), ["physics"]);
+  assert.deepEqual(m.subjects.map((s) => s.subject).sort(), ["maths", "physics"]);
 });
 
 test("each scenario shows how many times it has been answered, from the shared notebook", () => {
@@ -19,14 +26,14 @@ test("each scenario shows how many times it has been answered, from the shared n
   n.record({ subject: "physics", scenario: "truck-and-fly", choice: "truck" });
   n.record({ subject: "physics", scenario: "truck-and-fly", choice: "equal" });
   const m = homeModel(n, SCENARIOS);
-  const truck = m.subjects[0].scenarios.find((s) => s.id === "truck-and-fly");
+  const truck = subject(m).scenarios.find((s) => s.id === "truck-and-fly");
   assert.equal(truck.answered, 2);
   assert.equal(m.totalCards, 2);
 });
 
 test("links point inside the page, so everything stays on one origin", () => {
   const m = homeModel(nb(), SCENARIOS);
-  for (const s of m.subjects[0].scenarios) assert.match(s.path, /^\/s\//);
+  for (const s of subject(m).scenarios) assert.match(s.path, /^\/s\//);
   assert.equal(m.recordPath, "/record");
 });
 
@@ -49,7 +56,7 @@ test("every scenario in the registry is reachable from the front page", () => {
 
 test("concepts come in the order the pilot teaches them, not alphabetically", () => {
   const m = homeModel(nb(), SCENARIOS);
-  const order = m.subjects[0].concepts.map((c) => c.concept);
+  const order = subject(m).concepts.map((c) => c.concept);
   assert.deepEqual(order, [
     "motion-without-force", "falling", "action-and-reaction",
     "circular-motion", "friction-and-inertia",
@@ -58,7 +65,7 @@ test("concepts come in the order the pilot teaches them, not alphabetically", ()
 
 test("each concept carries a title a learner would read", () => {
   const m = homeModel(nb(), SCENARIOS);
-  for (const c of m.subjects[0].concepts) {
+  for (const c of subject(m).concepts) {
     assert.ok(c.title && !c.title.includes("-"), `${c.concept} has no readable title`);
     assert.ok(c.scenarios.length > 0, `${c.concept} is listed but empty`);
   }
@@ -73,7 +80,7 @@ test("progress is counted per concept, not just per item", () => {
   const n = nb();
   n.record({ subject: "physics", scenario: "two-balls-no-air", choice: "together" });
   const m = homeModel(n, SCENARIOS);
-  const falling = m.subjects[0].concepts.find((c) => c.concept === "falling");
+  const falling = subject(m).concepts.find((c) => c.concept === "falling");
   assert.equal(falling.answered, 1);
   assert.equal(falling.total, falling.scenarios.length);
 });

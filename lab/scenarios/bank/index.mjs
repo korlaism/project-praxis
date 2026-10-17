@@ -18,6 +18,10 @@ import week2 from "./week-2-falling.mjs";
 import week3 from "./week-3-action-reaction.mjs";
 import week4 from "./week-4-circular.mjs";
 import week5 from "./week-5-friction.mjs";
+import mathsLines from "./maths-lines.mjs";
+import mathsQuadratics from "./maths-quadratics.mjs";
 
 export const BY_WEEK = { 1: week1, 2: week2, 3: week3, 4: week4, 5: week5 };
-export default [...week1, ...week2, ...week3, ...week4, ...week5];
+/** Maths (P-91) is not part of the weekly pilot structure; it is a second subject. */
+export const BY_SUBJECT = { maths: [...mathsLines, ...mathsQuadratics] };
+export default [...week1, ...week2, ...week3, ...week4, ...week5, ...mathsLines, ...mathsQuadratics];

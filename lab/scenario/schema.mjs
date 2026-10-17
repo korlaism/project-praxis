@@ -125,7 +125,11 @@ export function validateScenario(spec) {
   // author's estimate until a cohort produces real numbers — it is recorded so
   // it can be checked against them later, not because we know it.
   const CONCEPTS = ["motion-without-force", "falling", "action-and-reaction",
-                    "circular-motion", "friction-and-inertia"];
+                    "circular-motion", "friction-and-inertia",
+                    // Maths (P-91). The subject is second because its answers
+                    // are computed rather than simulated, so the answer check
+                    // is exact and cheap — see spec/08.
+                    "straight-lines", "quadratics"];
   const DIFFICULTY = ["easy", "medium", "hard"];
   if (spec.concept !== undefined && !CONCEPTS.includes(spec.concept))
     bad(`concept "${spec.concept}" is not one of ${CONCEPTS.join(", ")}`);
