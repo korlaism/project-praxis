@@ -408,6 +408,123 @@ test("the second attempt explains rather than cueing again", async () => {
   dom.restore();
 });
 
+/* ── What the learner did with the cue (P-89, ADR 0018) ──────────────────
+ *
+ * Expertise reversal predicts a learner who already holds the schema gains
+ * nothing from a cue and pays to reconcile it. The only way that ever becomes
+ * visible in our own numbers is to know who took the cue and who reached past
+ * it. The lab reports it; the notebook keeps it.
+ */
+
+/** Mount with a cue and collect every cue response the lab reports. */
+async function withCueResponses(over = {}) {
+  const said = [];
+  const m = await mount(withCue({ onCueResponse: (r) => said.push(r), ...over }));
+  return { ...m, said };
+}
+
+test("the card filed at the reveal says a cue was shown", async () => {
+  const filed = [];
+  const { lab, dom } = await mount(withCue({ onReveal: (rec) => filed.push(rec) }));
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  assert.equal(filed[0].cue, "shown",
+    "the card is written before the learner can act — it must at least say the cue was offered");
+  dom.restore();
+});
+
+test("a card from an uncued reveal says no cue, not an empty one", async () => {
+  const filed = [];
+  const { lab, dom } = await mount(withCue({ onReveal: (rec) => filed.push(rec) }));
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  assert.equal(filed[0].cue, null, "right first time — there was nothing to take or skip");
+  dom.restore();
+});
+
+test("predicting again after a cue is reported as taking it", async () => {
+  const { lab, dom, button, said } = await withCueResponses();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  button("Predict again").onclick();
+  assert.deepEqual(said, ["retried"]);
+  dom.restore();
+});
+
+test("asking for the explanation instead is reported as reaching past the cue", async () => {
+  const { lab, dom, button, said } = await withCueResponses();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  button("Show why").onclick();
+  assert.deepEqual(said, ["explained"]);
+  dom.restore();
+});
+
+test("moving on without taking either path is reported as leaving", async () => {
+  const { lab, dom, button, said } = await withCueResponses();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  button("Ask again").onclick();
+  assert.deepEqual(said, ["left"]);
+  dom.restore();
+});
+
+test("leaving the scenario entirely with the cue unanswered is reported as leaving", async () => {
+  // The hub destroys one scenario to mount the next. Without this the most
+  // common response of all — walking away from the hint — would read as a
+  // closed tab, and ADR 0018's question would be answered from the minority
+  // who pressed something.
+  const { lab, dom, said } = await withCueResponses();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  lab.destroy();
+  assert.deepEqual(said, ["left"]);
+  dom.restore();
+});
+
+test("changing the setup while a cue stands counts as leaving it", async () => {
+  const { lab, dom, said } = await withCueResponses();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  const slider = dom.body.find((n) => n.id === "param-k");
+  slider.value = "7";
+  slider.oninput();
+  assert.deepEqual(said, ["left"], "a changed setup is a different question — the cue went unused");
+  dom.restore();
+});
+
+test("a cue response is reported once, whatever the learner presses afterwards", async () => {
+  const { lab, dom, button, said } = await withCueResponses();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  button("Show why").onclick();
+  button("Ask again").onclick();
+  lab.destroy();
+  assert.deepEqual(said, ["explained"], "the learner acted once; the record says so once");
+  dom.restore();
+});
+
+test("nothing is reported when no cue was ever shown", async () => {
+  const { lab, dom, button, said } = await withCueResponses();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  button("Ask again").onclick();
+  lab.destroy();
+  assert.deepEqual(said, [], "a learner who was right has no cue to leave");
+  dom.restore();
+});
+
+test("a notebook that throws on the cue response does not take the page down", async () => {
+  const { lab, dom, button } = await mount(withCue({
+    onCueResponse: () => { throw new Error("storage is on fire"); },
+  }));
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  assert.doesNotThrow(() => button("Predict again").onclick());
+  assert.equal(lab.record.choice, null, "the retry still happened");
+  dom.restore();
+});
+
 /* ── A hidden tab, and a way to drive the run without waiting (P-69) ──────
  *
  * dt is clamped to 1/30s per frame, so a tab throttled to ~0.5fps advances the

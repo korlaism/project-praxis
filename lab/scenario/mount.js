@@ -28,6 +28,8 @@ export function mountScenario(spec, { notebook = openNotebook() } = {}) {
   const primitive = getPrimitive(spec.primitive);
   const params = resolveParams(primitive, spec.params);
 
+  const filing = filer(spec, notebook, "observed");
+
   let lab;
   lab = mountLab({
     question: spec.question,
@@ -52,8 +54,9 @@ export function mountScenario(spec, { notebook = openNotebook() } = {}) {
     // ADR 0014. Keyed by the misconception the learner acted on, not by the
     // option they clicked: the same wrong belief recurs across scenarios.
     cue: (record) => spec.cues?.[errorTagFor(spec, record)] ?? null,
-    // Every reveal becomes a card in the scenario's subject notebook (ADR 0006).
-    onReveal: (record) => file(spec, record, notebook, "observed"),
+    // Every reveal becomes a card in the scenario's subject notebook (ADR 0006),
+    // and the card is finished off when the learner acts on the cue (P-89).
+    ...filing,
   });
   return lab;
 }
@@ -69,24 +72,39 @@ function mountWrapped(spec, notebook) {
     cue: (record) => spec.cues?.[errorTagFor(spec, record)] ?? null,
     // No observation is possible, so reveal() carries nothing and the gate
     // falls back to the authored answer — the seam P-52 already left open.
-    onReveal: (record) => file(spec, record, notebook, "asserted"),
+    ...filer(spec, notebook, "asserted"),
   });
 }
 
 /**
- * Put a reveal in the learner's notebook, saying how its outcome was
- * established: watched by us, or asserted by whoever wrote the scenario.
+ * The two notebook hooks a mounted scenario needs, sharing one card.
+ *
+ * A reveal files the card, saying how its outcome was established: watched by
+ * us, or asserted by whoever wrote the scenario. What the learner then does
+ * with the cue lands on that same card (P-89) — it cannot be filed with it,
+ * because at the reveal the learner has not had the chance to do anything yet.
  */
-function file(spec, record, notebook, outcomeSource) {
-  if (!spec.id || !spec.subject) return;              // a draft scenario has nowhere to file
-  const r = notebook.record({
-    ...record,
-    scenario: spec.id,
-    subject: spec.subject,
-    errorTag: errorTagFor(spec, record),
-    outcomeSource,
-  });
-  if (r.warning) console.warn(r.warning);
+function filer(spec, notebook, outcomeSource) {
+  let cardId = null;
+  return {
+    onReveal(record) {
+      if (!spec.id || !spec.subject) return;          // a draft scenario has nowhere to file
+      const r = notebook.record({
+        ...record,
+        scenario: spec.id,
+        subject: spec.subject,
+        errorTag: errorTagFor(spec, record),
+        outcomeSource,
+      });
+      cardId = r.card?.id ?? null;
+      if (r.warning) console.warn(r.warning);
+    },
+    onCueResponse(response) {
+      if (!cardId) return;
+      const r = notebook.amendCue(cardId, response);
+      if (r.warning) console.warn(r.warning);
+    },
+  };
 }
 
 /**

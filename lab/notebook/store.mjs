@@ -19,9 +19,28 @@ const REQUIRED = ["subject", "scenario", "choice"];
 // attempt/retryOf carry ADR 0014's retries: a second try is its own card that
 // points at the first, never an edit of it (R-014). Without them a retry would
 // file as an indistinguishable second card and the link would be lost.
+// cue carries ADR 0018's deferred question (P-89): null when none was shown,
+// "shown" until the learner acts, then what they did. It is the only field a
+// card can gain after filing, because the card is written at the reveal and
+// the learner has not acted yet.
 const KEPT = ["subject", "scenario", "choice", "confidence", "observed", "correct",
               "unlisted", "errorTag", "outcomeSource", "params", "committedAt", "revealedAt",
-              "attempt", "retryOf"];
+              "attempt", "retryOf", "cue"];
+
+/**
+ * What a learner can do with a cue, in the two surfaces that show one.
+ *
+ *   retried    predicted again — the lab
+ *   watched    ran it again without a new prediction — the landing, which has
+ *              no retry to offer, so this is what taking the cue looks like there
+ *   explained  reached past the cue and asked for the answer
+ *   left       did neither and moved on
+ *
+ * A card still reading "shown" is one where we never found out — the tab
+ * closed on the verdict. That is not the same as "left" and is not recorded
+ * as it.
+ */
+export const CUE_RESPONSES = ["retried", "watched", "explained", "left"];
 
 /** An in-memory stand-in for localStorage, for tests and as a last resort. */
 export function memoryBackend() {
@@ -154,6 +173,37 @@ export function openNotebook({ backend, now = Date.now, newId = defaultId, event
       const result = save(data);
       if (!result.persisted && store) unsaved.push(card);
       return { ok: true, card, ...result };
+    },
+
+    /**
+     * Resolve what the learner did with a cue (P-89, ADR 0018).
+     *
+     * Narrow on purpose. It reaches one field, on a card that is waiting for
+     * it, once. Everything else about a card stays append-only — a prediction
+     * that could be edited after the outcome is known is exactly the failure
+     * R-010 exists to prevent, and this must not become the hole in it.
+     *
+     * A device that will not take the write loses the response and says so.
+     * That is a lost answer to a secondary question, not a lost prediction.
+     */
+    amendCue(id, response) {
+      if (!CUE_RESPONSES.includes(response))
+        return { ok: false, errors: [`"${response}" is not a cue response`] };
+
+      const data = current();
+      let card = null;
+      for (const list of Object.values(data.subjects)) {
+        card = list.find((c) => c.id === id);
+        if (card) break;
+      }
+      if (!card) return { ok: false, errors: ["no card with that id"] };
+      if (card.cue !== "shown")
+        return { ok: false, errors: [card.cue
+          ? `that cue was already answered with "${card.cue}"`
+          : "no cue was shown on that card"] };
+
+      card.cue = response;
+      return { ok: true, card, ...save(data) };
     },
 
     cards(subject) {

@@ -84,6 +84,25 @@ export function mountLanding(spec, { root = document.body, notebook } = {}) {
   // there is anything to play. It is the same run the answer check measured.
   const run = recordRun(primitive, params);
   let frame = 0, timer = null, explained = false;
+  // P-89 / ADR 0018. "shown" while a cue stands unanswered, then what the
+  // learner did about it. cueCard is the card it belongs to.
+  let cueState = null, cueCard = null;
+
+  /**
+   * Say what was done with the cue, once. This surface offers no retry —
+   * there is nothing to predict again on a recording — so taking the cue here
+   * means watching it again, and it is recorded as that rather than borrowing
+   * the lab's word for a different act.
+   */
+  function answerCue(response) {
+    if (cueState !== "shown" || !cueCard) return;
+    cueState = response;
+    try {
+      notebook?.amendCue(cueCard, response);
+    } catch (err) {
+      console.error("could not file the cue response:", err);
+    }
+  }
 
   function size() {
     const w = stage.clientWidth || 340;
@@ -146,10 +165,12 @@ export function mountLanding(spec, { root = document.body, notebook } = {}) {
     paint();
     render();
     try {
-      notebook?.record({
+      const r = notebook?.record({
         subject: spec.subject, scenario: spec.id, ...gate.record,
         errorTag: errorTagFor(spec, gate.record), outcomeSource: "observed", params,
+        cue: cueState,
       });
+      cueCard = r?.card?.id ?? null;
     } catch (err) {
       console.error("could not file the prediction:", err);
     }
@@ -172,14 +193,17 @@ export function mountLanding(spec, { root = document.body, notebook } = {}) {
       : null;
 
     if (cue) {
+      // Recorded the first time it is on screen, so the card filed at the
+      // reveal can say the cue was offered even if nothing is done with it.
+      if (cueState === null) cueState = "shown";
       el("span", null, verdict, ` ${cue}`);
       const acts = el("div", "pl-acts", verdict);
       const again = el("button", "pl-again", acts, "Watch it again");
       again.type = "button";
-      again.onclick = () => { frame = 0; paint(); play(); };
+      again.onclick = () => { answerCue("watched"); frame = 0; paint(); play(); };
       const why = el("button", null, acts, "Show why");
       why.type = "button";
-      why.onclick = () => { explained = true; render(); };
+      why.onclick = () => { answerCue("explained"); explained = true; render(); };
     } else {
       el("span", null, verdict, ` ${spec.explain ?? ""}`);
       const acts = el("div", "pl-acts", verdict);
@@ -195,6 +219,8 @@ export function mountLanding(spec, { root = document.body, notebook } = {}) {
   document.addEventListener("visibilitychange", onVisibility);
   return {
     destroy() {
+      // Leaving with the cue untouched is a response, and the commonest one.
+      answerCue("left");
       stop();
       removeEventListener("resize", size);
       document.removeEventListener("visibilitychange", onVisibility);

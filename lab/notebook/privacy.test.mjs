@@ -54,10 +54,15 @@ test("a notebook card carries nothing that identifies a person", () => {
 
   // Not a blocklist of bad names — a whitelist of what a card is allowed to be
   // about. Anything new has to be justified here, in front of someone.
+  // "cue" (P-89) was added on purpose, against this comment. It records which
+  // of two buttons the learner pressed after a wrong answer — one of four
+  // fixed words, no free text, no new identifier, no timing the card does not
+  // already carry. It is about what the learner did with this prediction's
+  // reveal, which is what a card is for; ADR 0018 is why it exists.
   const ABOUT_THE_PREDICTION = new Set([
     "subject", "scenario", "choice", "confidence", "observed", "correct",
     "unlisted", "errorTag", "outcomeSource", "params", "committedAt",
-    "revealedAt", "attempt", "retryOf",
+    "revealedAt", "attempt", "retryOf", "cue",
   ]);
   const unexpected = fields.filter((f) => !ABOUT_THE_PREDICTION.has(f));
   assert.deepEqual(unexpected, [],

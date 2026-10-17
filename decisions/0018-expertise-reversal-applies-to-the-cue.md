@@ -31,6 +31,14 @@ The conflict did not move. ADR 0014 was written three days ago; the conflict was
 
 **3 · What Phase 1 owes it is the datum.** The question becomes answerable only if we can later ask *who used the cue*. Today the record cannot say: it holds the attempt and the retry, but not whether a cue was shown, nor whether the learner retried after it or asked for the explanation instead. `P-89` adds that. It is one field and it is the difference between a question we can answer from the pilot dataset and one we cannot.
 
+> **Annotated when `P-89` landed.** One field, as described, but the vocabulary is `null` / `shown` / `retried` / `watched` / `explained` / `left` rather than the three responses sketched here. The two additions are the point.
+>
+> `shown` is distinct from `left`. The card is written at the reveal, before the learner has had the chance to do anything; a card still reading `shown` is one where the tab closed on the verdict. Folding that into `left` would read a silence as a decision, and silence is likely to be the largest group.
+>
+> `watched` is distinct from `retried`. The landing offers no retry — there is nothing to predict again on a recording — so taking the cue there means watching it again. Recording that as `retried` would put two different acts in one column, on the surface most of the audience will meet first.
+>
+> The analysis `P-89` exists to enable is *took the cue* (`retried`, `watched`) against *reached past it* (`explained`). Both groupings survive; neither is assumed in the stored data.
+
 **4 · The mitigation already in place is named, so it is not lost.** The cue is **not compulsory**. ADR 0014 offers "predict again" and "show why" side by side, and a learner who does not need the hint can take the explanation in one tap. That optionality is what keeps this from being a live harm today, and it is now a constraint rather than a convenience: **the cue must never become the only path forward.**
 
 ## What would change the answer

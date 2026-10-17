@@ -112,3 +112,78 @@ test("a hidden tab stops the recording instead of crawling", async () => {
   assert.equal(dom.docListenerCount("visibilitychange"), 0, "destroy must stop listening");
   dom.restore();
 });
+
+/* ── What the learner did with the cue (P-89, ADR 0018) ──────────────────
+ *
+ * The landing offers no retry — there is nothing to predict again on a
+ * recording — so the act of taking the cue here is watching it again. That is
+ * a different act from predicting again and is recorded as a different one;
+ * calling it a retry would quietly put phone data and lab data in the same
+ * column while meaning two different things.
+ */
+
+test("a cued card on the phone says the cue was shown", async () => {
+  const { dom, view, opt, notebook } = await land("same-balls-with-air");
+  opt("together").onclick();
+  view.advance();
+  assert.equal(notebook.cards("physics")[0].cue, "shown");
+  dom.restore();
+});
+
+test("an uncued card on the phone says no cue", async () => {
+  const { dom, view, opt, notebook } = await land("same-balls-with-air");
+  opt("heavier").onclick();                        // right first time
+  view.advance();
+  assert.equal(notebook.cards("physics")[0].cue, null);
+  dom.restore();
+});
+
+test("watching it again after a cue is recorded as taking the cue", async () => {
+  const { dom, view, opt, notebook, button } = await land("same-balls-with-air");
+  opt("together").onclick();
+  view.advance();
+  button("Watch it again").onclick();
+  assert.equal(notebook.cards("physics")[0].cue, "watched");
+  dom.restore();
+});
+
+test("asking why instead is recorded as reaching past the cue", async () => {
+  const { dom, view, opt, notebook, button } = await land("same-balls-with-air");
+  opt("together").onclick();
+  view.advance();
+  button("Show why").onclick();
+  assert.equal(notebook.cards("physics")[0].cue, "explained");
+  dom.restore();
+});
+
+test("leaving the page with the cue unanswered is recorded as leaving", async () => {
+  const { dom, view, opt, notebook } = await land("same-balls-with-air");
+  opt("together").onclick();
+  view.advance();
+  view.destroy();
+  assert.equal(notebook.cards("physics")[0].cue, "left");
+  dom.restore();
+});
+
+test("the cue response is recorded once, whatever is pressed after", async () => {
+  const { dom, view, opt, notebook, button } = await land("same-balls-with-air");
+  opt("together").onclick();
+  view.advance();
+  button("Watch it again").onclick();
+  button("Show why")?.onclick();
+  view.destroy();
+  assert.equal(notebook.cards("physics")[0].cue, "watched");
+  dom.restore();
+});
+
+test("the landing files cue responses even with no notebook to file them in", async () => {
+  // mountLanding takes an optional notebook; a page without one must not throw
+  // on the way out.
+  const dom = installDom();
+  const { mountLanding } = await import("./app.js?" + Math.random());
+  const view = mountLanding(SCENARIOS["same-balls-with-air"], { notebook: null });
+  dom.body.find((n) => n.id === "pl-opt-together").onclick();
+  view.advance();
+  assert.doesNotThrow(() => view.destroy());
+  dom.restore();
+});

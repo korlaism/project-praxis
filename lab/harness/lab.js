@@ -93,6 +93,25 @@ export function mountLab(topic) {
   const verdict = el("div", "lab-verdict", root);
   // Set when the learner asks for the explanation instead of trying again.
   let explained = false;
+  // P-89 / ADR 0018. "shown" from the moment a cue is on screen until the
+  // learner does something about it; then what they did, so it is reported
+  // once. Null when no cue is standing.
+  let cueState = null;
+
+  /**
+   * Say what the learner did with the cue — once, and never for a cue that
+   * was not shown. The notebook's problem if it fails, not the learner's: the
+   * retry or the explanation they asked for happens either way.
+   */
+  function answerCue(response) {
+    if (cueState !== "shown") return;
+    cueState = response;
+    try {
+      topic.onCueResponse?.(response);
+    } catch (err) {
+      console.error("onCueResponse failed:", err);
+    }
+  }
   verdict.hidden = true;
 
   // ---- foot -------------------------------------------------------------
@@ -106,7 +125,8 @@ export function mountLab(topic) {
     stepBtn = button(transport, "Step", () => { tick(1 / 60); render(); });
     resetBtn = button(transport, "Reset", () => { softReset(); render(); });
   }
-  const againBtn = button(transport, "Ask again", () => { gate.reset(); softReset(); render(); });
+  const againBtn = button(transport, "Ask again",
+    () => { answerCue("left"); gate.reset(); softReset(); render(); });
 
   // Topic-supplied actions — "Cut the string", "Release", "Collide". The
   // moment a learner chooses to act is often the interesting one, so it
@@ -136,7 +156,7 @@ export function mountLab(topic) {
       // A prediction is a claim about a specific setup. Change the setup after
       // committing and it is a different question, so the old answer cannot
       // stand — otherwise the verdict scores a question nobody asked (P-52).
-      if (gate.state !== "awaiting") { gate.reset(); committedParams = null; }
+      if (gate.state !== "awaiting") { answerCue("left"); gate.reset(); committedParams = null; }
       softReset();
       render();
     };
@@ -165,6 +185,7 @@ export function mountLab(topic) {
 
   function softReset() {
     explained = false;
+    cueState = null;
     // State first. pause() renders, and rendering without state throws out of
     // mountLab, which kills resize() and leaves the canvas black forever.
     t = 0;
@@ -314,17 +335,21 @@ export function mountLab(topic) {
 
       const s = document.createElement("span");
       if (cue) {
+        // Recorded the first time it is on screen, so the card filed at the
+        // reveal can say the cue was offered even if nothing is done with it.
+        if (cueState === null) cueState = "shown";
         s.textContent = " " + cue;
         verdict.append(b, s);
         const acts = el("div", "lab-verdict-acts", verdict);
         // Neither is compulsory. Forcing a second attempt on someone just told
         // they are wrong is the shortest path to K-06.
         button(acts, "Predict again", () => {
+          answerCue("retried");
           gate.retry();
           softReset();
           render();
         }, "primary");
-        button(acts, "Show why", () => { explained = true; render(); });
+        button(acts, "Show why", () => { answerCue("explained"); explained = true; render(); });
       } else {
         const why = typeof topic.explain === "function" ? topic.explain(rec) : topic.explain;
         s.textContent = " " + (why ?? "");
@@ -359,6 +384,10 @@ export function mountLab(topic) {
    */
   function destroy() {
     if (destroyed) return;
+    // The hub destroys one scenario to mount the next. Walking away from a cue
+    // is a response, and the commonest one — unrecorded, ADR 0018's question
+    // would be answered from only the learners who pressed something.
+    answerCue("left");
     running = false;
     if (raf) cancelAnimationFrame(raf), (raf = null);
     destroyed = true;
@@ -371,7 +400,7 @@ export function mountLab(topic) {
 
   const api = { reveal, play, pause, advance, destroy, get choice() { return gate.choice; },
                 get attempts() { return gate.attempts; },
-                get record() { return { ...gate.record, params: committedParams }; } };
+                get record() { return { ...gate.record, params: committedParams, cue: cueState }; } };
 
   function onKey(e) {
     if (e.key === " ") { e.preventDefault(); gate.canRun && (running ? pause() : play()); }
