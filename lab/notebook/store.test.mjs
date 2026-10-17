@@ -259,3 +259,108 @@ test("a card says whether its outcome was observed or merely asserted", () => {
   nb.record(card({ outcomeSource: "asserted" }));
   assert.equal(nb.cards("physics")[0].outcomeSource, "asserted");
 });
+
+/* ── P-89: what the learner did with the cue ────────────────────────────────
+ *
+ * ADR 0018 defers the expertise-reversal question to a later phase and says
+ * what Phase 1 owes it: the datum. The card is written the moment the outcome
+ * is revealed, which is BEFORE the learner has had any chance to act on the
+ * cue, so this one field is resolved afterwards. Everything else about a card
+ * stays append-only — a prediction that could be edited after the fact is the
+ * failure R-010 exists to prevent.
+ */
+
+test("a card says a cue was shown, and later what was done with it", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card({ cue: "shown" }));
+  assert.equal(nb.cards("physics")[0].cue, "shown");
+
+  const r = nb.amendCue(filed.id, "retried");
+  assert.equal(r.ok, true, r.errors?.join(", "));
+  assert.equal(nb.cards("physics")[0].cue, "retried");
+  assert.equal(nb.export().subjects.physics[0].cue, "retried",
+    "the export is how this reaches the ADR 0018 question — it must carry the response");
+});
+
+test("a cue response outlives the tab", () => {
+  const backend = memoryBackend();
+  const { card: filed } = openNotebook({ backend, now, newId }).record(card({ cue: "shown" }));
+  openNotebook({ backend, now, newId }).amendCue(filed.id, "explained");
+  assert.equal(openNotebook({ backend, now, newId }).cards("physics")[0].cue, "explained");
+});
+
+test("every cue response the surfaces can report is accepted", () => {
+  // retried — predicted again (the lab). watched — replayed it without a new
+  // prediction (the landing, which offers no retry). explained — reached past
+  // the cue for the answer. left — did neither and moved on.
+  for (const response of ["retried", "watched", "explained", "left"]) {
+    const nb = openNotebook({ backend: memoryBackend(), now, newId });
+    const { card: filed } = nb.record(card({ cue: "shown" }));
+    assert.equal(nb.amendCue(filed.id, response).ok, true, `${response} was refused`);
+    assert.equal(nb.cards("physics")[0].cue, response);
+  }
+});
+
+test("a cue response that is not one of those is refused", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card({ cue: "shown" }));
+  for (const bad of ["shown", "skipped", "", null, "RETRIED"]) {
+    const r = nb.amendCue(filed.id, bad);
+    assert.equal(r.ok, false, `"${bad}" should not be a cue response`);
+  }
+  assert.equal(nb.cards("physics")[0].cue, "shown", "a refused response must change nothing");
+});
+
+test("a response cannot be recorded against a card that was never cued", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card());          // right first time: no cue
+  assert.equal(nb.amendCue(filed.id, "retried").ok, false);
+  assert.equal(nb.cards("physics")[0].cue, undefined);
+});
+
+test("a cue response cannot be overwritten once it is given", () => {
+  // The learner acts once. A second report is a bug in the surface, and the
+  // honest thing is to keep the first answer rather than the loudest.
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card({ cue: "shown" }));
+  assert.equal(nb.amendCue(filed.id, "retried").ok, true);
+  assert.equal(nb.amendCue(filed.id, "explained").ok, false);
+  assert.equal(nb.cards("physics")[0].cue, "retried");
+});
+
+test("amending a cue cannot touch the prediction", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card({ cue: "shown" }));
+  const before = { ...nb.cards("physics")[0] };
+  nb.amendCue(filed.id, "explained");
+  const after = nb.cards("physics")[0];
+  for (const k of Object.keys(before)) {
+    if (k === "cue") continue;
+    assert.deepEqual(after[k], before[k], `amendCue changed ${k}`);
+  }
+});
+
+test("a response against an unknown card is refused, not invented", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  nb.record(card({ cue: "shown" }));
+  assert.equal(nb.amendCue("no-such-card", "retried").ok, false);
+  assert.equal(nb.cards("physics").length, 1, "nothing may be created by amending");
+});
+
+test("a cue response finds its card whichever subject it is in", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  nb.record(card({ subject: "physics" }));
+  const { card: filed } = nb.record(card({ subject: "maths", scenario: "two-lines", cue: "shown" }));
+  assert.equal(nb.amendCue(filed.id, "watched").ok, true);
+  assert.equal(nb.cards("maths")[0].cue, "watched");
+});
+
+test("a cue response that cannot be written says so rather than claiming success", () => {
+  const backend = memoryBackend();
+  const nb = openNotebook({ backend, now, newId });
+  const { card: filed } = nb.record(card({ cue: "shown" }));
+  backend.setItem = () => { const e = new Error("full"); e.name = "QuotaExceededError"; throw e; };
+  const r = nb.amendCue(filed.id, "retried");
+  assert.equal(r.persisted, false);
+  assert.ok(r.warning, "a response the device would not keep must be reported");
+});

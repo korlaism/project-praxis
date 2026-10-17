@@ -19,6 +19,7 @@ The atomic unit. One card is one pass through the loop.
 | `outcome_correct` | bool | marker | Human-marked in Phase 1 |
 | `reconciliation` | text | **learner** | The gap, in their words — `R-012` |
 | `error_tag` | enum | marker | From the taxonomy below. Blank if correct. |
+| `cue` | enum, nullable | system | Null if no cue was shown. Otherwise what the learner did with it: `retried` / `watched` / `explained` / `left`, or `shown` where we never found out — ADR 0018, `P-89` |
 | `degenerate` | bool | auditor | Empty, copied, or reverse-engineered — feeds K-03 |
 
 Three fields are written by the learner and by nobody else, ever. That is [ADR 0002](../decisions/0002-ai-never-writes-in-the-notebook.md), and it is a data-model constraint rather than a UI preference precisely so that it survives contact with a product manager.
