@@ -364,3 +364,127 @@ test("a cue response that cannot be written says so rather than claiming success
   assert.equal(r.persisted, false);
   assert.ok(r.warning, "a response the device would not keep must be reported");
 });
+
+/* ── R-012: the learner writes the gap in their own words ───────────────────
+ *
+ * The second mechanic after the gate, and the part of the design closest to
+ * the scaffolded correction the evidence supports (Chi et al. 1989; ADR 0013).
+ * It is also the first card field that holds a child's own prose, so what can
+ * be done to it afterwards matters as much as what it holds.
+ */
+
+test("a reconciliation is written to the card and read back", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card());
+  const r = nb.writeReconciliation(filed.id, "I thought the heavy one would land first.");
+  assert.equal(r.ok, true, r.errors?.join(", "));
+  assert.equal(nb.cards("physics")[0].reconciliation, "I thought the heavy one would land first.");
+});
+
+test("a reconciliation carries its own timestamp", () => {
+  // R-014: every prediction, reveal, reconciliation and confusion entry is
+  // stored with a timestamp. The reveal's timestamp is not this one — the gap
+  // is written afterwards, and how long afterwards is part of the dataset.
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card({ revealedAt: 2 }));
+  nb.writeReconciliation(filed.id, "Friction was the bit I forgot.");
+  const c = nb.cards("physics")[0];
+  assert.equal(typeof c.reconciledAt, "number");
+  assert.ok(c.reconciledAt > c.recordedAt, "written after the card was filed");
+});
+
+test("a reconciliation outlives the tab", () => {
+  const backend = memoryBackend();
+  const { card: filed } = openNotebook({ backend, now, newId }).record(card());
+  openNotebook({ backend, now, newId }).writeReconciliation(filed.id, "I ignored the air entirely.");
+  assert.equal(openNotebook({ backend, now, newId }).cards("physics")[0].reconciliation,
+    "I ignored the air entirely.");
+});
+
+test("an honest short answer is long enough", () => {
+  // The floor is against a stray keypress, not against brevity. A learner who
+  // names the thing in three words has done what R-012 asks.
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card());
+  assert.equal(nb.writeReconciliation(filed.id, "Air resistance.").ok, true);
+});
+
+test("a note too short to be an answer is refused, and changes nothing", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card());
+  for (const bad of ["", "   ", "ok", "idk", "\n\t ", "x".repeat(11)]) {
+    const r = nb.writeReconciliation(filed.id, bad);
+    assert.equal(r.ok, false, `"${bad}" should not be fileable`);
+    assert.ok(r.errors?.length, "a refusal must say why — the learner sees this");
+  }
+  assert.equal(nb.cards("physics")[0].reconciliation, undefined);
+});
+
+test("whitespace around an answer does not count towards its length", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card());
+  assert.equal(nb.writeReconciliation(filed.id, "   ok    \n\n   ").ok, false,
+    "padding is not an answer");
+});
+
+test("a reconciliation is stored as written, not reformatted", () => {
+  // The learner's own words. Trimming the ends is not editing; anything more is.
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card());
+  nb.writeReconciliation(filed.id, "  i thought  heavier == faster.\nIt doesn't.  ");
+  assert.equal(nb.cards("physics")[0].reconciliation, "i thought  heavier == faster.\nIt doesn't.");
+});
+
+test("a reconciliation cannot be rewritten once it is given", () => {
+  // A second thought is a new attempt, which is a new card — never an edit of
+  // the first. Rewriting the gap after reading the explanation is exactly the
+  // post-hoc account R-010 exists to keep out of the record.
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card());
+  assert.equal(nb.writeReconciliation(filed.id, "I forgot about friction.").ok, true);
+  const second = nb.writeReconciliation(filed.id, "Actually I knew that all along.");
+  assert.equal(second.ok, false);
+  assert.equal(nb.cards("physics")[0].reconciliation, "I forgot about friction.");
+});
+
+test("writing a reconciliation cannot touch the prediction", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card({ cue: "shown" }));
+  const before = { ...nb.cards("physics")[0] };
+  nb.writeReconciliation(filed.id, "The push was smaller than friction.");
+  const after = nb.cards("physics")[0];
+  for (const k of Object.keys(before)) {
+    if (k === "reconciliation" || k === "reconciledAt") continue;
+    assert.deepEqual(after[k], before[k], `writeReconciliation changed ${k}`);
+  }
+});
+
+test("a reconciliation against an unknown card is refused, not invented", () => {
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  nb.record(card());
+  assert.equal(nb.writeReconciliation("no-such-card", "I forgot about friction.").ok, false);
+  assert.equal(nb.cards("physics").length, 1);
+});
+
+test("the learner's own words leave with the rest of the notebook", () => {
+  // Both halves of P-44: the dataset is the deliverable (R-014), so the export
+  // must carry the prose — and the learner can destroy it, so forget() must
+  // take it with the card rather than leaving it somewhere else.
+  const nb = openNotebook({ backend: memoryBackend(), now, newId });
+  const { card: filed } = nb.record(card());
+  nb.writeReconciliation(filed.id, "I was sure the heavier one wins.");
+  assert.equal(nb.export().subjects.physics[0].reconciliation, "I was sure the heavier one wins.");
+  nb.forget("physics");
+  assert.equal(JSON.stringify(nb.export()).includes("heavier one wins"), false,
+    "forgetting a subject must take the learner's words with it");
+});
+
+test("a reconciliation that cannot be written says so rather than claiming success", () => {
+  const backend = memoryBackend();
+  const nb = openNotebook({ backend, now, newId });
+  const { card: filed } = nb.record(card());
+  backend.setItem = () => { const e = new Error("full"); e.name = "QuotaExceededError"; throw e; };
+  const r = nb.writeReconciliation(filed.id, "I forgot about friction.");
+  assert.equal(r.persisted, false);
+  assert.ok(r.warning);
+});

@@ -18,6 +18,7 @@ The atomic unit. One card is one pass through the loop.
 | `committed_at` | timestamp | system | Reveal is impossible before this exists — `R-010` |
 | `outcome_correct` | bool | marker | Human-marked in Phase 1 |
 | `reconciliation` | text | **learner** | The gap, in their words — `R-012` |
+| `reconciled_at` | timestamp | system | `R-014` wants it timestamped in its own right — how long after the reveal it was written is part of the dataset. Null where the learner wrote nothing, which is allowed: [ADR 0020](../decisions/0020-the-reconciliation-is-offered-not-demanded.md) |
 | `error_tag` | enum | marker | From the taxonomy below. Blank if correct. |
 | `cue` | enum, nullable | system | Null if no cue was shown. Otherwise what the learner did with it: `retried` / `watched` / `explained` / `left`, or `shown` where we never found out — ADR 0018, `P-89` |
 | `degenerate` | bool | auditor | Empty, copied, or reverse-engineered — feeds K-03 |

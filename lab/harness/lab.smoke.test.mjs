@@ -408,6 +408,192 @@ test("the second attempt explains rather than cueing again", async () => {
   dom.restore();
 });
 
+/* ── The learner writes the gap in their own words (R-012, P-92) ─────────
+ *
+ * ADR 0014 fixes where it goes: after the cue and the retry, with the
+ * explanation — never in place of them, and never before them. ADR 0002 and
+ * R-015 fix what may be in it when the learner arrives: nothing.
+ */
+
+/** Mount with a note box and collect everything filed through it. */
+async function withNote(over = {}) {
+  const filed = [];
+  const m = await mount(withCue({
+    onNote: (text) => {
+      if (text.trim().length < 12) return { ok: false, errors: ["say a little more"] };
+      filed.push(text);
+      return { ok: true };
+    },
+    ...over,
+  }));
+  return { ...m, filed, box: () => m.dom.body.find((n) => n.tagName === "TEXTAREA"),
+           note: () => m.el("lab-note") };
+}
+
+test("there is nowhere to write before anything has been revealed", async () => {
+  const { dom, note } = await withNote();
+  assert.ok(note()?.hidden !== false, "the gap cannot be written before there is one");
+  dom.restore();
+});
+
+test("the box waits for the cue and the retry, and arrives with the explanation", async () => {
+  // The order is the decision ADR 0014 took. A writing box on screen beside an
+  // unanswered cue is a third thing competing with the two that matter.
+  const { lab, dom, button, note } = await withNote();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  assert.equal(note().hidden, true, "a cue is standing — the box must not be up yet");
+  button("Show why").onclick();
+  assert.equal(note().hidden, false, "the explanation is up; so is the box");
+  dom.restore();
+});
+
+test("a right answer gets the box straight away", async () => {
+  const { lab, dom, note } = await withNote();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  assert.equal(note().hidden, false, "being right is still worth explaining to yourself");
+  dom.restore();
+});
+
+test("the box is empty when the learner reaches it, and stays that way", async () => {
+  // R-015 and ADR 0002: no AI-generated text is ever written into a learner's
+  // own notebook fields. Nothing pre-fills it, and no later render does either.
+  const { lab, dom, box, el } = await withNote();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  assert.equal(box().value, "");
+  dom.tick(5);
+  assert.equal(box().value, "", "a render cycle filled the learner's box");
+  assert.equal(box().textContent, "", "nor may it arrive as content");
+  dom.restore();
+});
+
+test("the prompt never hands over the answer it is asking about", async () => {
+  const { lab, dom, note } = await withNote();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  const texts = [];
+  (function walk(n) { if (n.textContent) texts.push(n.textContent); n.children?.forEach(walk); })(note());
+  const prompt = texts.join(" ").toLowerCase();
+  assert.ok(!prompt.includes("yes"), `the prompt quotes the answer: ${prompt}`);
+  dom.restore();
+});
+
+test("what the learner types survives the simulation carrying on", async () => {
+  // The verdict panel is rebuilt on every frame. A box rebuilt with it loses
+  // whatever was half-written, which is the one bug that would make this
+  // feature worse than not having it.
+  const { lab, dom, box } = await withNote();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  const typed = box();
+  typed.value = "I was thinking about the mass, n";
+  dom.tick(10);
+  assert.equal(box().value, "I was thinking about the mass, n", "a frame ate the learner's words");
+  assert.equal(box(), typed, "the box was replaced mid-sentence");
+  dom.restore();
+});
+
+test("a written gap is filed", async () => {
+  const { lab, dom, box, button, filed } = await withNote();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  box().value = "I forgot that both of them are falling.";
+  button("Save").onclick();
+  assert.deepEqual(filed, ["I forgot that both of them are falling."]);
+  dom.restore();
+});
+
+test("a refused note says so and files nothing", async () => {
+  const { lab, dom, box, button, filed, note } = await withNote();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  box().value = "idk";
+  button("Save").onclick();
+  assert.deepEqual(filed, []);
+  const texts = [];
+  (function walk(n) { if (n.textContent) texts.push(n.textContent); n.children?.forEach(walk); })(note());
+  assert.match(texts.join(" "), /say a little more/);
+  assert.equal(box().value, "idk", "a refusal must not throw the words away");
+  dom.restore();
+});
+
+test("the box closes once the gap is written, and cannot be filed twice", async () => {
+  const { lab, dom, box, button, filed } = await withNote();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  box().value = "I forgot that both of them are falling.";
+  button("Save").onclick();
+  button("Save")?.onclick?.();
+  assert.equal(filed.length, 1, "one card, one reconciliation");
+  dom.restore();
+});
+
+test("what was written is shown back, not swallowed", async () => {
+  // It is their notebook. A box that empties itself on save looks exactly
+  // like a box that lost what you wrote.
+  const { lab, dom, box, button, note } = await withNote();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  box().value = "I forgot that both of them are falling.";
+  button("Save").onclick();
+  const texts = [];
+  (function walk(n) { if (n.textContent) texts.push(n.textContent); n.children?.forEach(walk); })(note());
+  assert.match(texts.join(" "), /both of them are falling/, "the learner's words vanished on save");
+  dom.restore();
+});
+
+test("a fresh question starts with an empty box, not the last one's words", async () => {
+  // Every attempt is its own card and its own gap. Carrying the text over
+  // invites re-filing a sentence written about a question already answered —
+  // and it would be the learner's own words in the wrong place, which is a
+  // quieter version of the thing ADR 0002 forbids.
+  const { lab, dom, box, button } = await withNote();
+  dom.body.find((n) => n.id === "opt-no").onclick();
+  lab.reveal("yes");
+  button("Show why").onclick();
+  box().value = "I thought it would stop straight away.";
+  button("Ask again").onclick();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  assert.equal(box().value, "", "the new attempt inherited the old attempt's words");
+  dom.restore();
+});
+
+test("nothing blocks the learner who writes nothing", async () => {
+  // R-012 says "before moving on". Nothing is withheld after the reveal, so a
+  // block here has no power except over someone who stayed — and K-06 is live.
+  // The record says whether it was written; it is not a toll gate.
+  const { lab, dom, button, filed } = await withNote();
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  assert.equal(button("Ask again").disabled, false, "the next question is not held hostage");
+  button("Ask again").onclick();
+  assert.equal(filed.length, 0);
+  assert.equal(lab.record.choice, null, "and it really did move on");
+  dom.restore();
+});
+
+test("a scenario with nowhere to file a note does not offer one", async () => {
+  const { lab, dom, el } = await mount(withCue());        // no onNote
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  assert.ok(!el("lab-note"), "a draft scenario has no notebook behind the box");
+  dom.restore();
+});
+
+test("a notebook that throws on the note does not take the page down", async () => {
+  const { lab, dom, box, button } = await withNote({
+    onNote: () => { throw new Error("storage is on fire"); },
+  });
+  dom.body.find((n) => n.id === "opt-yes").onclick();
+  lab.reveal("yes");
+  box().value = "I forgot that both of them are falling.";
+  assert.doesNotThrow(() => button("Save").onclick());
+  dom.restore();
+});
+
 /* ── What the learner did with the cue (P-89, ADR 0018) ──────────────────
  *
  * Expertise reversal predicts a learner who already holds the schema gains

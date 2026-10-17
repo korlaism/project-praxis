@@ -183,3 +183,48 @@ test("a retry files a second card that points at the first", async () => {
   assert.equal(second.correct, true);
   dom.restore();
 });
+
+/* ── R-012: the gap lands on the card it belongs to (P-92) ──────────────── */
+
+test("a note written after the reveal lands on that reveal's card", async () => {
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const notebook = openNotebook({ backend: memoryBackend() });
+
+  mountScenario(truckFly, { notebook });
+  dom.body.find((n) => n.id === "opt-truck").onclick();
+  dom.tick(2000);
+  // Wrong answer, so a cue stands between the outcome and the box (ADR 0014).
+  dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "Show why").onclick();
+  dom.body.find((n) => n.tagName === "TEXTAREA").value =
+    "I thought the big one must push harder because of the damage.";
+  dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "Save").onclick();
+
+  const cards = notebook.cards("physics");
+  assert.equal(cards.length, 1, "a note is not a second card");
+  assert.match(cards[0].reconciliation, /because of the damage/);
+  assert.equal(cards[0].choice, "truck", "and it is attached to what they actually said");
+  dom.restore();
+});
+
+test("a retry's note goes on the retry, not on the first attempt", async () => {
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const notebook = openNotebook({ backend: memoryBackend() });
+
+  mountScenario(truckFly, { notebook });
+  dom.body.find((n) => n.id === "opt-truck").onclick();
+  dom.tick(2000);
+  dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "Predict again").onclick();
+  dom.body.find((n) => n.id === "opt-equal").onclick();
+  dom.tick(2000);
+  dom.body.find((n) => n.tagName === "TEXTAREA").value = "The damage is not the same as the push.";
+  dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === "Save").onclick();
+
+  const cards = notebook.cards("physics");
+  assert.equal(cards.length, 2);
+  assert.equal(cards[0].reconciliation, undefined, "the first attempt was never written up");
+  assert.match(cards[1].reconciliation, /not the same as the push/);
+  assert.equal(cards[1].retryOf, 0, "and the second card still points at the first");
+  dom.restore();
+});
