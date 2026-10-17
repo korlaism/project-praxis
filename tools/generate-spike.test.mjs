@@ -92,3 +92,121 @@ test("the worked example teaches shape without leaking an answer", () => {
       `the example uses ${real}, which gives away an answer for it`);
   }
 });
+
+/* ── P-94: a paid run must not throw away what it has already bought ───────
+ *
+ * None of this mattered against a local ollama, where a lost call costs a
+ * retry. Against the endpoint P-90 is waiting for, every call is money.
+ */
+
+import { collect, callModel } from "./generate-spike.mjs";
+
+/** A provider that answers from a script: strings are replies, numbers are HTTP codes. */
+function provider(script) {
+  const seen = [];
+  return {
+    seen,
+    async call() {
+      const next = script[seen.length];
+      seen.push(next);
+      if (next === undefined) throw new Error("the test ran out of scripted replies");
+      if (typeof next === "number") {
+        const e = new Error(`HTTP ${next}`);
+        e.status = next;
+        throw e;
+      }
+      return { text: next };
+    },
+  };
+}
+
+const one = (id) => JSON.stringify([{
+  id, primitive: "two-pucks", concept: "friction", difficulty: "easy", subject: "physics",
+  params: {}, question: "q?", options: [{ id: "both", label: "b" }, { id: "outruns", label: "o" }],
+  correct: "both", errorTags: { outruns: "motion-implies-force" },
+}]);
+
+test("a provider failure keeps every reply already paid for", async () => {
+  // The defect: one 500 on the third call threw out of the loop, the process
+  // ended, and the two replies already bought were never written anywhere.
+  const p = provider([one("a"), one("b"), 500, one("c")]);
+  const r = await collect({ call: p.call, want: 3, batch: 1, attempts: 1 });
+  assert.deepEqual(r.specs.map((s) => s.id), ["a", "b", "c"]);
+  assert.ok(r.raw.includes('"a"') && r.raw.includes('"b"'),
+    "the replies bought before the failure are not in the transcript");
+  assert.equal(r.failures.length, 1);
+});
+
+test("the transcript is handed back even when every call fails", async () => {
+  const p = provider([500, 500, 500, 500, 500, 500, 500, 500]);
+  const r = await collect({ call: p.call, want: 2, batch: 1, attempts: 1 });
+  assert.deepEqual(r.specs, []);
+  assert.equal(typeof r.raw, "string", "a run that bought nothing must still hand back a transcript");
+  assert.ok(r.failures.length > 0, "and must still say what happened");
+});
+
+test("a rate limit is waited out, not thrown away", async () => {
+  // 429 is the provider saying "later", which is not the same as "no". Twenty
+  // calls fired back to back is exactly the shape that earns one.
+  const p = provider([429, one("a")]);
+  const waits = [];
+  const r = await collect({ call: p.call, want: 1, batch: 1, sleep: (ms) => waits.push(ms) });
+  assert.deepEqual(r.specs.map((s) => s.id), ["a"]);
+  assert.equal(waits.length, 1, "it did not wait before trying again");
+  assert.ok(waits[0] > 0);
+});
+
+test("waiting backs off rather than hammering", async () => {
+  const p = provider([429, 429, 429, one("a")]);
+  const waits = [];
+  await collect({ call: p.call, want: 1, batch: 1, attempts: 4, sleep: (ms) => waits.push(ms) });
+  assert.equal(waits.length, 3);
+  assert.ok(waits[1] > waits[0] && waits[2] > waits[1], `no back-off: ${waits.join(", ")}`);
+});
+
+test("a run gives up on a call rather than retrying for ever", async () => {
+  const p = provider(Array(20).fill(429));
+  const r = await collect({ call: p.call, want: 1, batch: 1, sleep: () => {} });
+  assert.ok(p.seen.length < 20, "it would retry a dead endpoint until the credit ran out");
+  assert.ok(r.failures.length > 0);
+});
+
+test("a refusal that is the prompt's fault is not retried", async () => {
+  // 400 means the request is wrong, and sending it again spends money to be
+  // told so twice. Only "later" and "our fault" are worth repeating.
+  const p = provider([400, 400, one("a")]);
+  const r = await collect({ call: p.call, want: 1, batch: 1, sleep: () => {} });
+  // The thing that proves it: no call has a SECOND attempt. Counting 400s
+  // alone cannot tell a retry apart from the next call meeting the same wall.
+  assert.deepEqual(r.failures.map((f) => f.attempt), [1, 1],
+    `a bad request was sent again: ${JSON.stringify(r.failures.map((f) => [f.call, f.attempt]))}`);
+  assert.deepEqual(r.specs.map((s) => s.id), ["a"], "and the run carried on to the next call");
+});
+
+test("a repeat is not a new sample", async () => {
+  const p = provider([one("a"), one("a"), one("b")]);
+  const r = await collect({ call: p.call, want: 2, batch: 1, attempts: 1 });
+  assert.deepEqual(r.specs.map((s) => s.id), ["a", "b"]);
+});
+
+test("an unparseable reply costs its call but not the run", async () => {
+  const p = provider(["I'd be happy to help with that!", one("a")]);
+  const r = await collect({ call: p.call, want: 1, batch: 1, attempts: 1 });
+  assert.deepEqual(r.specs.map((s) => s.id), ["a"]);
+  assert.ok(r.raw.includes("happy to help"), "what it actually said must still be kept");
+  assert.equal(r.failures.filter((f) => f.status === null).length, 1,
+    "a call that bought prose instead of scenarios must be reported as lost");
+});
+
+test("the HTTP status is carried, so the loop can tell a wait from a refusal", async () => {
+  // callModel is the only thing that knows about HTTP; everything above it
+  // decides on the number. Losing the status is what made every failure fatal.
+  const fetched = [];
+  const fakeFetch = async () => {
+    fetched.push(1);
+    return { ok: false, status: 429, statusText: "Too Many Requests", text: async () => "slow down" };
+  };
+  await assert.rejects(
+    () => callModel("m", "p", { fetch: fakeFetch, url: "http://x", key: "k" }),
+    (err) => err.status === 429);
+});

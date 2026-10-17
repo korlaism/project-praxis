@@ -183,11 +183,21 @@ export function extractScenarios(text) {
   throw new Error(`no scenarios in the reply: ${body.slice(0, 300)}`);
 }
 
-async function generate(model, prompt) {
-  const url = process.env.PRAXIS_MODEL_URL ?? "https://api.openai.com/v1/chat/completions";
-  const key = process.env.PRAXIS_MODEL_KEY ?? process.env.OPENAI_API_KEY;
+/**
+ * One call to the provider. The only thing in this file that knows about HTTP.
+ *
+ * A failure carries its status, because everything above here decides what to
+ * do from that number and nothing else. Losing it is what made every failure
+ * fatal and indistinguishable: a rate limit is the provider saying "later",
+ * and a 400 is the provider saying the request is wrong — sending that one
+ * again spends money to be told so twice.
+ */
+export async function callModel(model, prompt, opts = {}) {
+  const f = opts.fetch ?? globalThis.fetch;
+  const url = opts.url ?? process.env.PRAXIS_MODEL_URL ?? "https://api.openai.com/v1/chat/completions";
+  const key = opts.key ?? process.env.PRAXIS_MODEL_KEY ?? process.env.OPENAI_API_KEY;
   if (!key) throw new Error("no model key — set PRAXIS_MODEL_KEY or OPENAI_API_KEY");
-  const call = (extra) => fetch(url, {
+  const call = (extra) => f(url, {
     method: "POST",
     headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
     body: JSON.stringify({ model, messages: [{ role: "user", content: prompt }], ...extra }),
@@ -198,9 +208,84 @@ async function generate(model, prompt) {
   // rejects response_format, and that is not a reason to abandon the run.
   let res = await call({ response_format: { type: "json_object" } });
   if (!res.ok && res.status === 400) res = await call({});
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText} from ${url}: ${(await res.text()).slice(0, 400)}`);
+  if (!res.ok) {
+    const err = new Error(`${res.status} ${res.statusText} from ${url}: ${(await res.text()).slice(0, 400)}`);
+    err.status = res.status;
+    throw err;
+  }
   const body = await res.json();
   return { text: body.choices?.[0]?.message?.content ?? "", usage: body.usage };
+}
+
+/** Worth asking again: the provider said "later", or "our fault". */
+const RETRYABLE = new Set([408, 409, 429, 500, 502, 503, 504]);
+const naplength = (attempt, base) => base * 2 ** (attempt - 1);
+const nap = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Ask until the model answers, give up, or runs out of patience — and hand
+ * back everything bought along the way (P-94).
+ *
+ * The loop this replaced had no try/catch at all. One 500 on the third of
+ * four calls threw out of it, ended the process, and lost both replies
+ * already paid for, because the transcript was only written at the end.
+ * Against a local ollama that cost a retry. Against the endpoint P-90 is
+ * waiting for it costs money, twice.
+ *
+ * @param call   (ask, n) => { text }, throwing an Error carrying .status
+ * @param sleep  injected so a test can watch the back-off without living it
+ */
+export async function collect({ call, want = 20, batch = 5, attempts = 3,
+                                sleep = nap, wait = 500 } = {}) {
+  const specs = [], failures = [], seen = new Set();
+  let raw = "";
+  const maxCalls = Math.ceil(want / batch) + 2;
+
+  for (let n = 1; specs.length < want && n <= maxCalls; n++) {
+    const ask = Math.min(batch, want - specs.length);
+    let text = null;
+    for (let a = 1; a <= attempts; a++) {
+      try {
+        ({ text } = await call(ask, n));
+        break;
+      } catch (err) {
+        failures.push({ call: n, attempt: a, status: err.status ?? null, message: err.message });
+        if (!(RETRYABLE.has(err.status) && a < attempts)) break;
+        await sleep(naplength(a, wait));
+      }
+    }
+    if (text === null) continue;
+
+    // Keep what it actually said, whatever happens next. The first P-50 run
+    // parsed the wrong array and had nothing left to look at afterwards.
+    raw += (raw ? "\n---\n" : "") + text;
+    let got = [];
+    try {
+      got = extractScenarios(text);
+    } catch (err) {
+      failures.push({ call: n, status: null, message: err.message });
+      continue;
+    }
+    for (const spec of got) {
+      const id = String(spec.id ?? `item-${specs.length}`);
+      if (seen.has(id)) continue;              // a repeat is not a new sample
+      seen.add(id);
+      specs.push(spec);
+    }
+  }
+  return { specs, raw, failures };
+}
+
+/** One call with the same patience, for the per-primitive path. */
+async function generate(model, prompt, { attempts = 3, sleep = nap, wait = 500 } = {}) {
+  for (let a = 1; ; a++) {
+    try {
+      return await callModel(model, prompt);
+    } catch (err) {
+      if (!(RETRYABLE.has(err.status) && a < attempts)) throw err;
+      await sleep(naplength(a, wait));
+    }
+  }
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
@@ -233,6 +318,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 
   let specs = [];
   let raw = "";
+  let failed = [];
   if (from) {
     raw = readFileSync(from, "utf8");
     specs = extractScenarios(raw);
@@ -256,26 +342,25 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.error(`  ${id}: ${specs.filter((s) => s.primitive === id).length} unique`);
     }
   } else {
-    const seen = new Set();
-    for (let call = 1; specs.length < want && call <= Math.ceil(want / batch) + 2; call++) {
-      const ask = Math.min(batch, want - specs.length);
-      const { text } = await generate(model, buildPrompt(ask));
-      raw += (raw ? "\n---\n" : "") + text;
-      let got = [];
-      try { got = extractScenarios(text); }
-      catch (err) { console.error(`  call ${call}: ${err.message.slice(0, 90)}`); continue; }
-      for (const s of got) {
-        const id = String(s.id ?? `item-${specs.length}`);
-        if (seen.has(id)) continue;            // a repeat is not a new sample
-        seen.add(id);
-        specs.push(s);
-      }
-      console.error(`  call ${call}: asked ${ask}, got ${got.length}, total ${specs.length}`);
-    }
+    const r = await collect({
+      call: async (ask, n) => {
+        const out = await callModel(model, buildPrompt(ask));
+        console.error(`  call ${n}: asked ${ask}`);
+        return out;
+      },
+      want, batch,
+    });
+    specs = r.specs;
+    raw = r.raw;
+    failed = r.failures;
   }
-  const usage = null;
-  // Keep what the model actually said. The first run of this parsed the wrong
-  // array and there was nothing left to look at afterwards.
+
+  // A run that lost calls says so. Silence here reads as a model that produced
+  // nothing, when what happened was an endpoint that refused to answer.
+  for (const f of failed)
+    console.error(`  call ${f.call}${f.attempt ? ` try ${f.attempt}` : ""}: ` +
+                  `${f.status ?? "unparseable"} — ${String(f.message).slice(0, 90)}`);
+  if (failed.length) console.error(`  ${failed.length} call(s) lost`);
 
   if (!from) writeFileSync(`lab/scenarios/candidates/batch-02-${model}.raw.json`, raw);
   const out = `lab/scenarios/candidates/batch-02-${model}.mjs`;
