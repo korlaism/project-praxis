@@ -25,7 +25,7 @@ const REQUIRED = ["subject", "scenario", "choice"];
 // the learner has not acted yet.
 const KEPT = ["subject", "scenario", "choice", "confidence", "observed", "correct",
               "unlisted", "errorTag", "outcomeSource", "params", "committedAt", "revealedAt",
-              "attempt", "retryOf", "cue"];
+              "attempt", "retryOf", "cue", "reconciliation", "reconciledAt"];
 
 /**
  * What a learner can do with a cue, in the two surfaces that show one.
@@ -41,6 +41,17 @@ const KEPT = ["subject", "scenario", "choice", "confidence", "observed", "correc
  * as it.
  */
 export const CUE_RESPONSES = ["retried", "watched", "explained", "left"];
+
+/**
+ * The shortest thing that can be filed as a reconciliation (R-012).
+ *
+ * A floor against a stray keypress, not a quality bar. "Air resistance." is a
+ * complete answer and clears it; "idk" does not. The number is arbitrary and
+ * says so — spec/03 puts commit degeneracy (K-03) in the hands of a human
+ * auditor and explicitly does not infer it, so nothing here may try to judge
+ * whether an answer is any good.
+ */
+export const MIN_RECONCILIATION = 12;
 
 /** An in-memory stand-in for localStorage, for tests and as a last resort. */
 export function memoryBackend() {
@@ -203,6 +214,42 @@ export function openNotebook({ backend, now = Date.now, newId = defaultId, event
           : "no cue was shown on that card"] };
 
       card.cue = response;
+      return { ok: true, card, ...save(data) };
+    },
+
+    /**
+     * The learner's own words about the gap (R-012).
+     *
+     * Written once. A second thought is a new attempt, which is a new card —
+     * never an edit of this one. Rewriting the gap after reading the
+     * explanation would file a post-hoc account as if it were the learner's
+     * own first reckoning, which is the thing the gate exists to prevent.
+     *
+     * Trimmed at the ends and otherwise stored exactly as typed. Spelling,
+     * punctuation and capitals are the learner's, and ADR 0002 says nothing
+     * else writes here.
+     */
+    writeReconciliation(id, text) {
+      const words = typeof text === "string" ? text.trim() : "";
+      if (words.length < MIN_RECONCILIATION)
+        return { ok: false, errors: [words
+          ? "A few more words — what did you expect, and what happened instead?"
+          : "Write the gap in your own words before filing it."] };
+
+      const data = current();
+      let card = null;
+      for (const list of Object.values(data.subjects)) {
+        card = list.find((c) => c.id === id);
+        if (card) break;
+      }
+      if (!card) return { ok: false, errors: ["no card with that id"] };
+      if (card.reconciliation !== undefined)
+        return { ok: false, errors: ["that gap has already been written up"] };
+
+      card.reconciliation = words;
+      // R-014 wants the reconciliation timestamped in its own right: how long
+      // after the reveal it was written is part of the dataset, not noise.
+      card.reconciledAt = now();
       return { ok: true, card, ...save(data) };
     },
 

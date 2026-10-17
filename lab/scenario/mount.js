@@ -77,12 +77,13 @@ function mountWrapped(spec, notebook) {
 }
 
 /**
- * The two notebook hooks a mounted scenario needs, sharing one card.
+ * The notebook hooks a mounted scenario needs, sharing one card.
  *
  * A reveal files the card, saying how its outcome was established: watched by
  * us, or asserted by whoever wrote the scenario. What the learner then does
- * with the cue lands on that same card (P-89) — it cannot be filed with it,
- * because at the reveal the learner has not had the chance to do anything yet.
+ * with the cue lands on that same card (P-89), and so does the gap they write
+ * in their own words (R-012) — neither can be filed with it, because at the
+ * reveal the learner has not had the chance to do either yet.
  */
 function filer(spec, notebook, outcomeSource) {
   let cardId = null;
@@ -103,6 +104,17 @@ function filer(spec, notebook, outcomeSource) {
       if (!cardId) return;
       const r = notebook.amendCue(cardId, response);
       if (r.warning) console.warn(r.warning);
+    },
+    /**
+     * The gap, in the learner's own words (R-012), onto the card this reveal
+     * filed — never a card of its own. The notebook owns what counts as an
+     * answer; the harness shows back whatever it says.
+     */
+    onNote(text) {
+      if (!cardId) return { ok: false, errors: ["There is no notebook to write in."] };
+      const r = notebook.writeReconciliation(cardId, text);
+      if (r.warning) console.warn(r.warning);
+      return r;
     },
   };
 }

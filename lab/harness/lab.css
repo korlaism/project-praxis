@@ -18,7 +18,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
    painting — "question and answers, no ball". */
 .lab{position:fixed;inset:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;
   padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-.lab{grid-template-rows:auto minmax(0,1fr) auto auto auto}
+.lab{grid-template-rows:auto minmax(0,1fr) auto auto auto auto}
 
 .lab-head{padding:20px 24px 14px;border-bottom:1px solid var(--line)}
 .lab-q{font-size:clamp(1.25rem,3.2vw,1.9rem);font-weight:600;letter-spacing:-.015em;
@@ -69,6 +69,26 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
    leads, "Show why" is always there for someone who would rather just be told. */
 .lab-verdict-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 .lab-verdict span{color:var(--ink-2)}
+
+/* R-012: the gap, in the learner's own words. Deliberately plain — this is
+   the one part of the page that belongs to the learner, and it should not
+   look like the product asking them for something. */
+.lab-note{padding:14px 24px 16px;border-top:1px solid var(--line);
+  background:var(--panel);display:grid;gap:10px}
+.lab-note[hidden]{display:none!important}
+.lab-note-prompt{font-size:.82rem;color:var(--ink-2)}
+.lab-note-prompt[hidden],.lab-note-box[hidden],.lab-note-acts[hidden]{display:none!important}
+.lab-note-box{font-family:var(--font);font-size:.95rem;line-height:1.45;
+  color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:2px;
+  padding:10px 12px;resize:vertical;min-height:72px;width:100%}
+.lab-note-box:focus{outline:none;border-color:var(--accent)}
+.lab-note-acts{display:flex;gap:8px;flex-wrap:wrap}
+.lab-note-acts button{font-family:var(--font);font-weight:500;font-size:.88rem;
+  padding:8px 14px;border-radius:2px;cursor:pointer;
+  background:transparent;color:var(--ink);border:1px solid var(--line)}
+.lab-note-acts button.primary{background:var(--accent);border-color:var(--accent);color:#12100E}
+.lab-note-said{margin:0;font-size:.88rem;color:var(--ink-2);white-space:pre-wrap}
+.lab-note-said[hidden]{display:none!important}
 
 .lab-foot{display:flex;flex-wrap:wrap;gap:18px;align-items:center;
   padding:12px 24px;border-top:1px solid var(--line);background:var(--panel)}

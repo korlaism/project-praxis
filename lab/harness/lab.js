@@ -114,6 +114,75 @@ export function mountLab(topic) {
   }
   verdict.hidden = true;
 
+  /* ---- the gap, in the learner's own words (R-012) ----------------------
+   *
+   * Built once and reused. The verdict panel above is rebuilt on every frame;
+   * a box rebuilt with it would throw away whatever was half-written, which
+   * would make this worse than not having it at all.
+   *
+   * It arrives empty and nothing ever fills it — R-015 and ADR 0002. The only
+   * writer is the person whose notebook it is.
+   */
+  let noteEl = null, noteBox = null, noteSaveBtn = null, notePrompt = null, noteSaid = null;
+  let noteFiled = false, noteSaidText = "";
+  if (typeof topic.onNote === "function") {
+    noteEl = el("div", "lab-note", root);
+    noteEl.hidden = true;
+    notePrompt = el("label", "lab-note-prompt", noteEl);
+    notePrompt.setAttribute("for", "lab-note-box");
+    noteBox = document.createElement("textarea");
+    noteBox.id = "lab-note-box";
+    noteBox.className = "lab-note-box";
+    noteBox.setAttribute("rows", "3");
+    // No placeholder. A sentence sitting in the box is a sentence to agree
+    // with, and agreeing is not reconciling.
+    noteEl.appendChild(noteBox);
+    const noteActs = el("div", "lab-note-acts", noteEl);
+    noteSaveBtn = button(noteActs, "Save", () => fileNote(), "primary");
+    noteSaid = el("p", "lab-note-said", noteEl);
+    noteSaid.hidden = true;
+  }
+
+  /**
+   * File what the learner wrote. Whoever supplied onNote owns the rules about
+   * what is long enough; the harness only reports back what it was told.
+   */
+  function fileNote() {
+    if (noteFiled || !noteBox) return;
+    let r;
+    try {
+      r = topic.onNote(noteBox.value ?? "");
+    } catch (err) {
+      console.error("onNote failed:", err);
+      r = { ok: false, errors: ["The notebook could not take that just now."] };
+    }
+    if (r?.ok) {
+      noteFiled = true;
+      noteSaidText = (noteBox.value ?? "").trim();
+    } else {
+      // The words stay in the box. Throwing away what someone just wrote
+      // because it was too short is the surest way never to see a second try.
+      noteSaidText = r?.errors?.[0] ?? "That could not be filed.";
+    }
+    renderNote();
+  }
+
+  /** Show, hide and dress the box. It is never rebuilt, only reconfigured. */
+  function renderNote(cueOnScreen = false) {
+    if (!noteEl) return;
+    // ADR 0014 fixes the order: outcome, cue, retry, explanation — and only
+    // then this. A writing box beside an unanswered cue competes with it.
+    noteEl.hidden = !(gate.state === "revealed" && !cueOnScreen);
+    notePrompt.textContent = gate.isCorrect
+      ? "In your own words — why did it happen?"
+      : "In your own words — what did you expect, and what happened instead?";
+    notePrompt.hidden = noteFiled;
+    noteBox.hidden = noteFiled;
+    noteSaveBtn.hidden = noteFiled;
+    noteSaid.hidden = !noteSaidText;
+    noteSaid.textContent = noteSaidText;
+  }
+
   // ---- foot -------------------------------------------------------------
   const foot = el("div", "lab-foot", root);
   const transport = el("div", "lab-transport", foot);
@@ -186,6 +255,10 @@ export function mountLab(topic) {
   function softReset() {
     explained = false;
     cueState = null;
+    // A new attempt is a new card, so it is a new gap to write up.
+    noteFiled = false;
+    noteSaidText = "";
+    if (noteBox) noteBox.value = "";
     // State first. pause() renders, and rendering without state throws out of
     // mountLab, which kills resize() and leaves the canvas black forever.
     t = 0;
@@ -350,13 +423,16 @@ export function mountLab(topic) {
           render();
         }, "primary");
         button(acts, "Show why", () => { answerCue("explained"); explained = true; render(); });
+        renderNote(true);
       } else {
         const why = typeof topic.explain === "function" ? topic.explain(rec) : topic.explain;
         s.textContent = " " + (why ?? "");
         verdict.append(b, s);
+        renderNote(false);
       }
     } else {
       verdict.hidden = true;
+      renderNote(false);
     }
   }
 

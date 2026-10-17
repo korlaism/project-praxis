@@ -56,6 +56,7 @@ Step 2 is the load-bearing one. Everything else is in service of having an hones
 | [0017](decisions/0017-desktop-first-with-a-gated-phone-landing.md) | Desktop first, with a gated phone landing | Accepted |
 | [0018](decisions/0018-expertise-reversal-applies-to-the-cue.md) | Expertise reversal applies to the cue, not to the bait | Accepted |
 | [0019](decisions/0019-claims-without-a-kill-criterion.md) | A claim with no kill criterion is marked, not left blank | Accepted |
+| [0020](decisions/0020-the-reconciliation-is-offered-not-demanded.md) | The reconciliation is offered, not demanded | Accepted |
 
 Seventeen accepted, one proposed, one superseded. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
 
