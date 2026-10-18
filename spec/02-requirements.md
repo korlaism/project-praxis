@@ -1,7 +1,9 @@
 # Phase 1 Requirements
 
 **Status:** Draft, 2026-09-18. Not yet agreed.
-**Scope:** Phase 1 = a six-week cohort run on the thinnest viable instrument, plus the analysis. No app, no accounts, no infrastructure. Requirement ids are stable and never reused. ADRs cite them.
+**Scope:** Phase 1 = a six-week cohort run on the thinnest viable instrument, plus the analysis. ~~No app, no accounts, no infrastructure.~~ Requirement ids are stable and never reused. ADRs cite them.
+
+> **Amended by [ADR 0022](../decisions/0022-the-product-frame-wins.md), 2026-10-18.** The product frame governs, and this sentence no longer selects what gets built — it had governed every ticket, and what it produced was a research instrument rather than the product. The claims in §1, the kill criteria and the cohort design stay here, unchanged and still true, as the validation plan for when there is a cohort. The requirement ids below describe the product's mechanics just as well as the instrument's, which is why they are kept rather than rewritten.
 
 A requirement whose **Source** column is blank is a guess and is marked as one.
 

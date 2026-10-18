@@ -19,13 +19,15 @@ const REQUIRED = ["subject", "scenario", "choice"];
 // attempt/retryOf carry ADR 0014's retries: a second try is its own card that
 // points at the first, never an edit of it (R-014). Without them a retry would
 // file as an indistinguishable second card and the link would be lost.
+// session (P-95) says which session the prediction was made inside, so the
+// record can be read a topic at a time. An id of a container, not of a person.
 // cue carries ADR 0018's deferred question (P-89): null when none was shown,
 // "shown" until the learner acts, then what they did. It is the only field a
 // card can gain after filing, because the card is written at the reveal and
 // the learner has not acted yet.
 const KEPT = ["subject", "scenario", "choice", "confidence", "observed", "correct",
               "unlisted", "errorTag", "outcomeSource", "params", "committedAt", "revealedAt",
-              "attempt", "retryOf", "cue", "reconciliation", "reconciledAt"];
+              "attempt", "retryOf", "cue", "reconciliation", "reconciledAt", "session"];
 
 /**
  * What a learner can do with a cue, in the two surfaces that show one.

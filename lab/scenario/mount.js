@@ -16,19 +16,19 @@ import { openNotebook } from "../notebook/store.mjs";
  * @param spec      a scenario specification
  * @param notebook  where cards go; defaults to this device's notebook
  */
-export function mountScenario(spec, { notebook = openNotebook() } = {}) {
+export function mountScenario(spec, { notebook = openNotebook(), session = null } = {}) {
   const v = validateScenario(spec);
   if (!v.ok) throw new Error("invalid scenario:\n  " + v.errors.join("\n  "));
 
   // A wrapped scenario (ADR 0009) embeds someone else's simulation. Nothing
   // can watch it, so there is no primitive, no parameters and no answer check
   // — its answer is asserted by the author, and the card says so.
-  if (spec.embed) return mountWrapped(spec, notebook);
+  if (spec.embed) return mountWrapped(spec, notebook, session);
 
   const primitive = getPrimitive(spec.primitive);
   const params = resolveParams(primitive, spec.params);
 
-  const filing = filer(spec, notebook, "observed");
+  const filing = filer(spec, notebook, "observed", session);
 
   let lab;
   lab = mountLab({
@@ -61,7 +61,7 @@ export function mountScenario(spec, { notebook = openNotebook() } = {}) {
   return lab;
 }
 
-function mountWrapped(spec, notebook) {
+function mountWrapped(spec, notebook, session = null) {
   return mountLab({
     question: spec.question,
     note: spec.note,
@@ -72,7 +72,7 @@ function mountWrapped(spec, notebook) {
     cue: (record) => spec.cues?.[errorTagFor(spec, record)] ?? null,
     // No observation is possible, so reveal() carries nothing and the gate
     // falls back to the authored answer — the seam P-52 already left open.
-    ...filer(spec, notebook, "asserted"),
+    ...filer(spec, notebook, "asserted", session),
   });
 }
 
@@ -85,7 +85,7 @@ function mountWrapped(spec, notebook) {
  * in their own words (R-012) — neither can be filed with it, because at the
  * reveal the learner has not had the chance to do either yet.
  */
-function filer(spec, notebook, outcomeSource) {
+function filer(spec, notebook, outcomeSource, session = null) {
   let cardId = null;
   // R-013. Opened at mount from what the notebook already holds: come back to
   // the thing that stumped you last week and the lab should know it did.
@@ -128,6 +128,9 @@ function filer(spec, notebook, outcomeSource) {
         subject: spec.subject,
         errorTag: errorTagFor(spec, record),
         outcomeSource,
+        // Which session this was predicted in, when it was predicted in one
+        // (P-95). Lets the record be read a topic at a time.
+        ...(session ? { session } : {}),
       });
       cardId = r.card?.id ?? null;
       if (r.warning) console.warn(r.warning);

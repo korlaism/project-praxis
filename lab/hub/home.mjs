@@ -6,7 +6,7 @@
  * these build on each other: motion first, because everything else assumes it.
  * Alphabetical would put circular motion second, in front of the idea it needs.
  */
-const CONCEPT_ORDER = [
+export const CONCEPT_ORDER = [
   ["motion-without-force", "Motion without force"],
   ["falling",              "Falling"],
   ["action-and-reaction",  "Action and reaction"],
