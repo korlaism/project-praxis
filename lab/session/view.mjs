@@ -42,6 +42,18 @@ export function sessionModel(session, { scenarios, notebook }) {
     scenarios: c.scenarios.map((s) => ({ ...s, path: `/session/${session.id}${s.path}` })),
   }));
 
+  // Composed for this session and already past the answer check. Shown in
+  // their own group so a learner can tell what a model made from what ships.
+  const made = (session.scenarios ?? []).map((spec) => ({
+    id: spec.id,
+    question: spec.question,
+    difficulty: spec.difficulty ?? null,
+    path: `/session/${session.id}/s/${encodeURIComponent(spec.id)}`,
+  }));
+  if (made.length)
+    concepts.push({ concept: "composed", subject: "made for this session",
+                    title: "Composed by your AI", scenarios: made });
+
   return {
     id: session.id,
     topic: session.topic,
@@ -51,6 +63,7 @@ export function sessionModel(session, { scenarios, notebook }) {
     notes: session.notes.slice().reverse(),
     concepts,
     hasSimulations: concepts.length > 0,
+    composed: made.length,
     predictions: predictionsIn(notebook, session.id),
     // Told "nothing here", a learner deserves to be told what IS here. This
     // list is the honest size of the thing, and it is meant to look small.

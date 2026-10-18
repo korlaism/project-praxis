@@ -85,3 +85,26 @@
 .hub-empty-list{display:flex;flex-wrap:wrap;gap:6px}
 .hub-empty-c{font:.76rem var(--mono);color:var(--ink-2);padding:5px 9px;
   background:var(--panel);border:1px solid var(--line);border-radius:2px}
+
+/* ── The model seam (P-96, ADR 0023) ──────────────────────────────────────
+   Deliberately plain. This page asks for a key, so everything on it should
+   read as a statement of fact rather than a sales pitch. */
+.hub-plain{display:grid;gap:10px}
+.hub-form{display:grid;gap:14px}
+.hub-field{display:grid;gap:5px}
+.hub-field-l{font:.76rem var(--mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.1em}
+.hub-field-i{font-family:var(--font);font-size:.98rem;padding:12px 14px;width:100%;
+  color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:3px}
+.hub-field-i::placeholder{color:var(--ink-3)}
+.hub-field-i:focus{outline:none;border-color:var(--accent)}
+.hub-acts{display:flex;gap:8px;flex-wrap:wrap}
+.hub-forget{font-family:var(--font);font-weight:500;font-size:.88rem;padding:9px 16px;cursor:pointer;
+  background:transparent;color:var(--ink-2);border:1px dashed var(--line);border-radius:2px}
+.hub-forget:hover{color:var(--ink);border-color:var(--wrong)}
+.hub-said{margin:0;color:var(--ink-2);line-height:1.5;max-width:60ch}
+.hub-said[hidden]{display:none!important}
+.hub-compose{display:grid;gap:10px;justify-items:start}
+.hub-settings{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  font-family:var(--font);text-align:left;cursor:pointer;width:100%;padding:14px 18px;
+  background:transparent;border:1px dashed var(--line);border-radius:3px;color:var(--ink)}
+.hub-settings:hover{border-color:var(--accent)}

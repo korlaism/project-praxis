@@ -59,6 +59,7 @@ Step 2 is the load-bearing one. Everything else is in service of having an hones
 | [0020](decisions/0020-the-reconciliation-is-offered-not-demanded.md) | The reconciliation is offered, not demanded | Accepted |
 | [0021](decisions/0021-logged-confusion-is-measured-not-killable.md) | Logged confusion is measured, not killable | Accepted |
 | [0022](decisions/0022-the-product-frame-wins.md) | The product frame wins, and Phase 1's scope sentence does not | Accepted |
+| [0023](decisions/0023-the-model-seam-and-the-answer-check-as-its-gate.md) | The model seam, and the answer check as its gate | Accepted |
 
 Seventeen accepted, one proposed, one superseded. Each declares `Rests on:` in its header: `0001`, `0002` and `0004` rest on **judgment** — directions chosen, whose consequences the pilot tests.
 

@@ -17,7 +17,8 @@ import { installDom } from "../harness/dom-stub.mjs";
 import { openNotebook, memoryBackend } from "../notebook/store.mjs";
 import { openSessions } from "../session/store.mjs";
 
-async function start({ search = "", hash = "", scenarios, store, sessionStore } = {}) {
+async function start({ search = "", hash = "", scenarios, store, sessionStore,
+                      modelSettings, composeWith } = {}) {
   const dom = installDom();
   if (search) location.search = search;      // set before the hub reads it
   if (hash) location.hash = hash;            // the learner arriving on a saved address
@@ -27,7 +28,7 @@ async function start({ search = "", hash = "", scenarios, store, sessionStore } 
   // tie on touchedAt and the resume order becomes arbitrary.
   let clock = 1_700_000_000_000;
   const sessions = sessionStore ?? openSessions({ backend: memoryBackend(), now: () => (clock += 1000) });
-  startHub({ store: notebook, sessionStore: sessions, scenarios });
+  startHub({ store: notebook, sessionStore: sessions, scenarios, modelSettings, composeWith });
   const one = (cls) => dom.body.find((n) => n.className?.split?.(" ").includes(cls));
   const all = (cls) => dom.body.findAll((n) => n.className?.split?.(" ").includes(cls));
   const text = () => {
@@ -341,5 +342,146 @@ test("the front page still lists everything, under the sessions", async () => {
   const { dom, all, text } = await start();
   assert.equal(all("hub-card").length, Object.keys(SCENARIOS).length);
   assert.match(text(), /Or browse everything/);
+  dom.restore();
+});
+
+/* ── P-96: the model seam, and the answer check in front of it ──────────── */
+
+import { openModelSettings } from "../model/settings.mjs";
+import { composeFor } from "../model/compose.mjs";
+
+/** A model that replies with whatever specs the test names. */
+function modelReplying(scenarios) {
+  const sent = [];
+  return { sent, ask: async (prompt) => { sent.push(prompt); return JSON.stringify({ scenarios }); } };
+}
+
+const TRUTHFUL = {
+  schema: 1, id: "ice", primitive: "two-pucks", concept: "friction-and-inertia", difficulty: "easy",
+  subject: "physics", params: { push: 0.9, friction: 0.02, u: 2 },
+  question: "A hard shove on near-frictionless ice. What happens?",
+  options: [{ id: "outruns", label: "It runs away" }, { id: "both", label: "Both stop" }],
+  correct: "outruns", errorTags: { both: "things-naturally-stop" }, explain: "The push keeps winning.",
+};
+const LYING = { ...TRUTHFUL, id: "ice-2", correct: "both", errorTags: { outruns: "things-naturally-stop" } };
+
+/** A settings store with an endpoint already in it. */
+function configured() {
+  const m = openModelSettings({ backend: memoryBackend() });
+  m.save({ url: "https://api.example.com/v1/chat/completions", key: "sk-test", model: "a-model" });
+  return m;
+}
+
+test("with no model configured, nothing offers to compose and nothing can transmit", async () => {
+  const { dom, byId, button, text } = await start();
+  byId("hub-topic").value = "photosynthesis";
+  button("Start").onclick();
+  assert.ok(!button("Compose with your AI"), "a learner with no key is offered no model");
+  assert.match(text(), /not set up/);
+  dom.restore();
+});
+
+test("the settings page keeps an endpoint and says what leaves the device", async () => {
+  const { dom, byId, button, text, one } = await start();
+  // The label lives in spans inside the button, so find it by its class.
+  one("hub-settings").onclick();
+  assert.ok(byId("model-url"), "no endpoint field");
+  byId("model-url").value = "https://api.example.com/v1/chat/completions";
+  byId("model-key").value = "sk-test";
+  byId("model-name").value = "a-model";
+  button("Save").onclick();
+  assert.match(text(), /Saved/);
+  // The promise the ADR makes, made in front of the learner before they type.
+  assert.match(text(), /never sent/);
+  assert.match(text(), /thrown away and you never see it/);
+  dom.restore();
+});
+
+test("a composed scenario that survives the simulation is offered in the session", async () => {
+  const { dom, byId, button, text, sessions } = await start({
+    modelSettings: configured(),
+    composeWith: async () => ({ ok: true, scenarios: [TRUTHFUL], rejected: [], asked: 1 }),
+  });
+  byId("hub-topic").value = "friction on ice";
+  button("Start").onclick();
+  await button("Compose with your AI").onclick();
+  assert.match(text(), /Composed by your AI/);
+  assert.match(text(), /near-frictionless ice/);
+  assert.equal(sessions.list()[0].scenarios.length, 1, "it must survive a reload too");
+  dom.restore();
+});
+
+test("a composed scenario the simulation contradicts never reaches the page", async () => {
+  // The whole safety argument of ADR 0023, end to end: the real compose runs
+  // the answer check, so a plausible-and-wrong scenario is gone before the
+  // page ever hears about it.
+  const { dom, byId, button, text, sessions } = await start({
+    modelSettings: configured(),
+    composeWith: (topic, opts) => composeFor(topic, { ...opts, ask: async () => JSON.stringify({ scenarios: [LYING] }) }),
+  });
+  byId("hub-topic").value = "friction on ice";
+  button("Start").onclick();
+  await button("Compose with your AI").onclick();
+  assert.ok(!text().includes("Composed by your AI"), "a scenario the simulation contradicts was offered");
+  assert.deepEqual(sessions.list()[0].scenarios, []);
+  dom.restore();
+});
+
+test("what the model got wrong is said out loud, and survives the redraw", async () => {
+  // ADR 0023 §6. The first version of this wiped the report off the screen
+  // the instant it had something to report.
+  const { dom, byId, button, text } = await start({
+    modelSettings: configured(),
+    composeWith: (topic, opts) =>
+      composeFor(topic, { ...opts, ask: async () => JSON.stringify({ scenarios: [TRUTHFUL, LYING] }) }),
+  });
+  byId("hub-topic").value = "friction on ice";
+  button("Start").onclick();
+  await button("Compose with your AI").onclick();
+  assert.match(text(), /1 of 2 survived/);
+  assert.match(text(), /thrown away/);
+  dom.restore();
+});
+
+test("a model that honestly declines the topic is reported as a fair answer", async () => {
+  const { dom, byId, button, text } = await start({
+    modelSettings: configured(),
+    composeWith: (topic, opts) => composeFor(topic, { ...opts, ask: async () => JSON.stringify({ scenarios: [] }) }),
+  });
+  byId("hub-topic").value = "photosynthesis";
+  button("Start").onclick();
+  await button("Compose with your AI").onclick();
+  assert.match(text(), /fair answer/);
+  dom.restore();
+});
+
+test("an endpoint that fails is reported, and breaks nothing", async () => {
+  const { dom, byId, button, text } = await start({
+    modelSettings: configured(),
+    composeWith: async () => ({ ok: false, error: "401 Unauthorized", scenarios: [], rejected: [], asked: 0 }),
+  });
+  byId("hub-topic").value = "friction on ice";
+  button("Start").onclick();
+  await button("Compose with your AI").onclick();
+  assert.match(text(), /401 Unauthorized/);
+  assert.match(text(), /Your notes/, "the session is still usable");
+  dom.restore();
+});
+
+test("a composed scenario can be opened and predicted on, like any other", async () => {
+  const { dom, byId, button, all, notebook } = await start({
+    modelSettings: configured(),
+    composeWith: async () => ({ ok: true, scenarios: [TRUTHFUL], rejected: [], asked: 1 }),
+  });
+  byId("hub-topic").value = "friction on ice";
+  button("Start").onclick();
+  await button("Compose with your AI").onclick();
+  const card = all("hub-card").find((b) => b.find((n) => n.textContent?.includes("near-frictionless")));
+  assert.ok(card, "the composed scenario is listed but cannot be opened");
+  card.onclick();
+  dom.body.find((n) => n.id?.startsWith("opt-")).onclick();
+  dom.tick(3000);
+  const [filed] = notebook.cards("physics");
+  assert.equal(filed.scenario, "ice", "a prediction on a composed scenario is recorded like any other");
   dom.restore();
 });

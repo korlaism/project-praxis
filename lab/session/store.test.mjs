@@ -154,3 +154,37 @@ test("a session says it could not be saved rather than claiming it was", () => {
   assert.ok(r.warning);
   assert.equal(s.list().length, 1, "and it stays usable until the tab closes");
 });
+
+/* ── P-96: scenarios composed for this session ──────────────────────────── */
+
+test("a verified scenario can be kept in the session it was composed for", () => {
+  const s = open();
+  const { session } = s.start("friction");
+  const spec = { schema: 1, id: "gen-a", primitive: "two-pucks", subject: "physics", generated: true };
+  assert.equal(s.keep(session.id, spec).ok, true);
+  assert.deepEqual(s.get(session.id).scenarios.map((x) => x.id), ["gen-a"]);
+});
+
+test("keeping the same scenario twice does not list it twice", () => {
+  const s = open();
+  const { session } = s.start("friction");
+  const spec = { schema: 1, id: "gen-a", primitive: "two-pucks", subject: "physics", generated: true };
+  s.keep(session.id, spec);
+  s.keep(session.id, spec);
+  assert.equal(s.get(session.id).scenarios.length, 1);
+});
+
+test("a session without generated scenarios has an empty list, not a missing one", () => {
+  // Older sessions predate this. They must not read as broken.
+  const s = open();
+  const { session } = s.start("friction");
+  assert.deepEqual(s.get(session.id).scenarios, []);
+});
+
+test("a scenario kept in a session goes when the session goes", () => {
+  const s = open();
+  const { session } = s.start("friction");
+  s.keep(session.id, { schema: 1, id: "gen-a", primitive: "two-pucks", subject: "physics" });
+  s.drop(session.id);
+  assert.equal(JSON.stringify(s.export()).includes("gen-a"), false);
+});
