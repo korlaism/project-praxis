@@ -22,6 +22,8 @@ import mathsLines from "./maths-lines.mjs";
 import mathsQuadratics from "./maths-quadratics.mjs";
 import chemLimiting from "./chem-limiting.mjs";
 import chemMass from "./chem-mass.mjs";
+import csSearching from "./cs-searching.mjs";
+import csMemory from "./cs-memory.mjs";
 
 export const BY_WEEK = { 1: week1, 2: week2, 3: week3, 4: week4, 5: week5 };
 /**
@@ -32,6 +34,8 @@ export const BY_WEEK = { 1: week1, 2: week2, 3: week3, 4: week4, 5: week5 };
 export const BY_SUBJECT = {
   maths: [...mathsLines, ...mathsQuadratics],
   chemistry: [...chemLimiting, ...chemMass],
+  computing: [...csSearching, ...csMemory],
 };
 export default [...week1, ...week2, ...week3, ...week4, ...week5,
-                ...mathsLines, ...mathsQuadratics, ...chemLimiting, ...chemMass];
+                ...mathsLines, ...mathsQuadratics, ...chemLimiting, ...chemMass,
+                ...csSearching, ...csMemory];

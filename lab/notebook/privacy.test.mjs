@@ -36,14 +36,20 @@ function walk(dir) {
  * failed. A module that so much as names one of these is transmitting as far
  * as this test is concerned, and that is the right level of paranoia for it.
  */
+const IMPORT_URL = /\bimport\s*\(\s*["'`]https?:/;
 const TRANSPORTS = [
   /\bfetch\b/,
   /\bXMLHttpRequest\b/,
   /\bWebSocket\b/,
   /\bsendBeacon\b/,
   /\bEventSource\b/,
-  /\bimport\s*\(\s*["'`]https?:/,
+  IMPORT_URL,
 ];
+
+/** Everything between quotes, gone. Prose is not a call. */
+function withoutStrings(code) {
+  return code.replace(/(["'`])(?:\\.|(?!\1)[^\\])*\1/g, '""');
+}
 
 /**
  * The one module allowed to transmit (ADR 0023).
@@ -65,10 +71,16 @@ test("only one module in the built lab can send anything anywhere", () => {
     const where = file.slice(BUILT.length);
     const body = readFileSync(file, "utf8");
     for (const [n, line] of body.split("\n").entries()) {
-      // Strip line comments before matching: prose about fetch is not fetch.
+      // Comments are not code, and neither are strings. The name-based
+      // patterns above matched the English word "fetch" in a scenario's own
+      // question — "does the order change what memory has to fetch?" — and
+      // reported four bank items as transmitting. A page cannot call anything
+      // by writing its name inside a quote.
       const code = line.replace(/\/\/.*$/, "").replace(/^\s*\*.*$/, "");
       for (const t of TRANSPORTS) {
-        if (!t.test(code)) continue;
+        // The dynamic-import rule needs the URL, which lives in the string.
+        const against = t === IMPORT_URL ? code : withoutStrings(code);
+        if (!t.test(against)) continue;
         if (where === MAY_TRANSMIT) allowed++;
         else offenders.push(`${where}:${n + 1}  ${line.trim()}`);
       }

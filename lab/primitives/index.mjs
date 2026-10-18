@@ -8,10 +8,12 @@ import * as linePair from "./line-pair.mjs";
 import * as quadraticRoots from "./quadratic-roots.mjs";
 import * as limitingReagent from "./limiting-reagent.mjs";
 import * as sealedJar from "./sealed-jar.mjs";
+import * as searchRace from "./search-race.mjs";
+import * as cacheWalk from "./cache-walk.mjs";
 
 export const PRIMITIVES = Object.fromEntries(
   [circularRelease, contactCollision, twoPucks, freeFall, linePair, quadraticRoots,
-   limitingReagent, sealedJar].map((p) => [p.id, p]),
+   limitingReagent, sealedJar, searchRace, cacheWalk].map((p) => [p.id, p]),
 );
 
 export function getPrimitive(id) {

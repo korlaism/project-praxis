@@ -16,8 +16,28 @@ import { PRIMITIVES, getPrimitive, resolveParams } from "../primitives/index.mjs
 import whichWay from "../scenarios/which-way-does-it-fly.mjs";
 import truckFly from "../scenarios/truck-and-fly.mjs";
 import pucks from "../scenarios/what-keeps-it-moving.mjs";
+import BANK from "../scenarios/bank/index.mjs";
 
 const SHIPPED = { whichWay, truckFly, pucks };
+
+test("every answer a scenario claims is one its primitive can actually produce", () => {
+  // P-79: an item whose correct answer no setting of the controls reaches is
+  // an item nobody can ever be right about by watching.
+  //
+  // Deliberately about the CLAIMED answer and not about every declared
+  // outcome. An outcome list is also the vocabulary a scenario's options are
+  // drawn from, so a primitive may legitimately declare outcomes that exist
+  // only to be wrong answers — two-pucks declares "needs" for that reason,
+  // and asserting over the whole list flags it as a defect when it is not.
+  const reachable = new Map();
+  for (const spec of [...Object.values(SHIPPED), ...BANK]) {
+    if (spec.embed) continue;
+    const p = getPrimitive(spec.primitive);
+    if (!reachable.has(p.id)) reachable.set(p.id, reachableOutcomes(p));
+    assert.ok(reachable.get(p.id).has(spec.correct),
+      `${spec.id} claims "${spec.correct}", which no setting of ${p.id}'s controls produces`);
+  }
+});
 
 test("every primitive satisfies the contract", () => {
   for (const [id, p] of Object.entries(PRIMITIVES)) {
@@ -154,8 +174,14 @@ test("two primitives answer the same at every setting, and the rest do not", () 
   // Every subject added since has landed on the derived side, deliberately
   // (P-91, P-97). The generator's 0-of-7 there is the measurement that needs
   // more than one subject behind it before it means anything.
-  for (const id of ["line-pair", "quadratic-roots", "limiting-reagent", "sealed-jar"])
+  for (const id of ["line-pair", "quadratic-roots", "limiting-reagent", "sealed-jar",
+                    "search-race", "cache-walk"])
     assert.equal(isParameterIndependent(PRIMITIVES[id]), false, `${id} drifted to the easy side`);
   assert.equal(reachableOutcomes(PRIMITIVES["limiting-reagent"]).size, 3);
   assert.equal(reachableOutcomes(PRIMITIVES["sealed-jar"]).size, 2);
+  assert.equal(reachableOutcomes(PRIMITIVES["cache-walk"]).size, 2);
+  // Three, and the third is the one that went missing: search-race could
+  // produce a tie that no setting of its controls reached until its range
+  // started at two items. P-79, found for the second time.
+  assert.equal(reachableOutcomes(PRIMITIVES["search-race"]).size, 3);
 });

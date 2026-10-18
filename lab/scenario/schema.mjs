@@ -129,7 +129,7 @@ export function validateScenario(spec) {
                     // Maths (P-91). The subject is second because its answers
                     // are computed rather than simulated, so the answer check
                     // is exact and cheap — see spec/08.
-                    "straight-lines", "quadratics", "limiting-reagent", "conservation-of-mass"];
+                    "straight-lines", "quadratics", "limiting-reagent", "conservation-of-mass", "searching", "memory-and-cost"];
   const DIFFICULTY = ["easy", "medium", "hard"];
   if (spec.concept !== undefined && !CONCEPTS.includes(spec.concept))
     bad(`concept "${spec.concept}" is not one of ${CONCEPTS.join(", ")}`);
