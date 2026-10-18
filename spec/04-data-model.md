@@ -65,6 +65,8 @@ Phase 1 uses a fixed starting taxonomy for force and motion, drawn from the publ
 | `bigger-pushes-harder` | The larger body exerts the greater force in an interaction |
 | `more-means-more-product` | Whichever reactant there is most of decides how much is produced |
 | `mass-is-lost` | Fizzing, burning or dissolving destroys matter, because the balance reading falls |
+| `better-big-o-always-wins` | The algorithm with better growth is faster on every input, not just large ones |
+| `same-work-same-cost` | The same number of operations costs the same however they are ordered |
 | `outward-in-circles` | Circular motion involves an outward force |
 | `things-naturally-stop` | Rest is the default state; motion is the thing needing explanation |
 | `force-is-stored` | An object carries a quantity of "push" that depletes |

@@ -29,6 +29,15 @@ test("a topic naming a subject finds everything in it", () => {
   assert.deepEqual(found("maths"), ["quadratics", "straight-lines"]);
 });
 
+test("a word that could sit in any topic matches nothing", () => {
+  // "Finding things" and "why do things fall?" share six letters of nothing,
+  // and a learner asking about falling was offered binary search until the
+  // generic list existed. The length floor alone does not catch this.
+  assert.deepEqual(found("things"), []);
+  assert.deepEqual(found("what happens"), []);
+  assert.deepEqual(found("why do things fall?"), ["falling"], "and the real match still lands");
+});
+
 test("a topic we have nothing for finds nothing, and does not guess", () => {
   // The whole reason this function exists. An unrelated list here would be
   // the product lying about what it can do.

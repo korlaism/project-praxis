@@ -289,9 +289,17 @@ moving nor lines on a grid, which ADR 0007 named as the hard part.
 | `limiting-reagent` | a / b / neither | which pile permits fewer reactions, `⌊a/needA⌋` against `⌊b/needB⌋` |
 | `sealed-jar` | same / lighter | whether the gas can leave |
 
-The next run of the spike therefore measures the hard half across **three subjects** rather than
-one, and a per-subject split will say whether 0/7 was about mechanics or about derivation.
+`P-98` adds computing, and with it the two halves the vision asks for — algorithms and hardware:
 
-This changes nothing about what has been measured. No generator has been run against the maths or
-chemistry primitives; the figures above stand exactly as they are until `P-90` or a repeat of
-`P-50` is run.
+| Primitive | Outcomes | Decided by |
+|---|---|---|
+| `search-race` | linear / binary / tie | the position wanted, against where a halving search looks |
+| `cache-walk` | rows / same | whether the cache can hold a line per row |
+
+**Ten primitives across four subjects, eight of them on the derived side.** The next run of the
+spike therefore measures the hard half across four subjects rather than one, and a per-subject
+split will say whether 0/7 was about mechanics or about derivation.
+
+This changes nothing about what has been measured. No generator has been run against the maths,
+chemistry or computing primitives; the figures above stand exactly as they are until `P-90` or a
+repeat of `P-50` is run.

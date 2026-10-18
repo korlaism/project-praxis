@@ -18,6 +18,20 @@ const TITLE = new Map(CONCEPT_ORDER);
 const RANK = new Map(CONCEPT_ORDER.map(([id], i) => [id, i]));
 
 /**
+ * Words long enough to carry meaning but too general to carry any.
+ *
+ * The length floor alone is not enough: "Finding things" and "why do things
+ * fall?" share "things", which is six letters of nothing, and a learner
+ * asking about falling was offered binary search. Deliberately short — a word
+ * goes in here only when it could sit in any topic in any subject.
+ */
+const GENERIC = new Set([
+  "things", "thing", "stuff", "something", "anything", "what", "which", "when",
+  "where", "does", "happen", "happens", "about", "this", "that", "with", "from",
+  "your", "their", "them", "they", "work", "works", "like",
+]);
+
+/**
  * Words worth matching on. Four characters is the floor: it keeps "why", "do"
  * and "the" from matching everything, and it is the shortest word in the
  * vocabulary we actually have ("line", "fall", "push").
@@ -26,7 +40,7 @@ function content(text) {
   return String(text ?? "")
     .toLowerCase()
     .split(/[^a-z0-9]+/)
-    .filter((w) => w.length >= 4);
+    .filter((w) => w.length >= 4 && !GENERIC.has(w));
 }
 
 /** "fall" and "falling" are the same word for this purpose; "fall" and "far" are not. */

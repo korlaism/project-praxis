@@ -16,6 +16,8 @@ export const CONCEPT_ORDER = [
   ["quadratics",           "Quadratics"],
   ["limiting-reagent",     "What runs out first"],
   ["conservation-of-mass", "Where the mass went"],
+  ["searching",            "Searching a sorted list"],
+  ["memory-and-cost",      "Why order costs"],
 ];
 const TITLE = new Map(CONCEPT_ORDER);
 const RANK = new Map(CONCEPT_ORDER.map(([id], i) => [id, i]));
