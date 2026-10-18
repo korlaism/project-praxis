@@ -485,3 +485,75 @@ test("a composed scenario can be opened and predicted on, like any other", async
   assert.equal(filed.scenario, "ice", "a prediction on a composed scenario is recorded like any other");
   dom.restore();
 });
+
+/* ── P-100: linking topics, and groups on the front page ────────────────── */
+
+/** Start two sessions and hand back their ids, newest first. */
+async function twoSessions(harness, first, second) {
+  harness.byId("hub-topic").value = first;
+  harness.button("Start").onclick();
+  harness.dom.body.find((n) => n.className === "hub-back").onclick();
+  harness.byId("hub-topic").value = second;
+  harness.button("Start").onclick();
+  return harness.sessions.list().map((s) => s.id);
+}
+
+test("two topics can be linked, and the link shows on both", async () => {
+  const h = await start();
+  const [newer, older] = await twoSessions(h, "straight lines", "quadratics");
+  h.byId("session-link").value = older;
+  h.button("Link").onclick();
+  assert.deepEqual(h.sessions.linksOf(newer), [older]);
+  assert.match(h.text(), /Related topics/);
+  assert.match(h.text(), /straight lines/, "the other end is not shown");
+
+  // And from the other side, without linking it again.
+  h.dom.body.find((n) => n.className === "hub-back").onclick();
+  h.all("hub-session").find((b) => b.find((n) => n.textContent === "straight lines")).onclick();
+  assert.match(h.text(), /quadratics/);
+  h.dom.restore();
+});
+
+test("a link can be taken back from either end", async () => {
+  const h = await start();
+  const [newer, older] = await twoSessions(h, "straight lines", "quadratics");
+  h.byId("session-link").value = older;
+  h.button("Link").onclick();
+  h.button("Unlink").onclick();
+  assert.deepEqual(h.sessions.linksOf(newer), []);
+  h.dom.restore();
+});
+
+test("the front page puts linked topics together", async () => {
+  const h = await start();
+  const [newer, older] = await twoSessions(h, "straight lines", "quadratics");
+  h.byId("session-link").value = older;
+  h.button("Link").onclick();
+  h.dom.body.find((n) => n.className === "hub-back").onclick();
+
+  const groups = h.all("hub-group");
+  assert.equal(groups.length, 1, "the two linked topics are not grouped");
+  assert.match(h.text(), /2 linked topics/);
+  // Exact match: "hub-session-t" and "hub-session-n" are the spans inside
+  // each button, and a substring test counts the same button three times.
+  assert.equal(groups[0].findAll((n) => n.className === "hub-session").length, 2);
+  h.dom.restore();
+});
+
+test("a session nobody linked is still just a row", async () => {
+  const h = await start();
+  h.byId("hub-topic").value = "on its own";
+  h.button("Start").onclick();
+  h.dom.body.find((n) => n.className === "hub-back").onclick();
+  assert.equal(h.all("hub-group").length, 0, "a group of one must not look like a group");
+  assert.equal(h.all("hub-session").length, 1);
+  h.dom.restore();
+});
+
+test("the first session has nothing to link to, and says so", async () => {
+  const h = await start();
+  h.byId("hub-topic").value = "the only one";
+  h.button("Start").onclick();
+  assert.ok(!h.byId("session-link"), "there is no second topic to offer");
+  h.dom.restore();
+});

@@ -71,7 +71,9 @@ test("the home list says enough to choose between sessions", () => {
   const notebook = openNotebook({ backend: memoryBackend() });
   notebook.record({ subject: "physics", scenario: "two-balls-no-air", choice: "heavier", session: a.id });
 
-  const rows = homeSessions(s, notebook);
+  // Grouped since P-100: an unlinked session is a group of one, so the page
+  // is one shape whether or not anything has been linked.
+  const rows = homeSessions(s, notebook).flatMap((g) => g.sessions);
   assert.deepEqual(rows.map((r) => r.topic), ["quadratics", "falling"], "most recent first");
   const falling = rows.find((r) => r.id === a.id);
   assert.equal(falling.notes, 1);
@@ -80,4 +82,59 @@ test("the home list says enough to choose between sessions", () => {
   const quadratics = rows.find((r) => r.id === b.id);
   assert.equal(quadratics.notes, 0);
   assert.equal(quadratics.predictions, 0);
+});
+
+/* ── P-100: linked topics on the page ───────────────────────────────────── */
+
+test("a session page shows what it is linked to, and what it could be linked to", () => {
+  const s = sessions();
+  const a = s.start("straight lines").session;
+  const b = s.start("quadratics").session;
+  const c = s.start("friction").session;
+  s.link(a.id, b.id);
+  const m = sessionModel(s.get(a.id), { scenarios: SCENARIOS, notebook: openNotebook({ backend: memoryBackend() }), sessions: s });
+
+  assert.deepEqual(m.linked.map((x) => x.topic), ["quadratics"]);
+  assert.equal(m.linked[0].path, `/session/${b.id}`);
+  assert.deepEqual(m.linkable.map((x) => x.topic), ["friction"],
+    "already linked, and itself, are not offered again");
+  assert.ok(!m.linkable.some((x) => x.id === a.id), "a topic cannot be offered itself");
+});
+
+test("a session with no links says nothing is linked rather than showing an empty list", () => {
+  const s = sessions();
+  const a = s.start("alone").session;
+  const m = sessionModel(s.get(a.id), { scenarios: SCENARIOS, notebook: openNotebook({ backend: memoryBackend() }), sessions: s });
+  assert.deepEqual(m.linked, []);
+  assert.deepEqual(m.linkable, [], "there is nothing else to link to yet");
+});
+
+test("the home list groups linked topics together and leaves the rest alone", () => {
+  const s = sessions();
+  const a = s.start("straight lines").session;
+  const b = s.start("quadratics").session;
+  const c = s.start("friction").session;
+  s.link(a.id, b.id);
+  const rows = homeSessions(s, openNotebook({ backend: memoryBackend() }));
+
+  assert.equal(rows.length, 2, "a group of two and a session on its own");
+  const group = rows.find((r) => r.sessions.length > 1);
+  assert.deepEqual(group.sessions.map((x) => x.topic).sort(), ["quadratics", "straight lines"]);
+  assert.equal(group.linked, true);
+  const solo = rows.find((r) => r.sessions.length === 1);
+  assert.equal(solo.sessions[0].topic, "friction");
+  assert.equal(solo.linked, false);
+});
+
+test("groups are ordered by whichever of their topics was touched last", () => {
+  const s = sessions();
+  const a = s.start("old one").session;
+  const b = s.start("also old").session;
+  s.link(a.id, b.id);
+  const c = s.start("newest").session;
+  assert.equal(homeSessions(s, openNotebook({ backend: memoryBackend() }))[0].sessions[0].topic, "newest");
+
+  s.note(a.id, "back to this");
+  const rows = homeSessions(s, openNotebook({ backend: memoryBackend() }));
+  assert.equal(rows[0].sessions[0].topic, "old one", "the group rises when any of it is worked in");
 });

@@ -188,3 +188,143 @@ test("a scenario kept in a session goes when the session goes", () => {
   s.drop(session.id);
   assert.equal(JSON.stringify(s.export()).includes("gen-a"), false);
 });
+
+/* ── P-100: linking topics, and groups as connected components ──────────── */
+
+test("a link is visible from both ends", () => {
+  const s = open();
+  const a = s.start("straight lines").session;
+  const b = s.start("quadratics").session;
+  assert.equal(s.link(a.id, b.id).ok, true);
+  assert.deepEqual(s.linksOf(a.id), [b.id]);
+  assert.deepEqual(s.linksOf(b.id), [a.id], "a link only one side can see is not a link");
+});
+
+test("a link is stored once, not twice", () => {
+  // Two lists that must agree are two lists that can disagree. One normalised
+  // edge cannot, which is why the sessions themselves hold nothing.
+  const s = open();
+  const a = s.start("straight lines").session;
+  const b = s.start("quadratics").session;
+  s.link(a.id, b.id);
+  const raw = JSON.stringify(s.export());
+  assert.equal(raw.split(`"${a.id}"`).length - 1, 2,
+    "the id appears more than twice — once as a session, once in the edge");
+});
+
+test("linking the same pair twice changes nothing", () => {
+  const s = open();
+  const a = s.start("a").session, b = s.start("b").session;
+  s.link(a.id, b.id);
+  s.link(b.id, a.id);
+  assert.deepEqual(s.linksOf(a.id), [b.id]);
+});
+
+test("a session cannot be linked to itself", () => {
+  const s = open();
+  const a = s.start("a").session;
+  assert.equal(s.link(a.id, a.id).ok, false);
+  assert.deepEqual(s.linksOf(a.id), []);
+});
+
+test("a link to something that does not exist is refused", () => {
+  const s = open();
+  const a = s.start("a").session;
+  assert.equal(s.link(a.id, "no-such-session").ok, false);
+  assert.equal(s.link("no-such-session", a.id).ok, false);
+});
+
+test("a link can be taken back", () => {
+  const s = open();
+  const a = s.start("a").session, b = s.start("b").session;
+  s.link(a.id, b.id);
+  assert.equal(s.unlink(b.id, a.id).ok, true, "either end can undo it");
+  assert.deepEqual(s.linksOf(a.id), []);
+});
+
+test("dropping a session takes its links with it", () => {
+  // A link to something that no longer exists is a dead row in the store and
+  // a button on the page that goes nowhere.
+  const s = open();
+  const a = s.start("a").session, b = s.start("b").session;
+  s.link(a.id, b.id);
+  s.drop(b.id);
+  assert.deepEqual(s.linksOf(a.id), []);
+  assert.equal(JSON.stringify(s.export()).includes(b.id), false);
+});
+
+test("linked sessions come back as one group", () => {
+  // A group is not a second thing to keep in sync — it is what the links
+  // already say. Three sessions, two links, one group.
+  const s = open();
+  const a = s.start("straight lines").session;
+  const b = s.start("quadratics").session;
+  const c = s.start("friction").session;
+  s.link(a.id, b.id);
+  const groups = s.groups().map((g) => g.slice().sort());
+  assert.equal(groups.length, 2);
+  assert.ok(groups.some((g) => g.length === 2 && g.includes(a.id) && g.includes(b.id)));
+  assert.ok(groups.some((g) => g.length === 1 && g[0] === c.id));
+});
+
+test("a chain of links is one group, not two", () => {
+  // The reason components rather than pairs: a links b, b links c, and all
+  // three belong together even though a and c were never linked directly.
+  const s = open();
+  const a = s.start("a").session, b = s.start("b").session, c = s.start("c").session;
+  s.link(a.id, b.id);
+  s.link(b.id, c.id);
+  const groups = s.groups();
+  assert.equal(groups.length, 1);
+  assert.equal(groups[0].length, 3);
+});
+
+test("a group forms whichever way round the ids happen to sort", () => {
+  // Edges are stored sorted, and the tests above hand out ids in creation
+  // order, so the sorted edge always pointed from the older session to the
+  // newer one — which hid a graph built in only one direction. Real ids are
+  // UUIDs and sort arbitrarily, so this one hands them out backwards.
+  const backwards = ["m-b", "m-a"];
+  let n = 0;
+  const s = openSessions({ backend: memoryBackend(), now, newId: () => backwards[n++] ?? `m-${n}` });
+  const first = s.start("older, sorts later").session;
+  const second = s.start("newer, sorts earlier").session;
+  assert.ok(second.id < first.id, "this test is pointless unless the ids sort backwards");
+
+  s.link(first.id, second.id);
+  assert.deepEqual(s.linksOf(first.id), [second.id]);
+  assert.deepEqual(s.linksOf(second.id), [first.id]);
+  assert.equal(s.groups().length, 1, "the two are linked but came back as separate groups");
+});
+
+test("every session belongs to exactly one group", () => {
+  const s = open();
+  const ids = ["a", "b", "c", "d"].map((t) => s.start(t).session.id);
+  s.link(ids[0], ids[1]);
+  s.link(ids[2], ids[3]);
+  const seen = s.groups().flat();
+  assert.equal(seen.length, ids.length);
+  assert.deepEqual(seen.slice().sort(), ids.slice().sort());
+});
+
+test("links outlive the tab", () => {
+  const backend = memoryBackend();
+  const first = open(backend);
+  const a = first.start("a").session, b = first.start("b").session;
+  first.link(a.id, b.id);
+  assert.deepEqual(open(backend).linksOf(a.id), [b.id]);
+});
+
+test("a notebook written before links existed still opens", () => {
+  const backend = memoryBackend();
+  const s = open(backend);
+  const a = s.start("a").session;
+  const raw = JSON.parse(backend.getItem(SESSIONS_KEY));
+  delete raw.links;
+  backend.setItem(SESSIONS_KEY, JSON.stringify(raw));
+  const reopened = open(backend);
+  assert.deepEqual(reopened.linksOf(a.id), []);
+  assert.equal(reopened.list().length, 1, "the sessions must survive");
+  const b = reopened.start("b").session;
+  assert.equal(reopened.link(a.id, b.id).ok, true);
+});
