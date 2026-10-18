@@ -234,6 +234,25 @@ Nothing about a frontier model. ADR 0007's bar is ~90% unaided and both measured
 far below it, but a 7B model failing to compare two numbers is weak evidence about what a large
 one would do. That run still needs a key.
 
+### The gate now runs in the learner's browser (P-96, ADR 0023)
+
+The product composes scenarios at runtime from the learner's own endpoint, and every check in
+this file now runs **in the page** before anything is shown: schema, primitive, params,
+completion, invariants, and the answer check. Nothing that fails is rendered.
+
+Two things keep this file honest about what ships:
+
+* `buildPrompt` moved to `lab/scenario/prompt.mjs`, so **the prompt measured here is the prompt
+  the product sends**. A topic is appended when there is one; built without a topic it is
+  byte-identical to what produced the numbers above.
+* `verify()` moved to `lab/scenario/verify.mjs`. One implementation, used by the offline harness
+  and the browser alike — two would drift, and the one that drifted would be the one nobody was
+  measuring.
+
+The numbers above still stand and still describe a 7B model. What changes is the consequence: a
+generator that fails the derived half now produces **nothing on screen** rather than something
+plausible and wrong, and the learner is told how many were thrown away.
+
 ### The frontier run was attempted on 2026-10-17 and could not start
 
 `P-90` is blocked, not forgotten. The only model credential on this machine is an

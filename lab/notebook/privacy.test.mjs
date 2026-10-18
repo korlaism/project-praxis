@@ -26,28 +26,69 @@ function walk(dir) {
   });
 }
 
-/** Ways a page can talk to a server. Comments and strings are not calls. */
+/**
+ * Ways a page can talk to a server. Comments are not code.
+ *
+ * These match the NAME, not the call. The first version matched `fetch(` and
+ * would have missed `const f = opts.fetch ?? globalThis.fetch; f(url)` — which
+ * is exactly how lab/model/client.mjs is written, so the narrowed guard below
+ * passed for the wrong reason until its own "the seam still transmits" check
+ * failed. A module that so much as names one of these is transmitting as far
+ * as this test is concerned, and that is the right level of paranoia for it.
+ */
 const TRANSPORTS = [
-  /\bfetch\s*\(/,
-  /\bnew\s+XMLHttpRequest\b/,
-  /\bnew\s+WebSocket\b/,
-  /\bnavigator\s*\.\s*sendBeacon\b/,
-  /\bnew\s+EventSource\b/,
+  /\bfetch\b/,
+  /\bXMLHttpRequest\b/,
+  /\bWebSocket\b/,
+  /\bsendBeacon\b/,
+  /\bEventSource\b/,
   /\bimport\s*\(\s*["'`]https?:/,
 ];
 
-test("the built lab contains no way to send anything anywhere", () => {
+/**
+ * The one module allowed to transmit (ADR 0023).
+ *
+ * This test used to read "the built lab contains no way to send anything
+ * anywhere", which was the strongest privacy position this project will ever
+ * have. The product needs a model at runtime, so it is narrowed here — in the
+ * open, with an ADR, rather than deleted the day it became inconvenient.
+ *
+ * What it still catches is the thing it was written for: a prediction, a note
+ * or a confusion entry being sent somewhere by code nobody reviewed.
+ */
+const MAY_TRANSMIT = "model/client.mjs";
+
+test("only one module in the built lab can send anything anywhere", () => {
   const offenders = [];
+  let allowed = 0;
   for (const file of walk(BUILT).filter((f) => f.endsWith(".js") || f.endsWith(".mjs"))) {
+    const where = file.slice(BUILT.length);
     const body = readFileSync(file, "utf8");
     for (const [n, line] of body.split("\n").entries()) {
       // Strip line comments before matching: prose about fetch is not fetch.
       const code = line.replace(/\/\/.*$/, "").replace(/^\s*\*.*$/, "");
-      for (const t of TRANSPORTS)
-        if (t.test(code)) offenders.push(`${file.slice(BUILT.length)}:${n + 1}  ${line.trim()}`);
+      for (const t of TRANSPORTS) {
+        if (!t.test(code)) continue;
+        if (where === MAY_TRANSMIT) allowed++;
+        else offenders.push(`${where}:${n + 1}  ${line.trim()}`);
+      }
     }
   }
-  assert.deepEqual(offenders, [], `the lab must not be able to transmit:\n  ${offenders.join("\n  ")}`);
+  assert.deepEqual(offenders, [],
+    `only ${MAY_TRANSMIT} may transmit, and these also do:\n  ${offenders.join("\n  ")}`);
+  // A narrowing that stopped matching anything would pass for the wrong
+  // reason — and would hide the day the seam moved somewhere else.
+  assert.ok(allowed > 0, `${MAY_TRANSMIT} no longer transmits — has the seam moved?`);
+});
+
+test("the notebook and the session notes are not reachable from the module that transmits", () => {
+  // ADR 0023 §4. The seam carries the topic and the primitive contract. It
+  // must not be able to reach the record even by accident, and the cheapest
+  // durable way to say that is that it does not import it.
+  const client = readFileSync(new URL("../model/client.mjs", import.meta.url), "utf8");
+  for (const forbidden of ["notebook/store", "session/store", "openNotebook", "openSessions"])
+    assert.ok(!client.includes(forbidden),
+      `lab/model/client.mjs reaches ${forbidden}; what leaves the device must stay nameable`);
 });
 
 test("a notebook card carries nothing that identifies a person", () => {

@@ -112,7 +112,7 @@ export function openSessions({ backend, now = Date.now, newId = defaultId } = {}
       const t = words(topic);
       if (!t) return { ok: false, errors: ["say what you want to work on"] };
 
-      const session = { id: newId(), startedAt: now(), touchedAt: now(), notes: [] };
+      const session = { id: newId(), startedAt: now(), touchedAt: now(), notes: [], scenarios: [] };
       for (const k of KEPT) if (k === "topic") session[k] = t;
 
       const data = load();
@@ -126,7 +126,11 @@ export function openSessions({ backend, now = Date.now, newId = defaultId } = {}
     },
 
     get(id) {
-      return load().sessions.find((s) => s.id === id) ?? null;
+      const session = load().sessions.find((s) => s.id === id) ?? null;
+      // Sessions written before scenarios could be composed have no list.
+      // That is a session we understand, not a broken one.
+      if (session && !session.scenarios) session.scenarios = [];
+      return session;
     },
 
     /** Say you were here. Opening a session counts; so does working in it. */
@@ -148,6 +152,23 @@ export function openSessions({ backend, now = Date.now, newId = defaultId } = {}
       if (!t) return { ok: false, errors: ["there are no words there"] };
       return change(id, (session) => {
         session.notes.push({ id: newId(), writtenAt: now(), text: t });
+        return null;
+      });
+    },
+
+    /**
+     * Keep a scenario composed for this session (P-96, ADR 0023).
+     *
+     * Only ever called with a spec that has already survived the answer check
+     * — lab/model/compose.mjs is the only caller, and nothing that failed
+     * reaches it. This store does not re-run the check and must not be
+     * mistaken for the thing that does.
+     */
+    keep(id, spec) {
+      if (!spec?.id) return { ok: false, errors: ["a scenario needs an id"] };
+      return change(id, (session) => {
+        session.scenarios ??= [];
+        if (!session.scenarios.some((x) => x.id === spec.id)) session.scenarios.push(spec);
         return null;
       });
     },
