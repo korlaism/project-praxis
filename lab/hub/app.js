@@ -138,9 +138,15 @@ function settingsPage() {
        "Only two things leave this device: what you typed as a topic, and the list of simulations the lab can build " +
        "from — their controls and the outcomes they can produce. Both go to the address you enter below, on your " +
        "account, and nowhere else."),
+    // Qualified by ADR 0024, and it is a worse sentence than the one it
+    // replaced. It is also the true one.
     el("p", "hub-empty-p",
-       "Your notes, your predictions and your record are never sent. There is no server here and no account with us; " +
-       "the key is kept in this browser only, and \"Forget it\" removes it."),
+       "Your predictions and your record are never sent. A note is only sent if you pick it, one at a time, " +
+       "each time you ask for a simulation — and you see the exact words before they go. Nothing is remembered " +
+       "between asks and nothing is picked for you."),
+    el("p", "hub-empty-p",
+       "There is no server here and no account with us; the key is kept in this browser only, and " +
+       "\"Forget it\" removes it."),
     el("p", "hub-empty-p",
        "Anything the AI composes is run here first. If the simulation does not do what the question claims, " +
        "it is thrown away and you never see it.")));
@@ -231,9 +237,31 @@ function sessionPage(id) {
     show(null, `/session/${id}`);
   };
   notes.append(box, save);
+  // Each note carries its own choice about whether the model may see it
+  // (ADR 0024). Nothing is chosen by default, nothing is remembered between
+  // compositions, and the words themselves are on screen next to the choice —
+  // a learner cannot consent to a count.
+  const sharing = new Set();
   if (m.notes.length) {
     const written = el("div", "hub-note-list");
-    for (const note of m.notes) written.append(el("p", "hub-note", note.text));
+    for (const note of m.notes) {
+      const row = el("div", "hub-note-row");
+      row.append(el("p", "hub-note", note.text));
+      if (model.configured) {
+        const pick = el("button", "hub-note-share", "Show the AI");
+        pick.type = "button";
+        pick.setAttribute("aria-pressed", "false");
+        pick.onclick = () => {
+          const on = sharing.has(note.id);
+          if (on) sharing.delete(note.id); else sharing.add(note.id);
+          pick.textContent = on ? "Show the AI" : "Will be sent";
+          pick.className = on ? "hub-note-share" : "hub-note-share is-on";
+          pick.setAttribute("aria-pressed", String(!on));
+        };
+        row.append(pick);
+      }
+      written.append(row);
+    }
     notes.append(written);
   }
   page.append(notes);
@@ -296,8 +324,11 @@ function sessionPage(id) {
       go.disabled = true;
       go.textContent = "Composing…";
       report.hidden = false;
-      report.textContent = "Asking your model, then running everything it sends back.";
-      const r = await compose(session.topic, { settings: model.get() });
+      const chosenNow = m.notes.filter((n) => sharing.has(n.id)).length;
+      report.textContent = "Asking your model, then running everything it sends back." +
+        (chosenNow ? ` Sending ${chosenNow} of your note${chosenNow === 1 ? "" : "s"} with it.` : "");
+      const chosen = m.notes.filter((n) => sharing.has(n.id)).map((n) => n.text);
+      const r = await compose(session.topic, { settings: model.get(), notes: chosen });
       go.disabled = false;
       go.textContent = "Compose with your AI";
 
