@@ -557,3 +557,99 @@ test("the first session has nothing to link to, and says so", async () => {
   assert.ok(!h.byId("session-link"), "there is no second topic to offer");
   h.dom.restore();
 });
+
+/* ── P-101, ADR 0024: notes reach the model only if the learner picks them ── */
+
+/** A session with two notes, and a model configured. */
+async function withNotes() {
+  const seen = [];
+  const h = await start({
+    modelSettings: configured(),
+    composeWith: async (topic, opts) => { seen.push(opts.notes ?? []); return { ok: true, scenarios: [], rejected: [], asked: 0 }; },
+  });
+  h.byId("hub-topic").value = "friction";
+  h.button("Start").onclick();
+  for (const text of ["the one about friction", "the one I keep to myself"]) {
+    h.byId("session-note").value = text;
+    h.button("Save note").onclick();
+  }
+  return { ...h, seen };
+}
+
+test("composing with nothing picked sends no notes at all", async () => {
+  const h = await withNotes();
+  await h.button("Compose with your AI").onclick();
+  assert.deepEqual(h.seen, [[]], "a note went without being chosen");
+  h.dom.restore();
+});
+
+test("a note is sent only after the learner picks that note", async () => {
+  const h = await withNotes();
+  // Newest first, so the second note written is the first row.
+  h.all("hub-note-share")[1].onclick();
+  await h.button("Compose with your AI").onclick();
+  assert.deepEqual(h.seen, [["the one about friction"]]);
+  h.dom.restore();
+});
+
+test("picking one note does not pick the others", async () => {
+  const h = await withNotes();
+  h.all("hub-note-share")[1].onclick();
+  await h.button("Compose with your AI").onclick();
+  assert.ok(!h.seen[0].includes("the one I keep to myself"), "an unchosen note left the device");
+  h.dom.restore();
+});
+
+test("a choice can be taken back before anything is sent", async () => {
+  const h = await withNotes();
+  const pick = h.all("hub-note-share")[0];
+  pick.onclick();
+  pick.onclick();
+  await h.button("Compose with your AI").onclick();
+  assert.deepEqual(h.seen, [[]]);
+  h.dom.restore();
+});
+
+test("the button says whether a note will be sent", async () => {
+  // The learner has to be able to see the state, not remember it.
+  const h = await withNotes();
+  const pick = h.all("hub-note-share")[0];
+  assert.equal(pick.textContent, "Show the AI");
+  assert.equal(pick.getAttribute("aria-pressed"), "false");
+  pick.onclick();
+  assert.equal(pick.textContent, "Will be sent");
+  assert.equal(pick.getAttribute("aria-pressed"), "true");
+  h.dom.restore();
+});
+
+test("nothing is remembered between asks", async () => {
+  // ADR 0024 §1. A choice made once must not quietly apply for ever.
+  const h = await withNotes();
+  h.all("hub-note-share")[1].onclick();
+  await h.button("Compose with your AI").onclick();
+  await h.button("Compose with your AI").onclick();
+  assert.deepEqual(h.seen[1], [], "the second ask reused the first ask's choice");
+  h.dom.restore();
+});
+
+test("with no model set up, notes cannot be offered to one", async () => {
+  const h = await start();
+  h.byId("hub-topic").value = "friction";
+  h.button("Start").onclick();
+  h.byId("session-note").value = "a note";
+  h.button("Save note").onclick();
+  assert.equal(h.all("hub-note-share").length, 0, "a learner with no key was offered to share");
+  h.dom.restore();
+});
+
+test("the settings page no longer claims notes are never sent", async () => {
+  // It said so before ADR 0024 and that is now false. A promise the product
+  // has stopped keeping is worse than the weaker promise it can keep.
+  const h = await start();
+  h.one("hub-settings").onclick();
+  const said = h.text();
+  assert.ok(!/notes[^.]*are never sent/i.test(said), `the old promise is still on the page: ${said.slice(0, 200)}`);
+  assert.match(said, /only sent if you pick it/i);
+  assert.match(said, /see the exact words/i);
+  h.dom.restore();
+});

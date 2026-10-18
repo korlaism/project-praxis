@@ -38,8 +38,12 @@ function uniqueId(raw, taken) {
  * @param ask       (prompt, settings) => reply text; the one thing that calls out
  * @param want      how many to ask for
  */
-export async function composeFor(topic, { settings, ask = askModel, want = 3 } = {}) {
-  const prompt = buildPrompt(want, null, topic);
+export async function composeFor(topic, { settings, ask = askModel, want = 3, notes = [] } = {}) {
+  // Only the notes the learner picked for THIS request (ADR 0024). Nothing is
+  // remembered between composes and nothing is selected by default, so with
+  // no choice made the prompt is byte-identical to one built before any of
+  // this existed.
+  const prompt = buildPrompt(want, null, topic, notes);
 
   let reply;
   try {
