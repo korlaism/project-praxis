@@ -287,3 +287,31 @@ test("a confusion left open is waiting when the learner comes back", async () =>
   assert.ok(entries[0].resolvedAt, "and settling it must stick");
   dom.restore();
 });
+
+/* ── P-95: a prediction knows which session it was made in ──────────────── */
+
+test("a scenario opened inside a session files its card against that session", async () => {
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const notebook = openNotebook({ backend: memoryBackend() });
+
+  mountScenario(truckFly, { notebook, session: "sess-7" });
+  dom.body.find((n) => n.id === "opt-truck").onclick();
+  dom.tick(2000);
+  assert.equal(notebook.cards("physics")[0].session, "sess-7");
+  dom.restore();
+});
+
+test("a scenario opened outside a session carries no session at all", async () => {
+  // Not an empty string, not null — absent. The field means "made in a
+  // session", and a card that was not has nothing to say about it.
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const notebook = openNotebook({ backend: memoryBackend() });
+
+  mountScenario(truckFly, { notebook });
+  dom.body.find((n) => n.id === "opt-truck").onclick();
+  dom.tick(2000);
+  assert.equal("session" in notebook.cards("physics")[0], false);
+  dom.restore();
+});

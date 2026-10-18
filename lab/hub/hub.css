@@ -34,3 +34,54 @@
 .hub-concept-n{font:400 .7rem var(--mono);color:var(--ink-3)}
 .hub-card-d{font:400 .62rem var(--mono);color:var(--ink-3);text-transform:uppercase;letter-spacing:.06em}
 .hub-card-d.is-hard{color:var(--wrong)}
+
+/* ── The session shell (P-95, ADR 0022) ───────────────────────────────────
+   The prompt box is the first thing on the page and the biggest, because it
+   is how the product is meant to be entered. Nothing behind it generates
+   anything yet, so it must not look like it does. */
+.hub-opener{display:flex;gap:8px;flex-wrap:wrap}
+.hub-topic{flex:1;min-width:min(260px,100%);font-family:var(--font);font-size:1.05rem;
+  padding:14px 16px;color:var(--ink);background:var(--panel);
+  border:1px solid var(--line);border-radius:3px}
+.hub-topic::placeholder{color:var(--ink-3)}
+.hub-topic:focus{outline:none;border-color:var(--accent)}
+.hub-start{font-family:var(--font);font-weight:500;font-size:.95rem;padding:14px 22px;cursor:pointer;
+  background:var(--accent);color:#12100E;border:1px solid var(--accent);border-radius:3px}
+
+.hub-sessions{display:grid;gap:8px}
+.hub-session{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  font-family:var(--font);text-align:left;cursor:pointer;width:100%;
+  padding:14px 18px;background:var(--panel);border:1px solid var(--line);border-radius:3px;color:var(--ink)}
+.hub-session:hover{border-color:var(--accent)}
+.hub-session:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.hub-session-t{font-size:1.02rem}
+.hub-session-n{color:var(--ink-3);font:.76rem var(--mono);white-space:nowrap}
+.hub-browse{margin-top:14px}
+
+/* The topic is an input that reads as a heading: renaming a first guess
+   should not need a button of its own. */
+.hub-session-topic{font-family:var(--font);font-size:clamp(1.5rem,4.5vw,2.1rem);font-weight:600;
+  letter-spacing:-.02em;width:100%;padding:4px 0;color:var(--ink);
+  background:transparent;border:0;border-bottom:1px solid transparent}
+.hub-session-topic:hover{border-bottom-color:var(--line)}
+.hub-session-topic:focus{outline:none;border-bottom-color:var(--accent)}
+
+.hub-notes{display:grid;gap:10px}
+.hub-note-box{font-family:var(--font);font-size:.98rem;line-height:1.5;padding:12px 14px;
+  color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:3px;
+  resize:vertical;min-height:82px;width:100%}
+.hub-note-box::placeholder{color:var(--ink-3)}
+.hub-note-box:focus{outline:none;border-color:var(--accent)}
+.hub-note-save{font-family:var(--font);font-weight:500;font-size:.88rem;padding:9px 16px;cursor:pointer;
+  justify-self:start;background:var(--accent);color:#12100E;border:1px solid var(--accent);border-radius:2px}
+.hub-note-list{display:grid;gap:8px}
+.hub-note{margin:0;padding:12px 14px;white-space:pre-wrap;line-height:1.5;
+  background:var(--panel);border-left:2px solid var(--accent-2);border-radius:0 3px 3px 0}
+
+/* The honest empty state: most topics have nothing behind them, and the list
+   of what does is meant to look short. */
+.hub-empty{display:grid;gap:10px;padding:16px 18px;border:1px dashed var(--line);border-radius:3px}
+.hub-empty-p{margin:0;color:var(--ink-2);line-height:1.5;max-width:52ch}
+.hub-empty-list{display:flex;flex-wrap:wrap;gap:6px}
+.hub-empty-c{font:.76rem var(--mono);color:var(--ink-2);padding:5px 9px;
+  background:var(--panel);border:1px solid var(--line);border-radius:2px}

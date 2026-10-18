@@ -57,6 +57,11 @@ test("a notebook card carries nothing that identifies a person", () => {
 
   // Not a blocklist of bad names — a whitelist of what a card is allowed to be
   // about. Anything new has to be justified here, in front of someone.
+  // "session" (P-95) is the id of the session the prediction was made in —
+  // a container the learner created by typing a topic, living in the same
+  // browser, destroyed with it. It identifies a piece of work, never a
+  // person, and it is what lets the record be read a topic at a time.
+  //
   // "reconciliation" (R-012, P-92) is the hardest addition this list will
   // take, and it was taken deliberately. It holds a child's own prose about
   // their own mistake — the single most sensitive thing in the dataset, and
@@ -78,7 +83,7 @@ test("a notebook card carries nothing that identifies a person", () => {
     "subject", "scenario", "choice", "confidence", "observed", "correct",
     "unlisted", "errorTag", "outcomeSource", "params", "committedAt",
     "revealedAt", "attempt", "retryOf", "cue",
-    "reconciliation", "reconciledAt",
+    "reconciliation", "reconciledAt", "session",
   ]);
   const unexpected = fields.filter((f) => !ABOUT_THE_PREDICTION.has(f));
   assert.deepEqual(unexpected, [],

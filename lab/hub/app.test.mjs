@@ -15,12 +15,19 @@ import assert from "node:assert/strict";
 import { SCENARIOS } from "../scenarios/index.mjs";
 import { installDom } from "../harness/dom-stub.mjs";
 import { openNotebook, memoryBackend } from "../notebook/store.mjs";
+import { openSessions } from "../session/store.mjs";
 
-async function start({ search = "", scenarios } = {}) {
+async function start({ search = "", hash = "", scenarios, store, sessionStore } = {}) {
   const dom = installDom();
   if (search) location.search = search;      // set before the hub reads it
+  if (hash) location.hash = hash;            // the learner arriving on a saved address
   const { startHub } = await import("./app.js?" + Math.random());
-  startHub({ store: openNotebook({ backend: memoryBackend() }), scenarios });
+  const notebook = store ?? openNotebook({ backend: memoryBackend() });
+  // A stepping clock, because two sessions started in the same millisecond
+  // tie on touchedAt and the resume order becomes arbitrary.
+  let clock = 1_700_000_000_000;
+  const sessions = sessionStore ?? openSessions({ backend: memoryBackend(), now: () => (clock += 1000) });
+  startHub({ store: notebook, sessionStore: sessions, scenarios });
   const one = (cls) => dom.body.find((n) => n.className?.split?.(" ").includes(cls));
   const all = (cls) => dom.body.findAll((n) => n.className?.split?.(" ").includes(cls));
   const text = () => {
@@ -28,7 +35,9 @@ async function start({ search = "", scenarios } = {}) {
     (function walk(n) { if (n.textContent) out.push(n.textContent); n.children?.forEach(walk); })(dom.body);
     return out.join(" ");
   };
-  return { dom, one, all, text };
+  return { dom, one, all, text, notebook, sessions,
+           byId: (id) => dom.body.find((n) => n.id === id),
+           button: (label) => dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === label) };
 }
 
 test("the front page lists every scenario as a button, not a link", async () => {
@@ -168,5 +177,169 @@ test("the hub lists whatever scenarios it is given", async () => {
 test("given none, it says so rather than throwing", async () => {
   const { dom, all } = await start({ scenarios: {} });
   assert.equal(all("hub-card").length, 0);
+  dom.restore();
+});
+
+/* ── P-95: the session shell ─────────────────────────────────────────────
+ *
+ * ADR 0022. You open the lab, you say what you want to work on, and what you
+ * were doing last time is waiting underneath. Nothing here calls a model.
+ */
+
+test("the front page opens with a prompt box, and it proposes nothing", async () => {
+  const { dom, byId } = await start();
+  const box = byId("hub-topic");
+  assert.ok(box, "there is no prompt box");
+  assert.equal(box.value ?? "", "", "the box must be empty — nobody has typed yet");
+  assert.match(box.getAttribute("placeholder"), /\?$/, "the box asks; it does not suggest");
+  dom.restore();
+});
+
+test("typing a topic starts a session and goes into it", async () => {
+  const { dom, byId, button, text, sessions } = await start();
+  byId("hub-topic").value = "quadratics";
+  button("Start").onclick();
+  assert.equal(sessions.list().length, 1);
+  assert.equal(sessions.list()[0].topic, "quadratics");
+  assert.match(text(), /Your notes/, "we are not on the session page");
+  dom.restore();
+});
+
+test("an empty prompt starts nothing", async () => {
+  const { dom, byId, button, sessions } = await start();
+  byId("hub-topic").value = "   ";
+  button("Start").onclick();
+  assert.deepEqual(sessions.list(), []);
+  dom.restore();
+});
+
+test("sessions are waiting underneath the box when you come back", async () => {
+  const backend = memoryBackend();
+  const before = openSessions({ backend });
+  before.start("falling objects");
+  const { dom, all, text } = await start({ sessionStore: openSessions({ backend }) });
+  assert.equal(all("hub-session").length, 1);
+  assert.match(text(), /Pick up where you left off/);
+  assert.match(text(), /falling objects/);
+  dom.restore();
+});
+
+test("a note written in a session is there when you come back to it", async () => {
+  const { dom, byId, button, text, sessions } = await start();
+  byId("hub-topic").value = "falling";
+  button("Start").onclick();
+  byId("session-note").value = "I think the heavy one wins";
+  button("Save note").onclick();
+  assert.match(text(), /I think the heavy one wins/);
+  assert.equal(byId("session-note").value, "", "the box clears once the note is kept");
+
+  const id = sessions.list()[0].id;
+  assert.equal(sessions.get(id).notes[0].text, "I think the heavy one wins");
+  dom.restore();
+});
+
+test("a topic we can simulate offers its simulations inside the session", async () => {
+  const { dom, byId, button, all, text } = await start();
+  byId("hub-topic").value = "quadratics";
+  button("Start").onclick();
+  assert.ok(all("hub-card").length > 0, "no simulations offered for a topic we have");
+  assert.ok(!text().includes("No simulations for this topic yet"));
+  dom.restore();
+});
+
+test("a topic we cannot simulate says so, and says what there is", async () => {
+  // The empty state is the honest state of the product. It must not be hidden
+  // behind an unrelated list of everything we happen to have.
+  const { dom, byId, button, all, text } = await start();
+  byId("hub-topic").value = "photosynthesis";
+  button("Start").onclick();
+  assert.match(text(), /No simulations for this topic yet/);
+  assert.equal(all("hub-card").length, 0, "an unrelated list here would be a lie");
+  assert.ok(all("hub-empty-c").length > 0, "told 'nothing here', a learner deserves to see what IS here");
+  assert.match(text(), /Your notes/, "and the notes still work");
+  dom.restore();
+});
+
+test("a prediction made inside a session is filed against it", async () => {
+  const { dom, byId, button, all, notebook, sessions } = await start();
+  byId("hub-topic").value = "quadratics";
+  button("Start").onclick();
+  all("hub-card")[0].onclick();
+  dom.body.find((n) => n.id?.startsWith("opt-")).onclick();
+  dom.tick(2000);
+  const [card] = notebook.cards("maths");
+  assert.equal(card.session, sessions.list()[0].id, "the card does not know where it was made");
+  dom.restore();
+});
+
+test("leaving a simulation opened in a session returns to that session", async () => {
+  const { dom, byId, button, all, text } = await start();
+  byId("hub-topic").value = "quadratics";
+  button("Start").onclick();
+  all("hub-card")[0].onclick();
+  const back = dom.body.find((n) => n.className === "hub-back");
+  assert.equal(back.textContent, "← Session", "it would drop the learner back at the front page");
+  back.onclick();
+  assert.match(text(), /Your notes/);
+  dom.restore();
+});
+
+test("opening a simulation from a session brings that session back to the top", async () => {
+  // The resume list is for resuming. Working inside a session is working.
+  const { dom, byId, button, all, sessions } = await start();
+  byId("hub-topic").value = "quadratics";
+  button("Start").onclick();
+  const quadratics = sessions.list()[0].id;
+  dom.body.find((n) => n.className === "hub-back").onclick();
+  byId("hub-topic").value = "friction";
+  button("Start").onclick();
+  assert.notEqual(sessions.list()[0].id, quadratics, "the newer session is on top, as it should be");
+
+  // Back to the older one, and straight into a simulation without touching
+  // its notes — opening the session page alone would not prove anything.
+  dom.body.find((n) => n.className === "hub-back").onclick();
+  // The topic lives in a span inside the button, so the button's own
+  // textContent is empty — search its subtree, as a learner's eye does.
+  all("hub-session").find((b) => b.find((n) => n.textContent === "quadratics")).onclick();
+  all("hub-card")[0].onclick();
+  assert.equal(sessions.list()[0].id, quadratics, "the session being worked in is not at the top");
+  dom.restore();
+});
+
+test("reopening a saved address inside a session brings that session back", async () => {
+  // Not every arrival goes through the session page. A reload while inside a
+  // simulation, or a bookmark, lands straight on this address — and that is
+  // still working in the session.
+  const backend = memoryBackend();
+  let clock = 1_700_000_000_000;
+  const before = openSessions({ backend, now: () => (clock += 1000) });
+  const older = before.start("quadratics").session.id;
+  before.start("friction");
+  assert.notEqual(before.list()[0].id, older, "the newer session starts on top");
+
+  const { dom, sessions } = await start({
+    sessionStore: openSessions({ backend, now: () => (clock += 1000) }),
+    hash: `#/session/${older}/s/how-many-solutions`,
+  });
+  assert.equal(sessions.list()[0].id, older, "arriving straight inside a session did not resurface it");
+  dom.restore();
+});
+
+test("a session can be renamed in place, because a topic is a first guess", async () => {
+  const { dom, byId, button, sessions } = await start();
+  byId("hub-topic").value = "math stuff";
+  button("Start").onclick();
+  const topic = byId("session-topic");
+  topic.value = "quadratics";
+  topic.onchange();
+  assert.equal(sessions.list()[0].topic, "quadratics");
+  dom.restore();
+});
+
+test("the front page still lists everything, under the sessions", async () => {
+  // The browse list is how anything gets found until a model can compose.
+  const { dom, all, text } = await start();
+  assert.equal(all("hub-card").length, Object.keys(SCENARIOS).length);
+  assert.match(text(), /Or browse everything/);
   dom.restore();
 });
