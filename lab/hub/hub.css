@@ -108,3 +108,15 @@
   font-family:var(--font);text-align:left;cursor:pointer;width:100%;padding:14px 18px;
   background:transparent;border:1px dashed var(--line);border-radius:3px;color:var(--ink)}
 .hub-settings:hover{border-color:var(--accent)}
+
+/* ── Linked topics (P-100) ────────────────────────────────────────────────
+   A group is a connected component of the link graph, drawn as a box around
+   its members. A group of one is not drawn as a group at all. */
+.hub-group{display:grid;gap:6px;padding:10px 10px 12px;
+  border:1px solid var(--line);border-left:2px solid var(--accent-2);border-radius:3px}
+.hub-group-n{font:.72rem var(--mono);color:var(--ink-3);letter-spacing:.08em;
+  text-transform:uppercase;padding-left:6px}
+.hub-related{display:grid;gap:8px}
+.hub-related-row{display:flex;gap:8px;align-items:stretch}
+.hub-related-row .hub-session{flex:1}
+.hub-related-row select{flex:1;min-width:0}

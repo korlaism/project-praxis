@@ -94,16 +94,26 @@ function opener(page) {
   start.onclick = open;
   page.append(el("div", "hub-opener", box, start));
 
-  const rows = homeSessions(sessions, notebook);
-  if (!rows.length) return;
+  const groups = homeSessions(sessions, notebook);
+  if (!groups.length) return;
   const list = el("div", "hub-sessions");
-  for (const r of rows)
-    list.append(navButton("hub-session", r.path,
-      el("span", "hub-session-t", r.topic),
-      el("span", "hub-session-n", [
-        r.notes ? `${r.notes} note${r.notes === 1 ? "" : "s"}` : null,
-        r.predictions ? `${r.predictions} prediction${r.predictions === 1 ? "" : "s"}` : null,
-      ].filter(Boolean).join(" · ") || "nothing in it yet")));
+  const button_ = (r) => navButton("hub-session", r.path,
+    el("span", "hub-session-t", r.topic),
+    el("span", "hub-session-n", [
+      r.notes ? `${r.notes} note${r.notes === 1 ? "" : "s"}` : null,
+      r.predictions ? `${r.predictions} prediction${r.predictions === 1 ? "" : "s"}` : null,
+    ].filter(Boolean).join(" · ") || "nothing in it yet"));
+
+  for (const g of groups) {
+    // A group is a connected component of the link graph (P-100). One that
+    // nobody linked is a group of one, and renders as a plain row, so the
+    // page is one shape whether or not anything has been linked.
+    if (!g.linked) { list.append(button_(g.sessions[0])); continue; }
+    const box = el("div", "hub-group");
+    box.append(el("span", "hub-group-n", `${g.sessions.length} linked topics`));
+    for (const r of g.sessions) box.append(button_(r));
+    list.append(box);
+  }
   page.append(el("section", "hub-resume", el("h2", "hub-h2", "Pick up where you left off"), list));
 }
 
@@ -187,7 +197,7 @@ function sessionPage(id) {
   const session = sessions.get(id);
   if (!session) { go("/"); return () => {}; }
   sessions.touch(id);
-  const m = sessionModel(sessions.get(id), { scenarios: SCENARIOS, notebook });
+  const m = sessionModel(sessions.get(id), { scenarios: SCENARIOS, notebook, sessions });
   const page = el("main", "hub");
 
   // The topic is editable in place: what you typed to get started is a first
@@ -239,6 +249,39 @@ function sessionPage(id) {
       page.append(el("section", "hub-concept",
         el("h3", "hub-h3", el("span", "hub-concept-name", `${c.title} — ${c.subject}`)), list));
     }
+  }
+
+  // ---- what this topic is linked to (P-100) -----------------------------
+  if (m.linked.length || m.linkable.length) {
+    const related = el("section", "hub-related", el("h2", "hub-h2", "Related topics"));
+    for (const other of m.linked) {
+      const row = el("div", "hub-related-row");
+      row.append(navButton("hub-session", other.path, el("span", "hub-session-t", other.topic)));
+      const cut = el("button", "hub-forget", "Unlink");
+      cut.type = "button";
+      cut.onclick = () => { sessions.unlink(id, other.id); show(null, `/session/${id}`); };
+      row.append(cut);
+      related.append(row);
+    }
+    if (m.linkable.length) {
+      const pick = document.createElement("select");
+      pick.id = "session-link";
+      pick.className = "hub-field-i";
+      for (const other of m.linkable) {
+        const option = document.createElement("option");
+        option.value = other.id;
+        option.textContent = other.topic;
+        pick.append(option);
+      }
+      pick.value = m.linkable[0].id;
+      const add = el("button", "hub-note-save", "Link");
+      add.type = "button";
+      add.onclick = () => { sessions.link(id, pick.value); show(null, `/session/${id}`); };
+      related.append(el("div", "hub-related-row", pick, add));
+    } else if (!m.linked.length) {
+      related.append(el("p", "hub-empty-p", "Nothing else to link to yet."));
+    }
+    page.append(related);
   }
 
   // ---- compose more, with the learner's own AI (ADR 0023) ---------------
