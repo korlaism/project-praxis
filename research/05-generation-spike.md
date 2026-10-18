@@ -279,9 +279,19 @@ answer**. Three outcomes each, no setting that makes the question vacuous:
 | `line-pair` | one-point / parallel / same-line | whether `m1 = m2`, then whether `c1 = c2` |
 | `quadratic-roots` | two / one / none | the sign of `b² − 4ac` |
 
-Six primitives now, four of them on the derived side. The next run of the spike therefore measures
-the hard half in two subjects rather than one, and a per-subject split will say whether 0/7 was
-about mechanics or about derivation.
+Six primitives then, four of them on the derived side. **`P-97` makes it eight and six**, adding
+`limiting-reagent` (which reactant runs out first) and `sealed-jar` (what a fizzing reaction
+weighs with the lid on or off) — the first primitives in this repository that are neither things
+moving nor lines on a grid, which ADR 0007 named as the hard part.
 
-This changes nothing about what has been measured. No generator has been run against the maths
-primitives; the figures above stand exactly as they are until `P-90` or a repeat of `P-50` is run.
+| Primitive | Outcomes | Decided by |
+|---|---|---|
+| `limiting-reagent` | a / b / neither | which pile permits fewer reactions, `⌊a/needA⌋` against `⌊b/needB⌋` |
+| `sealed-jar` | same / lighter | whether the gas can leave |
+
+The next run of the spike therefore measures the hard half across **three subjects** rather than
+one, and a per-subject split will say whether 0/7 was about mechanics or about derivation.
+
+This changes nothing about what has been measured. No generator has been run against the maths or
+chemistry primitives; the figures above stand exactly as they are until `P-90` or a repeat of
+`P-50` is run.
