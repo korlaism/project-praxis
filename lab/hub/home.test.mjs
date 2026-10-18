@@ -18,7 +18,12 @@ test("scenarios are grouped by subject, every one of them listed", () => {
   const m = homeModel(nb(), SCENARIOS);
   const listed = m.subjects.flatMap((s) => s.scenarios.map((x) => x.id)).sort();
   assert.deepEqual(listed, Object.keys(SCENARIOS).sort());
-  assert.deepEqual(m.subjects.map((s) => s.subject).sort(), ["maths", "physics"]);
+  // Derived from the registry, not written down. A literal here is how the
+  // front page silently stopped listing new scenarios once before (P-80), and
+  // it went stale again the moment chemistry arrived (P-97).
+  const subjects = [...new Set(Object.values(SCENARIOS).map((x) => x.subject))].sort();
+  assert.deepEqual(m.subjects.map((s) => s.subject).sort(), subjects);
+  assert.ok(subjects.length >= 2, "grouping by subject is only meaningful with more than one");
 });
 
 test("each scenario shows how many times it has been answered, from the shared notebook", () => {

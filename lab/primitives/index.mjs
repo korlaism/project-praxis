@@ -6,9 +6,12 @@ import * as twoPucks from "./two-pucks.mjs";
 import * as freeFall from "./free-fall.mjs";
 import * as linePair from "./line-pair.mjs";
 import * as quadraticRoots from "./quadratic-roots.mjs";
+import * as limitingReagent from "./limiting-reagent.mjs";
+import * as sealedJar from "./sealed-jar.mjs";
 
 export const PRIMITIVES = Object.fromEntries(
-  [circularRelease, contactCollision, twoPucks, freeFall, linePair, quadraticRoots].map((p) => [p.id, p]),
+  [circularRelease, contactCollision, twoPucks, freeFall, linePair, quadraticRoots,
+   limitingReagent, sealedJar].map((p) => [p.id, p]),
 );
 
 export function getPrimitive(id) {

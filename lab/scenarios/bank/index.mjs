@@ -20,8 +20,18 @@ import week4 from "./week-4-circular.mjs";
 import week5 from "./week-5-friction.mjs";
 import mathsLines from "./maths-lines.mjs";
 import mathsQuadratics from "./maths-quadratics.mjs";
+import chemLimiting from "./chem-limiting.mjs";
+import chemMass from "./chem-mass.mjs";
 
 export const BY_WEEK = { 1: week1, 2: week2, 3: week3, 4: week4, 5: week5 };
-/** Maths (P-91) is not part of the weekly pilot structure; it is a second subject. */
-export const BY_SUBJECT = { maths: [...mathsLines, ...mathsQuadratics] };
-export default [...week1, ...week2, ...week3, ...week4, ...week5, ...mathsLines, ...mathsQuadratics];
+/**
+ * Subjects outside the weekly pilot structure. Maths arrived in P-91 and
+ * chemistry in P-97 — the first one that is neither a thing moving nor a line
+ * on a grid, which is what ADR 0007 said would be the hard part.
+ */
+export const BY_SUBJECT = {
+  maths: [...mathsLines, ...mathsQuadratics],
+  chemistry: [...chemLimiting, ...chemMass],
+};
+export default [...week1, ...week2, ...week3, ...week4, ...week5,
+                ...mathsLines, ...mathsQuadratics, ...chemLimiting, ...chemMass];

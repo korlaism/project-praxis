@@ -63,6 +63,8 @@ Phase 1 uses a fixed starting taxonomy for force and motion, drawn from the publ
 | `motion-implies-force` | Movement requires a force in the direction of travel |
 | `heavier-falls-faster` | Mass determines rate of fall |
 | `bigger-pushes-harder` | The larger body exerts the greater force in an interaction |
+| `more-means-more-product` | Whichever reactant there is most of decides how much is produced |
+| `mass-is-lost` | Fizzing, burning or dissolving destroys matter, because the balance reading falls |
 | `outward-in-circles` | Circular motion involves an outward force |
 | `things-naturally-stop` | Rest is the default state; motion is the thing needing explanation |
 | `force-is-stored` | An object carries a quantity of "push" that depletes |

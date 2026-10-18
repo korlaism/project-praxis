@@ -137,7 +137,7 @@ test("a cue never quotes the answer it is supposed to withhold", () => {
 
 /* ── Which primitives can a generator be right about by accident (P-50) ─── */
 
-test("two primitives answer the same at every setting, and two do not", () => {
+test("two primitives answer the same at every setting, and the rest do not", () => {
   // Not a preference — a fact about the physics, and the reason a single
   // pass rate over all four flatters a generator. Every cut string flies
   // along the tangent and every collision is equal; the pucks and the falling
@@ -150,4 +150,12 @@ test("two primitives answer the same at every setting, and two do not", () => {
   assert.deepEqual([...reachableOutcomes(PRIMITIVES["contact-collision"])], ["equal"]);
   assert.ok(reachableOutcomes(PRIMITIVES["two-pucks"]).size >= 3);
   assert.ok(reachableOutcomes(PRIMITIVES["free-fall"]).size === 2);
+
+  // Every subject added since has landed on the derived side, deliberately
+  // (P-91, P-97). The generator's 0-of-7 there is the measurement that needs
+  // more than one subject behind it before it means anything.
+  for (const id of ["line-pair", "quadratic-roots", "limiting-reagent", "sealed-jar"])
+    assert.equal(isParameterIndependent(PRIMITIVES[id]), false, `${id} drifted to the easy side`);
+  assert.equal(reachableOutcomes(PRIMITIVES["limiting-reagent"]).size, 3);
+  assert.equal(reachableOutcomes(PRIMITIVES["sealed-jar"]).size, 2);
 });
