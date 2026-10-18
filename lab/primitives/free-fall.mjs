@@ -20,6 +20,9 @@ import { stepFall, terminalSpeed, freeFallTime, G } from "../components/falling.
 const TIE = 0.01;
 
 export const id = "free-fall";
+// Ours, not the model's. A generated scenario names a subject too, and the
+// two can disagree — which is worth reporting rather than trusting (P-102).
+export const subject = "physics";
 export const outcomes = ["together", "heavier"];
 export const outcomeText = {
   together: "They hit the ground at the same moment, however different their masses.",

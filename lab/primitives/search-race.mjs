@@ -17,6 +17,9 @@ const STEP_SECONDS = 0.22;
 const SETTLE = 0.6;
 
 export const id = "search-race";
+// Ours, not the model's. A generated scenario names a subject too, and the
+// two can disagree — which is worth reporting rather than trusting (P-102).
+export const subject = "computing";
 export const outcomes = ["linear", "binary", "tie"];
 export const outcomeText = {
   linear: "The simple scan got there in fewer comparisons.",

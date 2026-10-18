@@ -23,6 +23,9 @@ const RISE = 70;                  // pixels per second
 const SETTLE = 0.7;
 
 export const id = "sealed-jar";
+// Ours, not the model's. A generated scenario names a subject too, and the
+// two can disagree — which is worth reporting rather than trusting (P-102).
+export const subject = "chemistry";
 export const outcomes = ["same", "lighter"];
 export const outcomeText = {
   same: "The balance read exactly the same at the end as at the start.",

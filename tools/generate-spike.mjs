@@ -33,8 +33,13 @@
  * What leaves this machine is the prompt below and nothing else. Every part of
  * it is already public in this repository.
  */
-import { writeFileSync, readFileSync } from "node:fs";
+import { writeFileSync, readFileSync, existsSync } from "node:fs";
 import { buildPrompt, extractScenarios } from "../lab/scenario/prompt.mjs";
+// Needed by the per-primitive path below. P-96 moved buildPrompt into lab/
+// and took this import with it, which broke that path and nothing noticed:
+// the tests exercise the exported functions and never the CLI's own branch.
+// collectPerPrimitive exists so that branch is a tested function too.
+import { PRIMITIVES } from "../lab/primitives/index.mjs";
 
 // Re-exported: these moved to lab/ under ADR 0023 so the product sends the
 // same prompt this spike measures. The spike's own tests import them here.
@@ -133,6 +138,46 @@ export async function collect({ call, want = 20, batch = 5, attempts = 3,
   return { specs, raw, failures };
 }
 
+/**
+ * One call per primitive, `each` times over (P-50).
+ *
+ * Left to itself this generator wrote the same parameter-independent
+ * primitive seven times out of seven, so the half of the corpus where the
+ * answer must be derived went entirely unmeasured. Naming the primitive makes
+ * the task no easier — the contract, the controls and the outcome list are
+ * unchanged, and there is still no answer key.
+ *
+ * @param call  (primitiveId) => { text }
+ */
+export async function collectPerPrimitive({ call, each = 2, onPrimitive = () => {} } = {}) {
+  const specs = [], failures = [];
+  const seen = new Set();
+  let raw = "";
+  for (const id of Object.keys(PRIMITIVES)) {
+    for (let i = 0; i < each; i++) {
+      let got = [];
+      try {
+        const { text } = await call(id);
+        raw += (raw ? "\n---\n" : "") + text;
+        got = extractScenarios(text);
+      } catch (err) {
+        failures.push({ primitive: id, attempt: i + 1, status: err.status ?? null, message: err.message });
+        continue;
+      }
+      for (const spec of got) {
+        // Keyed by primitive AND id: two primitives may both call their first
+        // item "item-1", and neither is a repeat of the other.
+        const key = `${spec.primitive}:${spec.id}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        specs.push(spec);
+      }
+    }
+    onPrimitive(id, specs.filter((s) => s.primitive === id).length);
+  }
+  return { specs, raw, failures };
+}
+
 /** One call with the same patience, for the per-primitive path. */
 async function generate(model, prompt, { attempts = 3, sleep = nap, wait = 500 } = {}) {
   for (let a = 1; ; a++) {
@@ -180,24 +225,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     raw = readFileSync(from, "utf8");
     specs = extractScenarios(raw);
   } else if (perPrimitive) {
-    const seen = new Set();
-    for (const id of Object.keys(PRIMITIVES)) {
-      for (let i = 0; i < perPrimitive; i++) {
-        let got = [];
-        try {
-          const { text } = await generate(model, buildPrompt(1, id));
-          raw += (raw ? "\n---\n" : "") + text;
-          got = extractScenarios(text);
-        } catch (err) { console.error(`  ${id} ${i + 1}: ${err.message.slice(0, 80)}`); continue; }
-        for (const s of got) {
-          const key = `${s.primitive}:${s.id}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
-          specs.push(s);
-        }
-      }
-      console.error(`  ${id}: ${specs.filter((s) => s.primitive === id).length} unique`);
-    }
+    const r = await collectPerPrimitive({
+      call: (id) => generate(model, buildPrompt(1, id)),
+      each: perPrimitive,
+      onPrimitive: (id, n) => console.error(`  ${id}: ${n} unique`),
+    });
+    specs = r.specs;
+    raw = r.raw;
+    failed = r.failures;
   } else {
     const r = await collect({
       call: async (ask, n) => {
@@ -219,10 +254,27 @@ if (import.meta.url === `file://${process.argv[1]}`) {
                   `${f.status ?? "unparseable"} — ${String(f.message).slice(0, 90)}`);
   if (failed.length) console.error(`  ${failed.length} call(s) lost`);
 
-  if (!from) writeFileSync(`lab/scenarios/candidates/batch-02-${model}.raw.json`, raw);
-  const out = `lab/scenarios/candidates/batch-02-${model}.mjs`;
+  // A measurement is evidence, and a run must not be able to delete the one
+  // before it (P-102). The old path was keyed on the model alone, so a second
+  // run of the same model silently overwrote the first — which is exactly what
+  // happened here, to P-50's own recorded output, and git was the only reason
+  // it came back. The label defaults to today, and an existing file stops the
+  // write rather than being replaced.
+  const label = args.includes("--label") ? args[args.indexOf("--label") + 1]
+    : new Date().toISOString().slice(0, 10);
+  const stem = `lab/scenarios/candidates/batch-${label}-${model}`;
+  const out = `${stem}.mjs`;
+  for (const path of [out, `${stem}.raw.json`])
+    if (existsSync(path) && !args.includes("--overwrite")) {
+      console.error(`\n  ${path} already exists.`);
+      console.error("  A previous run's output is evidence. Pass --label <name> for this one,");
+      console.error("  or --overwrite only if you mean to discard what is there.");
+      process.exit(1);
+    }
+
+  if (!from) writeFileSync(`${stem}.raw.json`, raw);
   writeFileSync(out, "// SPDX-License-Identifier: MIT\n" +
-    `// Generated by ${model} from the contract alone (P-50). Not edited.\n` +
+    `// Generated by ${model} from the contract alone. Not edited.\n` +
     `export default ${JSON.stringify(specs, null, 2)};\n`);
   console.error(`${specs.length} scenarios -> ${out}`);
 }

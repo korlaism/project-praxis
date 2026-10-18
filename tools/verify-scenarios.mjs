@@ -64,6 +64,33 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log(`\n  where the answer cannot vary:  ${pct(split.fixed)}`);
   console.log(`  where it must be derived:      ${pct(split.derived)}`);
 
+  // P-102. P-50's 0/7 on the derived side came entirely from mechanics, which
+  // left it ambiguous: bad at deriving, or bad at pucks? With ten primitives
+  // across four subjects that is answerable inside one run — provided the
+  // derived half is reported per subject rather than as one number.
+  //
+  // The subject comes from the PRIMITIVE, which is ours, not from the
+  // scenario, which the model wrote. The two can disagree; that is reported
+  // below rather than treated as a failure, because adding a check mid-stream
+  // would make this run incomparable to the one it exists to follow up.
+  const bySubject = {};
+  let mislabelled = 0;
+  for (const r of rows) {
+    const prim = PRIMITIVES[r.s.primitive];
+    if (!prim) continue;
+    if (r.s.subject && r.s.subject !== prim.subject) mislabelled++;
+    const b = (bySubject[prim.subject] ??= { fixed: { n: 0, ok: 0 }, derived: { n: 0, ok: 0 } });
+    const bucket = isParameterIndependent(prim) ? b.fixed : b.derived;
+    bucket.n++;
+    if (Object.keys(r.fail).length === 0) bucket.ok++;
+  }
+  console.log("\n  the derived half, by subject:");
+  for (const [subject, b] of Object.entries(bySubject).sort())
+    console.log(`    ${subject.padEnd(10)} derived ${pct(b.derived).padEnd(16)}` +
+                (b.fixed.n ? `  (fixed ${pct(b.fixed)})` : ""));
+  if (mislabelled)
+    console.log(`\n  ${mislabelled} scenario(s) named a subject their primitive does not belong to`);
+
   // P-51 · the loop, not a single pass.
   if (repairing) {
   const loops = specs.map((s, i) => ({ i, ...repairLoop(s) }));

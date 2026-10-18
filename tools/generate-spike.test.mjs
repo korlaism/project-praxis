@@ -210,3 +210,55 @@ test("the HTTP status is carried, so the loop can tell a wait from a refusal", a
     () => callModel("m", "p", { fetch: fakeFetch, url: "http://x", key: "k" }),
     (err) => err.status === 429);
 });
+
+/* ── P-102: the per-primitive path is a function, and therefore tested ─────
+ *
+ * It used to live inside the CLI's main block, where nothing reached it. When
+ * P-96 moved buildPrompt into lab/ and took the PRIMITIVES import with it,
+ * that path broke outright — ReferenceError on the first line — and the whole
+ * suite stayed green, because every test here calls an exported function and
+ * none of them runs the command.
+ */
+
+import { collectPerPrimitive } from "./generate-spike.mjs";
+import { PRIMITIVES } from "../lab/primitives/index.mjs";
+
+/** A reply naming whichever primitive was asked for. */
+const from = (primitive, id = `${primitive}-1`) =>
+  JSON.stringify([{ ...JSON.parse(one(id))[0], primitive }]);
+
+test("every primitive is asked for, the named number of times", () => {
+  const asked = [];
+  return collectPerPrimitive({ call: async (id) => { asked.push(id); return { text: from(id) }; }, each: 2 })
+    .then(() => {
+      assert.equal(asked.length, Object.keys(PRIMITIVES).length * 2);
+      for (const id of Object.keys(PRIMITIVES))
+        assert.equal(asked.filter((x) => x === id).length, 2, `${id} was not asked for twice`);
+    });
+});
+
+test("a primitive that fails every time does not stop the others", async () => {
+  const r = await collectPerPrimitive({
+    call: async (id) => {
+      if (id === "two-pucks") throw new Error("500 boom");
+      return { text: from(id) };
+    },
+    each: 1,
+  });
+  assert.equal(r.failures.length, 1);
+  assert.equal(r.failures[0].primitive, "two-pucks");
+  assert.equal(r.specs.length, Object.keys(PRIMITIVES).length - 1);
+});
+
+test("the same id from two different primitives is not a repeat", async () => {
+  // Every primitive naming its item "item-1" is one scenario each, not one
+  // scenario total.
+  const r = await collectPerPrimitive({ call: async (id) => ({ text: from(id, "item-1") }), each: 1 });
+  assert.equal(r.specs.length, Object.keys(PRIMITIVES).length);
+});
+
+test("the transcript keeps every reply, including from primitives that failed later", async () => {
+  const r = await collectPerPrimitive({ call: async (id) => ({ text: from(id) }), each: 1 });
+  for (const id of Object.keys(PRIMITIVES))
+    assert.ok(r.raw.includes(id), `${id}'s reply is missing from the transcript`);
+});

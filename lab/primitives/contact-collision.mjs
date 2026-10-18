@@ -9,6 +9,9 @@ const SLOW = 0.002, K = 500, LEFT = -0.12, RIGHT = 0.28;
 const FLY_START = 0.05, REVEAL_AT = 0.15, SQUASH_REF = 0.013;
 
 export const id = "contact-collision";
+// Ours, not the model's. A generated scenario names a subject too, and the
+// two can disagree — which is worth reporting rather than trusting (P-102).
+export const subject = "physics";
 export const outcomes = ["truck", "equal", "fly"];
 export const outcomeText = {
   truck: "The heavy body pushed harder on the light one than it was pushed back.",

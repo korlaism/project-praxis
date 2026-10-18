@@ -10,6 +10,9 @@ const CENTRE = { cx: 0, cy: 0 };
 const REVEAL_AFTER = 1.6;
 
 export const id = "circular-release";
+// Ours, not the model's. A generated scenario names a subject too, and the
+// two can disagree — which is worth reporting rather than trusting (P-102).
+export const subject = "physics";
 export const outcomes = ["outward", "tangent", "curve", "spiral"];
 /** What each outcome looks like, said plainly — for when the setup was changed. */
 export const outcomeText = {

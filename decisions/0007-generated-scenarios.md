@@ -107,4 +107,5 @@ Still the right answer where PhET has a sim, and `P-33` remains open. It does no
 ## Revisit when
 
 * The `P-45` spike returns below roughly 90% unaided pass rate, especially on the answer check.
+  **Two measurements in, and both are below it.** `P-50`: 38% unaided, 0/7 where the answer must be derived. `P-102`: 63% unaided, 7/13 derived — and every single failure in that run was the answer check, with five of six missing a balanced case the generator never predicts. Both used a local 7B; `P-90`, the frontier run this bar was really written for, is still blocked on a credential. The decision stands because the gate does its job — a wrong scenario is refused rather than shown ([ADR 0023](0023-the-model-seam-and-the-answer-check-as-its-gate.md)) — not because the bar has been met.
 * Tier 2 verification proves tractable, at which point the deferral should be lifted deliberately rather than by drift.

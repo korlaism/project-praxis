@@ -23,6 +23,9 @@ const PAIR_SECONDS = 0.14;        // how long one pairing takes on screen
 const SETTLE = 0.5;
 
 export const id = "limiting-reagent";
+// Ours, not the model's. A generated scenario names a subject too, and the
+// two can disagree — which is worth reporting rather than trusting (P-102).
+export const subject = "chemistry";
 export const outcomes = ["a", "b", "neither"];
 export const outcomeText = {
   a: "The first reactant ran out first — some of the second was left over.",
