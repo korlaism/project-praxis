@@ -33,12 +33,19 @@ export function buildPrompt(count = 20, only = null, topic = null, notes = []) {
     .filter((p) => !only || p.id === only)
     .map((p) => ({
     primitive: p.id,
+    // Ours, and stated, because the model has no way to know it otherwise
+    // (P-103). The field list below tells it to copy this rather than decide.
+    subject: p.subject,
     controls: p.controls.map((c) => ({ key: c.key, min: c.min, max: c.max, step: c.step, unit: (c.unit ?? "").trim() })),
     outcomes: Object.fromEntries(p.outcomes.map((o) => [o, p.outcomeText[o]])),
   }));
 
   return [
-    "You are writing prediction items for a physics lab aimed at 11-15 year olds.",
+    // Not "a physics lab" (P-103). It said that from when physics was the only
+    // subject, and the model believed it: 11 of 16 generated scenarios called
+    // themselves physics, including every chemistry and computing one.
+    "You are writing prediction items for a science, maths and computing lab aimed at",
+    "11-15 year olds.",
     "",
     "Each item names a simulation primitive and a set of parameters. The simulation is then run,",
     "and the option you marked `correct` must be the outcome it actually produces. You cannot see",
@@ -50,7 +57,7 @@ export function buildPrompt(count = 20, only = null, topic = null, notes = []) {
     "",
     '  schema      1',
     '  id          a short kebab-case id, unique across the twenty',
-    '  subject     "physics"',
+    '  subject     copy the `subject` of the primitive you chose, exactly as given below',
     '  primitive   one of the primitive names below',
     '  params      an object giving a value for EVERY control of that primitive, within min..max',
     '  question    what the learner is asked, in plain language',
@@ -86,7 +93,11 @@ export function buildPrompt(count = 20, only = null, topic = null, notes = []) {
     JSON.stringify([{
       schema: 1,
       id: "a-kettle-on-a-hob",
-      subject: "physics",
+      // The example taught "physics" harder than the instruction above taught
+      // anything (P-103): it is the thing a model copies. Its invented
+      // primitive gets an invented subject, so there is nothing here to copy
+      // but the shape.
+      subject: "the-subject-of-that-primitive",
       primitive: "example-only-not-real",
       params: { heat: 2.5, water: 0.8 },
       question: "The hob is on full. What does the water do first?",

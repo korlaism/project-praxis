@@ -181,3 +181,42 @@ test("a note cannot smuggle instructions past the contract", async () => {
   assert.match(sent, /simulation/i);
 });
 
+
+/* ── P-103: the subject is ours, not the model's ────────────────────────── */
+
+test("a composed scenario is filed under its primitive's subject, not the one it claimed", async () => {
+  // P-95 files a card under spec.subject, so a generated chemistry item that
+  // called itself physics would put the learner's prediction in the wrong
+  // notebook. The primitive knows the answer and the model only guesses it.
+  const wrong = { ...truthful(), subject: "physics", primitive: "two-pucks" };
+  const chem = {
+    ...truthful("chem"), primitive: "limiting-reagent", subject: "physics",
+    params: { a: 4, b: 10, needA: 1, needB: 2 },
+    options: [{ id: "a", label: "A runs out" }, { id: "b", label: "B runs out" }],
+    correct: "a", errorTags: { b: "more-means-more-product" },
+  };
+  const r = await composeFor("anything", { settings: SETTINGS, ask: replying({ scenarios: [wrong, chem] }) });
+  assert.equal(r.scenarios.length, 2, r.rejected.map((x) => JSON.stringify(x.fail)).join("; "));
+  assert.equal(r.scenarios[0].subject, "physics");
+  assert.equal(r.scenarios[1].subject, "chemistry", "a chemistry item was filed as physics");
+});
+
+test("a scenario that names no subject at all still gets the right one", async () => {
+  const bare = { ...truthful() };
+  delete bare.subject;
+  const r = await composeFor("friction", { settings: SETTINGS, ask: replying({ scenarios: [bare] }) });
+  assert.equal(r.scenarios[0].subject, "physics");
+});
+
+test("how often the model got the subject wrong is reported, not hidden", async () => {
+  // Stamping the right value must not conceal a generator that cannot follow
+  // the one instruction it was given about it.
+  const chem = {
+    ...truthful("chem"), primitive: "limiting-reagent", subject: "physics",
+    params: { a: 4, b: 10, needA: 1, needB: 2 },
+    options: [{ id: "a", label: "A runs out" }, { id: "b", label: "B runs out" }],
+    correct: "a", errorTags: { b: "more-means-more-product" },
+  };
+  const r = await composeFor("anything", { settings: SETTINGS, ask: replying({ scenarios: [truthful(), chem] }) });
+  assert.equal(r.mislabelled, 1);
+});

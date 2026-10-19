@@ -19,6 +19,7 @@
 import { buildPrompt, extractScenarios } from "../scenario/prompt.mjs";
 import { verify } from "../scenario/verify.mjs";
 import { SCENARIOS } from "../scenarios/index.mjs";
+import { PRIMITIVES } from "../primitives/index.mjs";
 import { ask as askModel } from "./client.mjs";
 
 /** Generated ids are namespaced: one must never shadow a shipped scenario. */
@@ -49,7 +50,7 @@ export async function composeFor(topic, { settings, ask = askModel, want = 3, no
   try {
     reply = await ask(prompt, settings);
   } catch (err) {
-    return { ok: false, error: err.message, scenarios: [], rejected: [], asked: 0 };
+    return { ok: false, error: err.message, scenarios: [], rejected: [], mislabelled: 0, asked: 0 };
   }
 
   let proposed;
@@ -60,19 +61,32 @@ export async function composeFor(topic, { settings, ask = askModel, want = 3, no
     // primitive can honestly serve the topic — and extractScenarios cannot
     // tell an empty list from prose, because there is nothing in either.
     if (/"scenarios"\s*:\s*\[\s*\]/.test(reply)) 
-      return { ok: true, scenarios: [], rejected: [], asked: 0 };
-    return { ok: false, error: `the reply could not be read: ${err.message}`, scenarios: [], rejected: [], asked: 0 };
+      return { ok: true, scenarios: [], rejected: [], mislabelled: 0, asked: 0 };
+    return { ok: false, error: `the reply could not be read: ${err.message}`, scenarios: [], rejected: [], mislabelled: 0, asked: 0 };
   }
 
   const taken = new Set();
   const scenarios = [];
   const rejected = [];
+  let mislabelled = 0;
   for (const spec of proposed) {
-    const candidate = { ...spec, id: uniqueId(spec.id, taken), generated: true };
+    // The subject is ours, not the model's (P-103). P-95 files a card under
+    // spec.subject, so a generated chemistry item calling itself physics
+    // would put the learner's prediction in the wrong notebook. The primitive
+    // knows; the model guesses — and how often it guessed wrong is counted
+    // rather than quietly corrected away.
+    const primitive = PRIMITIVES[spec.primitive];
+    if (primitive && spec.subject && spec.subject !== primitive.subject) mislabelled++;
+    const candidate = {
+      ...spec,
+      ...(primitive ? { subject: primitive.subject } : {}),
+      id: uniqueId(spec.id, taken),
+      generated: true,
+    };
     const { fail } = verify(candidate);
     if (Object.keys(fail).length) { rejected.push({ spec: candidate, fail }); continue; }
     taken.add(candidate.id);
     scenarios.push(candidate);
   }
-  return { ok: true, scenarios, rejected, asked: proposed.length };
+  return { ok: true, scenarios, rejected, mislabelled, asked: proposed.length };
 }

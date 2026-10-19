@@ -286,6 +286,10 @@ primitive. Sixteen unique scenarios; two calls were lost to a dropped connection
 no chemistry item at all. Whatever the earlier number measured, it was not a uniform inability to
 reason from parameters.
 
+> **Corrected by `P-103` below.** A second run of the same model scored chemistry **2/3**, not
+> 0/3. The per-subject split did not replicate and should be read as noise at this sample size.
+> Only maths (4/4 twice) and the overall derived rate (~55% twice) held.
+
 **It is not a clean answer either, and the sample is why.** Two to four items per subject. A 4/4
 and a 0/3 are four and three observations; neither carries weight on its own, and the physics
 derived count is 2 here against 7 in `P-50`, so even that comparison is not like for like.
@@ -304,7 +308,11 @@ params, completion and invariants passed every time. Form is no longer the probl
 | `cache-walk` | `rows` | `same` |
 
 The generator never predicts the tie. That is `boundary-ignored` — the misconception named in
-`spec/04` and baited by several of our own items — exhibited by the thing writing the items. It is
+`spec/04` and baited by several of our own items — exhibited by the thing writing the items.
+
+> **Corrected by `P-103` below.** It does predict the tie — twice, where there wasn't one. The
+> direction was an artefact of six observations. It is unreliable about the balanced case both
+> ways, which is a duller and more defensible claim. It is
 also the reason `P-79` and `P-98` insisted those balanced outcomes be reachable: they are where
 this generator goes wrong, and an unreachable one would have hidden it.
 
@@ -317,6 +325,67 @@ physics, computing → physics. The prompt opens *"You are writing prediction it
 lab"*, written when physics was the only subject. The model is believing its instructions.
 `P-103` carries the fix and the re-run, together, so the before and after stay comparable — it was
 deliberately not corrected inside this measurement.
+
+## The same run again, with the prompt fixed (`P-103`)
+
+The prompt had told the model `subject "physics"` in its field list, shown it a worked example
+labelled `physics`, and opened *"prediction items for a physics lab"* — all written when physics
+was the only subject. `P-103` fixed all three and gave each primitive its own `subject` in the
+contract, then ran the spike again: same model, same budget, two calls per primitive.
+
+**The mislabelling is gone.**
+
+| | before | after |
+|---|---|---|
+| named a subject their primitive does not belong to | **11 of 16** | **0 of 15** |
+
+**Two things in the `P-102` write-up above do not survive the re-run, and are corrected here
+rather than quietly left standing.**
+
+### The per-subject split did not replicate
+
+| Derived half | `P-102` | `P-103` |
+|---|---|---|
+| maths | 4/4 (100%) | 4/4 (100%) |
+| chemistry | **0/3 (0%)** | **2/3 (67%)** |
+| computing | 2/4 (50%) | 1/3 (33%) |
+| physics | 1/2 (50%) | 0/2 (0%) |
+| **overall derived** | 7/13 (54%) | 7/12 (58%) |
+
+The overall derived rate is stable at roughly 55%, and maths is 4/4 twice. **Everything else moved,
+and chemistry moved from nothing to two thirds.** `P-102` said these were two-to-four-item samples
+that could not carry weight on their own; the re-run is what that caution looks like when it bites.
+
+**So the honest reading of the per-subject split is: at this sample size it is noise, except that
+maths has now been perfect twice.** The question `P-102` set out to answer — was 0/7 about
+mechanics or about derivation — is **still open**. What both runs do agree on is that the derived
+half sits near 55% and the trivial half near 100%, for this model.
+
+### "The generator never predicts the tie" was wrong
+
+`P-102` found five of six failures claiming a decisive outcome where the simulation produced a
+balanced one, and called it `boundary-ignored` in the generator. The re-run has it the other way
+round:
+
+| Primitive | Claimed | Actually |
+|---|---|---|
+| `contact-collision` | `fly` | `equal` |
+| `two-pucks` | `needs` | `both` |
+| `free-fall` | `together` | `heavier` |
+| `sealed-jar` | `lighter` | `same` |
+| `cache-walk` | **`same`** | `rows` |
+| `cache-walk` | **`same`** | `rows` |
+
+Twice it claimed the tie where there was none. The accurate statement is weaker and duller: **this
+generator is unreliable about the balanced case in both directions**, not biased against it.
+
+### One thing worth more than either rate
+
+`two-pucks` was given the answer **`needs`** — an outcome that *no setting of that primitive's
+controls can produce*. It exists only so a scenario can offer it as a wrong answer, and nothing in
+the prompt says so, because the outcome list does not distinguish a reachable outcome from a
+distractor. That is `P-99`, demonstrated rather than argued: the generator wrote an item whose
+correct answer cannot happen, and only the answer check stopped it.
 
 ### The frontier run was attempted on 2026-10-17 and could not start
 
