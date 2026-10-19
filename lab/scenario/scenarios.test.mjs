@@ -20,6 +20,68 @@ import BANK from "../scenarios/bank/index.mjs";
 
 const SHIPPED = { whichWay, truckFly, pucks };
 
+/* ── P-99: an outcome list does two jobs, and now says which is which ─────
+ *
+ * `outcomes` is both what the simulation can produce AND the vocabulary a
+ * scenario's options are drawn from. Nothing distinguished them, so a
+ * reachability test over the whole list flagged two-pucks' "needs" — a
+ * deliberate wrong answer — as a defect, and the test had to be narrowed to
+ * claimed answers instead. The generator then wrote an item whose correct
+ * answer was "needs", because nothing in the prompt said it cannot happen.
+ */
+
+test("every primitive's distractors are among its outcomes", () => {
+  for (const [id, p] of Object.entries(PRIMITIVES)) {
+    for (const d of p.distractors ?? [])
+      assert.ok(p.outcomes.includes(d), `${id}: "${d}" is a distractor but not an outcome`);
+  }
+});
+
+test("every outcome that is not a distractor can actually be reached", () => {
+  // The strong form, which P-98 could not assert and had to weaken. An
+  // outcome a learner can never dial is one they meet only as "what happened
+  // was none of the choices" — P-79, found twice.
+  for (const [id, p] of Object.entries(PRIMITIVES)) {
+    const reachable = reachableOutcomes(p);
+    const distractors = new Set(p.distractors ?? []);
+    for (const outcome of p.outcomes) {
+      if (distractors.has(outcome)) continue;
+      assert.ok(reachable.has(outcome),
+        `${id} declares "${outcome}" and no setting of its controls produces it — ` +
+        `either make it reachable or declare it a distractor`);
+    }
+  }
+});
+
+test("every declared distractor really is unreachable", () => {
+  // Without this, the test above is dodged by declaring an awkward outcome a
+  // distractor. A distractor is a claim about the simulation, and claims are
+  // checked here.
+  for (const [id, p] of Object.entries(PRIMITIVES)) {
+    const reachable = reachableOutcomes(p);
+    for (const d of p.distractors ?? [])
+      assert.ok(!reachable.has(d),
+        `${id} calls "${d}" a distractor, but the simulation produces it`);
+  }
+});
+
+test("the primitives with distractors are the ones whose answer never varies", () => {
+  // Not a coincidence worth leaving implicit: a primitive that always answers
+  // the same way needs wrong options to be a question at all, and every other
+  // outcome it names is one of them. two-pucks is the exception — it varies,
+  // and still carries one belief nobody can dial.
+  const withDistractors = Object.entries(PRIMITIVES)
+    .filter(([, p]) => (p.distractors ?? []).length).map(([id]) => id).sort();
+  assert.deepEqual(withDistractors, ["circular-release", "contact-collision", "two-pucks"]);
+
+  for (const id of ["circular-release", "contact-collision"]) {
+    const p = PRIMITIVES[id];
+    assert.ok(isParameterIndependent(p), `${id} should answer the same at every setting`);
+    assert.equal(p.distractors.length, p.outcomes.length - 1,
+      `${id}: every outcome but the one it always produces should be a distractor`);
+  }
+});
+
 test("every answer a scenario claims is one its primitive can actually produce", () => {
   // P-79: an item whose correct answer no setting of the controls reaches is
   // an item nobody can ever be right about by watching.

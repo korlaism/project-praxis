@@ -38,6 +38,12 @@ export function buildPrompt(count = 20, only = null, topic = null, notes = []) {
     subject: p.subject,
     controls: p.controls.map((c) => ({ key: c.key, min: c.min, max: c.max, step: c.step, unit: (c.unit ?? "").trim() })),
     outcomes: Object.fromEntries(p.outcomes.map((o) => [o, p.outcomeText[o]])),
+    // Which of those the simulation can actually produce (P-99). The list
+    // above is a vocabulary for OPTIONS; some of its entries exist only to be
+    // wrong. Without this the model has no way to tell, and it duly wrote an
+    // item whose correct answer was two-pucks' "needs" — which no setting of
+    // the controls produces (P-103).
+    canBeCorrect: p.outcomes.filter((o) => !(p.distractors ?? []).includes(o)),
   }));
 
   return [
@@ -64,14 +70,17 @@ export function buildPrompt(count = 20, only = null, topic = null, notes = []) {
     '  note        optional one line of framing',
     '  options     2 to 6 objects of { id, label }. Option ids MUST be outcome ids of that primitive,',
     '              and the outcome the simulation produces MUST be among them',
-    '  correct     the option id the simulation will produce for these params',
+    '  correct     the option id the simulation will produce for these params.',
+    '              It MUST be one of that primitive\'s `canBeCorrect` outcomes. The others are',
+    '              there to be offered as wrong answers and the simulation never produces them,',
+    '              so an item whose `correct` is one of those is wrong however plausible it reads.',
     '  errorTags   { option id -> misconception tag } for WRONG options only.',
     '              Tagging the correct option is rejected. Tags must come from the list below.',
     '  explain     why the outcome happens',
     "",
     "Rules that reject an item outright: a tag on the correct option; an option id that is not an",
     "outcome of that primitive; a params value outside a control's range; a `correct` that is not",
-    "what the simulation produces.",
+    "what the simulation produces, or that is not among that primitive's `canBeCorrect`.",
     "",
     "## Misconception tags",
     "",

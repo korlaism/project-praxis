@@ -13,6 +13,18 @@ export const id = "contact-collision";
 // two can disagree — which is worth reporting rather than trusting (P-102).
 export const subject = "physics";
 export const outcomes = ["truck", "equal", "fly"];
+/**
+ * Outcomes the simulation can never produce (P-99).
+ *
+ * The forces are always equal, whatever the masses or the speed. The other
+ * two are what the question is for: nothing a learner can dial makes either
+ * of them happen.
+ *
+ * Declared rather than inferred: the contract test asserts every outcome NOT
+ * named here is reachable, and that every one that IS named is not — so this
+ * cannot be used to wave an awkward outcome past the check.
+ */
+export const distractors = ["truck", "fly"];
 export const outcomeText = {
   truck: "The heavy body pushed harder on the light one than it was pushed back.",
   equal: "They pushed on each other with exactly the same force, in opposite directions.",

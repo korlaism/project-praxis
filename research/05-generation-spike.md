@@ -387,6 +387,43 @@ the prompt says so, because the outcome list does not distinguish a reachable ou
 distractor. That is `P-99`, demonstrated rather than argued: the generator wrote an item whose
 correct answer cannot happen, and only the answer check stopped it.
 
+## The contract now says which outcomes can happen (`P-99`)
+
+`P-103` found the generator marking `needs` as the correct answer for `two-pucks` — an outcome no
+setting of that primitive's controls produces. It was not the model's mistake to make: the
+contract handed it a list of outcomes without saying that some of them exist only to be offered
+as wrong answers.
+
+Three primitives carry such outcomes, and they are not an accident:
+
+| Primitive | Only ever produces | Declared distractors |
+|---|---|---|
+| `circular-release` | `tangent` | `outward`, `curve`, `spiral` |
+| `contact-collision` | `equal` | `truck`, `fly` |
+| `two-pucks` | varies | `needs` |
+
+The first two are the parameter-independent pair. A primitive that always answers the same way
+needs wrong options to be a question at all, so every other outcome it names is one. `two-pucks`
+varies and still carries one belief nobody can dial — motion requiring a continuing push is not a
+setting.
+
+Primitives now declare `distractors`, and the contract test asserts **both** directions: every
+outcome not named there is reachable, and every outcome named there is not. The second half is
+what stops the first from being dodged by relabelling an awkward outcome. It also restores the
+strong reachability check that `P-98` had to weaken to "every answer a scenario claims", which
+would not have caught `search-race`'s unreachable tie before an item used it.
+
+### What this does to comparability
+
+The prompt now carries `canBeCorrect` per primitive. **A run after this change is not directly
+comparable to `P-50`, `P-102` or `P-103`**: the model is being told something it previously had to
+infer, and at least one failure in `P-103` came from not knowing it.
+
+That makes the next number both higher and *cleaner*. Marking an unreachable outcome correct was
+never a reasoning failure about the simulation — it was our contract being ambiguous — and a
+measurement of generation quality is better off without it. The comparison that survives across
+the change is the shape of the failures, not the rate.
+
 ### The frontier run was attempted on 2026-10-17 and could not start
 
 `P-90` is blocked, not forgotten. The only model credential on this machine is an
