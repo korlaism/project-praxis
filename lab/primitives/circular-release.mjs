@@ -14,6 +14,18 @@ export const id = "circular-release";
 // two can disagree — which is worth reporting rather than trusting (P-102).
 export const subject = "physics";
 export const outcomes = ["outward", "tangent", "curve", "spiral"];
+/**
+ * Outcomes the simulation can never produce (P-99).
+ *
+ * Every cut string flies along the tangent, whatever the radius or the spin.
+ * The other three are the beliefs the item exists to catch, and no setting
+ * of the controls produces any of them.
+ *
+ * Declared rather than inferred: the contract test asserts every outcome NOT
+ * named here is reachable, and that every one that IS named is not — so this
+ * cannot be used to wave an awkward outcome past the check.
+ */
+export const distractors = ["outward", "curve", "spiral"];
 /** What each outcome looks like, said plainly — for when the setup was changed. */
 export const outcomeText = {
   outward: "It flew straight out along the line of the string.",

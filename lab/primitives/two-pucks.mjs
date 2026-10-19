@@ -12,6 +12,18 @@ export const id = "two-pucks";
 // two can disagree — which is worth reporting rather than trusting (P-102).
 export const subject = "physics";
 export const outcomes = ["needs", "runaway", "same", "both", "outruns"];
+/**
+ * Outcomes the simulation can never produce (P-99).
+ *
+ * `needs` is the belief that motion requires a continuing push. It is here so
+ * a scenario can offer it, and the simulation never produces it — Newton's
+ * first law is not a setting.
+ *
+ * Declared rather than inferred: the contract test asserts every outcome NOT
+ * named here is reachable, and that every one that IS named is not — so this
+ * cannot be used to wave an awkward outcome past the check.
+ */
+export const distractors = ["needs"];
 export const outcomeText = {
   needs:   "The pushed puck held its speed while the other slowed — here the push exactly balanced friction.",
   runaway: "The pushed puck kept gaining speed while the other held its speed, with nothing pushing it.",

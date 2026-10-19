@@ -290,3 +290,37 @@ test("the guard needs nothing from the run, so it can run before it", () => {
   assert.equal(outputPaths.length, 2);
   assert.doesNotThrow(() => refuseToClobber(outputPaths("m", "x"), { exists: () => false }));
 });
+
+/* ── P-99: the prompt says which outcomes can actually happen ────────────── */
+
+/** The primitive contract out of a prompt — the first fenced block, not the example. */
+const contractIn = (prompt) =>
+  JSON.parse(prompt.match(/```json\n([\s\S]*?)\n```/)[1]);
+
+test("the contract says which outcomes a correct answer may be", async () => {
+  // Without it the model has no way to tell a real outcome from one that is
+  // only ever a wrong option — and in P-103 it duly marked two-pucks' "needs"
+  // correct, which no setting of the controls produces.
+  const { PRIMITIVES } = await import("../lab/primitives/index.mjs");
+  const pucks = buildPrompt(1, "two-pucks");
+  assert.match(pucks, /canBeCorrect/);
+
+  // The FIRST json block is the primitive contract; the second is the worked
+  // example, which describes an invented primitive and has no canBeCorrect.
+  const block = contractIn(pucks);
+  const spec = block.find((x) => x.primitive === "two-pucks");
+  assert.ok(!spec.canBeCorrect.includes("needs"), "the prompt still offers needs as a possible answer");
+  for (const o of PRIMITIVES["two-pucks"].outcomes)
+    if (o !== "needs") assert.ok(spec.canBeCorrect.includes(o), `${o} is missing from canBeCorrect`);
+});
+
+test("a primitive with no distractors can be correct about all of its outcomes", async () => {
+  const { PRIMITIVES } = await import("../lab/primitives/index.mjs");
+  const block = contractIn(buildPrompt(1, "quadratic-roots"));
+  const spec = block.find((x) => x.primitive === "quadratic-roots");
+  assert.deepEqual(spec.canBeCorrect.slice().sort(), PRIMITIVES["quadratic-roots"].outcomes.slice().sort());
+});
+
+test("the rules say an answer outside canBeCorrect is rejected", () => {
+  assert.match(buildPrompt(1, "two-pucks"), /canBeCorrect[\s\S]{0,400}never produces them/);
+});
