@@ -54,9 +54,21 @@ test("a snapshot carries the whole spec, so it survives its scenario", () => {
 
 test("a snapshot needs a scenario to be a snapshot of", () => {
   const s = open();
-  for (const bad of [undefined, null, {}, { spec: null }, { spec: { question: "no id" } }])
+  for (const bad of [undefined, null, {}, { spec: null }, { spec: { question: "no id" } },
+                     { spec: { id: "neither-kind" } }])
     assert.equal(s.take(bad ?? {}).ok, false, JSON.stringify(bad));
   assert.deepEqual(s.list(), []);
+});
+
+test("a wrapped scenario can be kept, even though it has no primitive", () => {
+  // ADR 0009's kind has an embed instead of a primitive and is still a
+  // scenario. Requiring a primitive refused it silently, which on the page
+  // looked like a button that did nothing.
+  const s = open();
+  const embedded = { schema: 1, id: "someone-elses", subject: "physics",
+                     embed: { src: "embeds/example/index.html", title: "An example" } };
+  assert.equal(s.take({ spec: embedded, params: {} }).ok, true);
+  assert.equal(s.get(s.list()[0].id).spec.embed.src, "embeds/example/index.html");
 });
 
 test("snapshots come back newest first", () => {
