@@ -16,7 +16,8 @@ import { openNotebook } from "../notebook/store.mjs";
  * @param spec      a scenario specification
  * @param notebook  where cards go; defaults to this device's notebook
  */
-export function mountScenario(spec, { notebook = openNotebook(), session = null } = {}) {
+export function mountScenario(spec, { notebook = openNotebook(), session = null,
+                                      snapshots = null, params: startAt = null } = {}) {
   const v = validateScenario(spec);
   if (!v.ok) throw new Error("invalid scenario:\n  " + v.errors.join("\n  "));
 
@@ -26,7 +27,8 @@ export function mountScenario(spec, { notebook = openNotebook(), session = null 
   if (spec.embed) return mountWrapped(spec, notebook, session);
 
   const primitive = getPrimitive(spec.primitive);
-  const params = resolveParams(primitive, spec.params);
+  // A snapshot re-opens at the setup the learner had, not the author's (P-43).
+  const params = resolveParams(primitive, startAt ?? spec.params);
 
   const filing = filer(spec, notebook, "observed", session);
 
@@ -54,6 +56,9 @@ export function mountScenario(spec, { notebook = openNotebook(), session = null 
     // ADR 0014. Keyed by the misconception the learner acted on, not by the
     // option they clicked: the same wrong belief recurs across scenarios.
     cue: (record) => spec.cues?.[errorTagFor(spec, record)] ?? null,
+    // Keep this scenario exactly as it stands (P-43). The whole spec goes in,
+    // so a snapshot of a generated scenario survives its session being closed.
+    ...(snapshots ? { onKeep: (at) => snapshots.take({ spec, params: at, session }) } : {}),
     // Every reveal becomes a card in the scenario's subject notebook (ADR 0006),
     // and the card is finished off when the learner acts on the cue (P-89).
     ...filing,

@@ -194,6 +194,25 @@ export function mountLab(topic) {
     stepBtn = button(transport, "Step", () => { tick(1 / 60); render(); });
     resetBtn = button(transport, "Reset", () => { softReset(); render(); });
   }
+  // "Keep this" (P-43). The setup a learner dialled is a question they asked,
+  // and it is gone the moment they move a slider. Available at every step,
+  // including before a commit: the interesting setup is often the one they
+  // built BEFORE finding out what it does.
+  let keepBtn = null, keptSaid = null;
+  if (typeof topic.onKeep === "function") {
+    keepBtn = button(transport, "Keep this", () => {
+      let r;
+      try {
+        r = topic.onKeep({ ...params });
+      } catch (err) {
+        console.error("onKeep failed:", err);
+        r = { ok: false };
+      }
+      keptSaid.hidden = false;
+      keptSaid.textContent = r?.ok ? "Kept, with these settings." : "That could not be kept.";
+    });
+  }
+
   const againBtn = button(transport, "Ask again",
     () => { answerCue("left"); gate.reset(); softReset(); render(); });
 
@@ -304,6 +323,11 @@ export function mountLab(topic) {
     addBtn.hidden = !canSay;
   }
 
+  if (keepBtn) {
+    keptSaid = el("p", "lab-kept", foot);
+    keptSaid.hidden = true;
+  }
+
   const clock = el("div", "lab-clock", foot);
 
   // ---- loop -------------------------------------------------------------
@@ -327,6 +351,9 @@ export function mountLab(topic) {
   function softReset() {
     explained = false;
     cueState = null;
+    // A new attempt is a new setup; the last confirmation no longer describes
+    // what is on screen.
+    if (keptSaid) { keptSaid.hidden = true; keptSaid.textContent = ""; }
     // A new attempt is a new card, so it is a new gap to write up.
     noteFiled = false;
     noteSaidText = "";

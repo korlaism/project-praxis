@@ -132,3 +132,21 @@
 .hub-note-share:hover{color:var(--ink-2);border-color:var(--accent)}
 .hub-note-share.is-on{background:var(--accent);border-style:solid;
   border-color:var(--accent);color:#12100E}
+
+/* ── Kept scenarios (P-43) ────────────────────────────────────────────────
+   A snapshot is a question the learner built. Listed with the settings it was
+   built at, because those settings are the question. */
+.hub-kept{display:grid;gap:8px}
+.hub-kept-row{display:flex;gap:8px}
+.hub-kept-row .hub-session{flex:1}
+/* Top right, under the back button. Bottom-left put it straight over the
+   transport — a panel that hides Play and Reset is worse than no panel. The
+   left side is where primitives draw their readouts, so it is not free
+   either. */
+.hub-kept-aside{position:fixed;right:20px;top:64px;width:min(320px,calc(100vw - 40px));
+  display:grid;gap:8px;z-index:3}
+.hub-kept-aside .hub-note{margin:0;background:var(--panel);
+  box-shadow:0 2px 14px rgba(0,0,0,.45)}
+.hub-kept-aside .hub-note-box{box-shadow:0 2px 14px rgba(0,0,0,.45)}
+.lab-kept{margin:0;font:.78rem var(--mono);color:var(--accent-2);white-space:nowrap}
+.lab-kept[hidden]{display:none!important}

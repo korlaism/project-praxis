@@ -19,12 +19,14 @@ import { SCENARIOS as SHIPPED } from "../scenarios/index.mjs";
 import { homeModel } from "./home.mjs";
 import { openSessions } from "../session/store.mjs";
 import { sessionModel, homeSessions } from "../session/view.mjs";
+import { openSnapshots } from "../notebook/snapshots.mjs";
 import { openModelSettings } from "../model/settings.mjs";
 import { composeFor } from "../model/compose.mjs";
 
 let notebook = null;
 let sessions = null;
 let model = null;
+let snapshots = null;
 // How a session composes. A seam like the notebook and the scenarios are
 // (P-59): it is the one path that would otherwise make the hub untestable
 // without a network, and it is the path that most needs testing.
@@ -198,6 +200,46 @@ function settingsPage() {
   return () => { page.remove(); back.remove(); };
 }
 
+/**
+ * One kept scenario, re-opened exactly as it was (P-43).
+ *
+ * The spec travels with the snapshot, so this works for a scenario composed
+ * in a session that has since been closed — which is the point of keeping
+ * specifications rather than code (ADR 0007).
+ */
+function keptPage(id) {
+  const snapshot = snapshots.get(id);
+  if (!snapshot) { go("/"); return () => {}; }
+
+  document.body.className = "hub-in-scenario";
+  const lab = mountScenario(snapshot.spec, {
+    notebook, snapshots, params: snapshot.params, session: snapshot.session ?? null,
+  });
+  const unhook = instrument(lab);
+
+  const aside = el("div", "hub-kept-aside");
+  if (snapshot.note) {
+    aside.append(el("p", "hub-note", snapshot.note));
+  } else {
+    const box = document.createElement("textarea");
+    box.id = "kept-note";
+    box.className = "hub-note-box";
+    box.value = "";
+    box.setAttribute("rows", "2");
+    box.setAttribute("placeholder", "Why you kept this. Nobody writes here but you.");
+    const save = el("button", "hub-note-save", "Save note");
+    save.type = "button";
+    save.onclick = () => { if (snapshots.note(id, box.value).ok) show(null, `/kept/${id}`); };
+    aside.append(box, save);
+  }
+  document.body.append(aside);
+
+  const back = navButton("hub-back", snapshot.session ? `/session/${snapshot.session}` : "/",
+                         snapshot.session ? "← Session" : "← Lab");
+  document.body.append(back);
+  return () => { unhook(); lab.destroy(); aside.remove(); back.remove(); };
+}
+
 /** One session: its topic, the learner's notes, and what can be simulated. */
 function sessionPage(id) {
   const session = sessions.get(id);
@@ -277,6 +319,22 @@ function sessionPage(id) {
       page.append(el("section", "hub-concept",
         el("h3", "hub-h3", el("span", "hub-concept-name", `${c.title} — ${c.subject}`)), list));
     }
+  }
+
+  // ---- what the learner chose to keep (P-43) ----------------------------
+  const kept = snapshots.list(id);
+  if (kept.length) {
+    const box = el("section", "hub-kept", el("h2", "hub-h2", "Kept"));
+    for (const k of kept) {
+      const row = el("div", "hub-kept-row");
+      row.append(navButton("hub-session", `/kept/${k.id}`,
+        el("span", "hub-session-t", k.spec.question ?? k.spec.id),
+        el("span", "hub-session-n", Object.entries(k.params ?? {})
+          .map(([key, v]) => `${key} ${v}`).join(" · ") || "as it shipped")));
+      box.append(row);
+      if (k.note) box.append(el("p", "hub-note", k.note));
+    }
+    page.append(box);
   }
 
   // ---- what this topic is linked to (P-100) -----------------------------
@@ -470,14 +528,18 @@ function show(path, again = null) {
   // The composition report belongs to one session and one visit to it.
   if (composed && path !== `/session/${composed.session}`) composed = null;
 
-  if (path === "/settings") {
+  const keptId = path.match(/^\/kept\/(.+)$/)?.[1];
+
+  if (keptId) {
+    leave = keptPage(decodeURIComponent(keptId));
+  } else if (path === "/settings") {
     leave = settingsPage();
   } else if (onlySession) {
     leave = sessionPage(onlySession);
   } else if (spec) {
     document.body.className = "hub-in-scenario";
     if (sessionId) sessions.touch(sessionId);
-    const lab = mountScenario(spec, { notebook, session: sessionId });
+    const lab = mountScenario(spec, { notebook, session: sessionId, snapshots });
     const back = navButton("hub-back", sessionId ? `/session/${sessionId}` : "/",
                            sessionId ? "← Session" : "← Lab");
     document.body.append(back);
@@ -498,10 +560,12 @@ function show(path, again = null) {
  * this — so the module graph can be loaded (and checked) without a browser.
  */
 export function startHub({ store = openNotebook(), sessionStore = openSessions(),
-                           modelSettings = openModelSettings(), composeWith, scenarios } = {}) {
+                           modelSettings = openModelSettings(), snapshotStore = openSnapshots(),
+                           composeWith, scenarios } = {}) {
   notebook = store;
   sessions = sessionStore;
   model = modelSettings;
+  snapshots = snapshotStore;
   if (composeWith) compose = composeWith;
   composed = null;
   if (scenarios) SCENARIOS = scenarios;

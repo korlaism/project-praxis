@@ -163,6 +163,25 @@ test("a confusion entry carries nothing that identifies a person either", () => 
     `new confusion fields must be justified against P-44 before they ship: ${unexpected.join(", ")}`);
 });
 
+test("a snapshot carries a scenario, not a person", () => {
+  // A third record shape, and a third gate. The card whitelist guards one and
+  // the confusion log another; a shape with neither would be one nobody
+  // looked at, which is how a whitelist fails open.
+  const src = readFileSync(new URL("./snapshots.mjs", import.meta.url), "utf8");
+  const kept = src.match(/const KEPT = \[([\s\S]*?)\];/)[1];
+  const fields = [...kept.matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+
+  // `spec` and `params` are the scenario and the settings it was kept at —
+  // about the simulation, not the learner. `note` is the learner's own words
+  // about why they kept it, under the same rule as every other field they
+  // own (ADR 0002, ADR 0020). `session` names the piece of work it belongs
+  // to, which is a container they made, never a person.
+  const ABOUT_THE_SCENARIO = new Set(["spec", "params", "note", "session"]);
+  const unexpected = fields.filter((f) => !ABOUT_THE_SCENARIO.has(f));
+  assert.deepEqual(unexpected, [],
+    `new snapshot fields must be justified against P-44 before they ship: ${unexpected.join(", ")}`);
+});
+
 test("a learner's own words never reach the URL", async () => {
   // The classic accident: prose in a query string or a fragment, where it
   // lands in history, in a shared link and in every screen recording. The lab
