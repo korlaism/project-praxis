@@ -262,3 +262,31 @@ test("the transcript keeps every reply, including from primitives that failed la
   for (const id of Object.keys(PRIMITIVES))
     assert.ok(r.raw.includes(id), `${id}'s reply is missing from the transcript`);
 });
+
+/* ── P-103: the guard runs before the money is spent ─────────────────────── */
+
+import { outputPaths, refuseToClobber } from "./generate-spike.mjs";
+
+test("a run's output path is dated, so one run cannot overwrite another", () => {
+  const a = outputPaths("qwen2.5:7b", "2026-10-19");
+  const b = outputPaths("qwen2.5:7b", "2026-10-19b");
+  assert.notEqual(a.out, b.out);
+  assert.match(a.out, /batch-2026-10-19-qwen2\.5:7b\.mjs$/);
+  assert.match(a.raw, /\.raw\.json$/);
+});
+
+test("a path already in the way is reported", () => {
+  const paths = outputPaths("m", "x");
+  assert.deepEqual(refuseToClobber(paths, { exists: () => false }), []);
+  assert.deepEqual(refuseToClobber(paths, { exists: (p) => p === paths.out }), [paths.out]);
+  assert.equal(refuseToClobber(paths, { exists: () => true }).length, 2);
+});
+
+test("the guard needs nothing from the run, so it can run before it", () => {
+  // The point of the fix. The first version checked after generating, and
+  // threw away sixteen scenarios and ninety minutes to protect two empty
+  // files. A guard that fires after the expense has destroyed what it
+  // protected. These take a model and a label and nothing else.
+  assert.equal(outputPaths.length, 2);
+  assert.doesNotThrow(() => refuseToClobber(outputPaths("m", "x"), { exists: () => false }));
+});

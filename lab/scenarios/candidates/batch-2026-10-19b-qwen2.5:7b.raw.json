@@ -1,0 +1,532 @@
+{
+  "schema": 1,
+  "id": "circular_release_example",
+  "subject": "physics",
+  "primitive": "circular-release",
+  "params": {
+    "r": 1.5,
+    "omega": 2.0
+  },
+  "question": "If we release the object, what will happen?",
+  "note": "",
+  "options": [
+    {
+      "id": "outward",
+      "label": "It flies straight out along the line of the string."
+    },
+    {
+      "id": "tangent",
+      "label": "It flies off in a straight line along the tangent — the way it was already going."
+    },
+    {
+      "id": "curve",
+      "label": "It keeps following the circle, as if the string were still there."
+    },
+    {
+      "id": "spiral",
+      "label": "It spirals outward, partly along the string and partly across it."
+    }
+  ],
+  "correct": "tangent",
+  "errorTags": {
+    "outward": "motion-implies-force",
+    "curve": "things-naturally-stop",
+    "spiral": "boundary-ignored"
+  },
+  "explain": "The object continues in the direction it was moving at the moment of release due to inertia."
+}
+---
+{
+  "schema": 1,
+  "id": "contact-collision-primitive",
+  "subject": "physics",
+  "primitive": "contact-collision",
+  "params": {
+    "mt": 3.5,
+    "mf": 200,
+    "u": 15
+  },
+  "question": "If the heavy body is moving towards the light one, which will move more?",
+  "note": "",
+  "options": [
+    {
+      "id": "truck",
+      "label": "The heavy body moves more."
+    },
+    {
+      "id": "equal",
+      "label": "They move with equal speed."
+    },
+    {
+      "id": "fly",
+      "label": "The light body moves more."
+    }
+  ],
+  "correct": "fly",
+  "errorTags": {
+    "truck": "outward-in-circles",
+    "equal": "things-naturally-stop"
+  },
+  "explain": "The lighter object experiences a greater acceleration due to Newton’s second law, hence it moves more."
+}
+---
+{
+  "schema": 1,
+  "id": "force-separation",
+  "subject": "physics",
+  "primitive": "contact-collision",
+  "params": {
+    "mt": 3,
+    "mf": 200,
+    "u": 15
+  },
+  "question": "What happens when the heavy body hits the light one while both are moving?",
+  "options": [
+    {
+      "id": "fly",
+      "label": "The light body flies off with a larger velocity."
+    },
+    {
+      "id": "equal",
+      "label": "Both bodies exchange forces equally, but the lighter one moves more because of its lower mass."
+    },
+    {
+      "id": "truck",
+      "label": "The heavy body stops completely while pushing harder on the light one."
+    }
+  ],
+  "correct": "equal",
+  "errorTags": {
+    "fly": "bigger-pushes-harder",
+    "truck": "things-naturally-stop"
+  },
+  "explain": "Both bodies experience equal and opposite forces due to Newton’s Third Law, but the light body has a lower mass and thus gains a higher velocity."
+}
+---
+{
+  "schema": 1,
+  "id": "puck-push-experiment",
+  "subject": "physics",
+  "primitive": "two-pucks",
+  "params": {
+    "push": 0.5,
+    "friction": 0.15,
+    "u": 4
+  },
+  "question": "What happens to the pucks when you give one a push and increase friction slightly?",
+  "options": [
+    {
+      "id": "needs",
+      "label": "The pushed puck held its speed while the other slowed — here the push exactly balanced friction."
+    },
+    {
+      "id": "both",
+      "label": "Both pucks lost speed — friction beat whatever push there was."
+    },
+    {
+      "id": "runaway",
+      "label": "The pushed puck kept gaining speed while the other held its speed, with nothing pushing it."
+    }
+  ],
+  "correct": "needs",
+  "errorTags": {
+    "both": "things-naturally-stop",
+    "runaway": "motion-implies-force"
+  },
+  "explain": "With a push and increased friction, the pushed puck continues at its initial speed as the opposing force of friction balances the applied force."
+}
+---
+{
+  "schema": 1,
+  "id": "free-fall-practice-1",
+  "subject": "physics",
+  "primitive": "free-fall",
+  "params": {
+    "heavy": 5,
+    "light": 1,
+    "height": 20,
+    "air": 0.05
+  },
+  "question": "If a heavier ball and a lighter ball are dropped from the same height, which one will hit the ground first?",
+  "options": [
+    {
+      "id": "together",
+      "label": "They both hit the ground at the same time."
+    },
+    {
+      "id": "heavier-first",
+      "label": "The heavier ball hits the ground first."
+    }
+  ],
+  "correct": "together",
+  "errorTags": {
+    "heavier-first": "motion-implies-force"
+  },
+  "explain": "Both balls experience the same gravitational acceleration, so they hit the ground simultaneously regardless of their masses."
+}
+---
+{
+  "schema": 1,
+  "id": "line-pair-intersection",
+  "subject": "maths",
+  "primitive": "line-pair",
+  "params": {
+    "m1": 2.0,
+    "c1": -3.0,
+    "m2": -1.0,
+    "c2": 4.0
+  },
+  "question": "What happens when these two lines are drawn on the same graph?",
+  "note": "",
+  "options": [
+    {
+      "id": "one-point",
+      "label": "They crossed once, at a single point."
+    },
+    {
+      "id": "parallel",
+      "label": "They never met — same steepness, different heights."
+    },
+    {
+      "id": "same-line",
+      "label": "They were the same line all along, one drawn over the other."
+    }
+  ],
+  "correct": "one-point",
+  "errorTags": {
+    "parallel": "boundary-ignored",
+    "same-line": "special-case-reasoning"
+  },
+  "explain": "The lines have different slopes, so they intersect at exactly one point."
+}
+---
+{
+  "schema": 1,
+  "id": "line-pair-exercise-1",
+  "subject": "maths",
+  "primitive": "line-pair",
+  "params": {
+    "m1": 2,
+    "c1": 1,
+    "m2": -1,
+    "c2": 3
+  },
+  "question": "What will happen when these two lines are drawn on the coordinate plane?",
+  "note": "",
+  "options": [
+    {
+      "id": "one-point",
+      "label": "They crossed once, at a single point."
+    },
+    {
+      "id": "parallel",
+      "label": "They never met — same steepness, different heights."
+    },
+    {
+      "id": "same-line",
+      "label": "They were the same line all along, one drawn over the other."
+    }
+  ],
+  "correct": "one-point",
+  "errorTags": {
+    "parallel": "special-case-reasoning",
+    "same-line": "special-case-reasoning"
+  },
+  "explain": "The lines have different slopes but intersect at a single point."
+}
+---
+{
+  "schema": 1,
+  "id": "quadratic_roots_example",
+  "subject": "maths",
+  "primitive": "quadratic-roots",
+  "params": {
+    "a": 2,
+    "b": -4,
+    "c": 2
+  },
+  "question": "For the quadratic equation with coefficients a = 2, b = -4, and c = 2, how many real solutions does it have?",
+  "options": [
+    {
+      "id": "two",
+      "label": "Two real solutions"
+    },
+    {
+      "id": "one",
+      "label": "One real solution"
+    },
+    {
+      "id": "none",
+      "label": "No real solutions"
+    }
+  ],
+  "correct": "one",
+  "errorTags": {
+    "two": "motion-implies-force",
+    "none": "sign-or-direction"
+  },
+  "explain": "The discriminant b^2 - 4ac is zero, indicating one repeated root."
+}
+---
+{
+  "schema": 1,
+  "id": "quadratic-equation-analysis",
+  "subject": "maths",
+  "primitive": "quadratic-roots",
+  "params": {
+    "a": 2,
+    "b": -5,
+    "c": -3
+  },
+  "question": "How many solutions does the equation $2x^2 - 5x - 3 = 0$ have?",
+  "options": [
+    {
+      "id": "two",
+      "label": "Two solutions"
+    },
+    {
+      "id": "one",
+      "label": "One solution"
+    },
+    {
+      "id": "none",
+      "label": "No real solutions"
+    }
+  ],
+  "correct": "two",
+  "errorTags": {
+    "one": "special-case-reasoning",
+    "none": "things-naturally-stop"
+  },
+  "explain": "The discriminant $b^2 - 4ac = (-5)^2 - 4 \times 2 \times (-3) = 25 + 24 = 49$ is positive, indicating two distinct real solutions."
+}
+---
+{
+  "schema": 1,
+  "id": "limiting_reagent_experiment",
+  "subject": "chemistry",
+  "primitive": "limiting-reagent",
+  "params": {
+    "a": 3,
+    "b": 6,
+    "needA": 2,
+    "needB": 1
+  },
+  "question": "Which reactant runs out first, and how much of the other is left over?",
+  "note": "Simulate a reaction to identify the limiting reagent.",
+  "options": [
+    {
+      "id": "a",
+      "label": "Reactant A runs out first; some of B remains."
+    },
+    {
+      "id": "b",
+      "label": "Reactant B runs out first; all of A is used up."
+    }
+  ],
+  "correct": "a",
+  "errorTags": {
+    "b": "special-case-reasoning"
+  },
+  "explain": "Reactant A is in excess because the need for A is more than the available amount, while B runs out first."
+}
+---
+{
+  "schema": 1,
+  "id": "reagent-analysis",
+  "subject": "chemistry",
+  "primitive": "limiting-reagent",
+  "params": {
+    "a": 4,
+    "b": 8,
+    "needA": 2,
+    "needB": 1
+  },
+  "question": "If we have ingredients to make a reaction, which ingredient will run out first?",
+  "note": "",
+  "options": [
+    {
+      "id": "a",
+      "label": "Ingredient A runs out first."
+    },
+    {
+      "id": "b",
+      "label": "Ingredient B runs out first."
+    },
+    {
+      "id": "neither",
+      "label": "Neither ingredient runs out before the other."
+    }
+  ],
+  "correct": "a",
+  "errorTags": {
+    "b": "special-case-reasoning",
+    "neither": "things-naturally-stop"
+  },
+  "explain": "Ingredient A will run out first because it is used at a higher rate compared to the required amount, whereas ingredient B has sufficient quantity."
+}
+---
+{
+  "schema": 1,
+  "id": "sealed-jar-experiment",
+  "subject": "chemistry",
+  "primitive": "sealed-jar",
+  "params": {
+    "start": 50,
+    "gas": 3,
+    "sealed": 1
+  },
+  "question": "After heating the jar, what will happen to the balance reading?",
+  "options": [
+    {
+      "id": "same",
+      "label": "The weight stays the same"
+    },
+    {
+      "id": "lighter",
+      "label": "The weight decreases slightly"
+    }
+  ],
+  "correct": "lighter",
+  "errorTags": {
+    "same": "motion-implies-force"
+  },
+  "explain": "Gas expansion inside the sealed jar pushes out a small amount of air, causing the overall mass to decrease slightly."
+}
+---
+{
+  "schema": 1,
+  "id": "sealed-jar-experiment",
+  "subject": "chemistry",
+  "primitive": "sealed-jar",
+  "params": {
+    "start": 50,
+    "gas": 6,
+    "sealed": 1
+  },
+  "question": "What happens to the balance of the sealed jar with gas inside when you allow it to sit for some time?",
+  "note": "",
+  "options": [
+    {
+      "id": "lighter",
+      "label": "The jar becomes lighter as some gas escapes"
+    },
+    {
+      "id": "same",
+      "label": "The balance remains the same, no change in weight"
+    }
+  ],
+  "correct": "lighter",
+  "errorTags": {
+    "same": "motion-implies-force"
+  },
+  "explain": "When gas escapes from a sealed container, the total mass of the system decreases, causing the jar to become lighter on the balance."
+}
+---
+{
+  "schema": 1,
+  "id": "search-race-binary",
+  "subject": "computing",
+  "primitive": "search-race",
+  "params": {
+    "n": 20,
+    "target": 17
+  },
+  "question": "Given a list of 20 items, which search method will find the target in fewer steps?",
+  "note": "",
+  "options": [
+    {
+      "id": "binary",
+      "label": "Binary Search"
+    },
+    {
+      "id": "linear",
+      "label": "Linear Search"
+    }
+  ],
+  "correct": "binary",
+  "errorTags": {
+    "linear": "special-case-reasoning"
+  },
+  "explain": "Binary search splits the list in half each step, while linear search checks each element sequentially."
+}
+---
+{
+  "schema": 1,
+  "id": "search-race-binary",
+  "subject": "computing",
+  "primitive": "search-race",
+  "params": {
+    "n": 20,
+    "target": 9
+  },
+  "question": "Which search method will find the target in fewer comparisons?",
+  "options": [
+    {
+      "id": "linear",
+      "label": "The simple scan"
+    },
+    {
+      "id": "binary",
+      "label": "The halving search"
+    }
+  ],
+  "correct": "binary",
+  "explain": "The halving search is more efficient and will find the target in fewer comparisons than a simple linear scan."
+}
+---
+{
+  "schema": 1,
+  "id": "cache-walk-experiment",
+  "subject": "computing",
+  "primitive": "cache-walk",
+  "params": {
+    "rows": 4,
+    "cols": 6,
+    "line": 2,
+    "held": 3
+  },
+  "question": "If the line moves from row 1, column 3 to row 4, column 6, how many lines are fetched?",
+  "note": "",
+  "options": [
+    {
+      "id": "rows",
+      "label": "Going along the rows fetched fewer lines from memory."
+    },
+    {
+      "id": "same",
+      "label": "Both orders fetched exactly the same number of lines."
+    }
+  ],
+  "correct": "same",
+  "errorTags": {},
+  "explain": "Since both movements involve fetching lines in a single direction (right and down) from the same starting point, they require the same number of memory accesses."
+}
+---
+{
+  "schema": 1,
+  "id": "cache-walk-example",
+  "subject": "computing",
+  "primitive": "cache-walk",
+  "params": {
+    "rows": 4,
+    "cols": 6,
+    "line": 2,
+    "held": 3
+  },
+  "question": "If the program starts at row 2, column 3 and needs to fetch line 2, how many lines are fetched from memory?",
+  "note": "",
+  "options": [
+    {
+      "id": "same",
+      "label": "Both orders fetched exactly the same number of lines."
+    },
+    {
+      "id": "rows",
+      "label": "Going along the rows fetched fewer lines from memory."
+    }
+  ],
+  "correct": "same",
+  "errorTags": {},
+  "explain": "Both starting positions result in fetching the same line, so the number of lines fetched remains the same."
+}
