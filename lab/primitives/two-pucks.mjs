@@ -8,6 +8,9 @@ import { stepWithFriction } from "../components/motion.mjs";
 const G = 9.81, SPAN = 26, TICK = 0.25, MASS = 0.5;
 
 export const id = "two-pucks";
+// Ours, not the model's. A generated scenario names a subject too, and the
+// two can disagree — which is worth reporting rather than trusting (P-102).
+export const subject = "physics";
 export const outcomes = ["needs", "runaway", "same", "both", "outruns"];
 export const outcomeText = {
   needs:   "The pushed puck held its speed while the other slowed — here the push exactly balanced friction.",

@@ -253,6 +253,71 @@ The numbers above still stand and still describe a 7B model. What changes is the
 generator that fails the derived half now produces **nothing on screen** rather than something
 plausible and wrong, and the learner is told how many were thrown away.
 
+## The per-subject split, 2026-10-19 (`P-102`)
+
+**This is not the frontier run.** `P-90` is still blocked; the key on this machine answers `403`
+to every chat model. This is the half of its question that was never blocked.
+
+The ambiguity was stated above: `P-50`'s **0/7** on the derived side came entirely from mechanics,
+so it could not distinguish *bad at deriving* from *bad at pucks*. With ten primitives across four
+subjects the same model can answer it inside one run.
+
+Same model as `P-50` (`qwen2.5:7b`), same prompt, same call budget — twenty calls, two per
+primitive. Sixteen unique scenarios; two calls were lost to a dropped connection.
+
+| | unaided |
+|---|---|
+| overall | **10/16 (63%)** |
+| where the answer cannot vary | 3/3 (100%) |
+| where it must be derived | **7/13 (54%)** |
+
+**The derived half, by subject:**
+
+| Subject | Derived |
+|---|---|
+| maths | **4/4 (100%)** |
+| computing | 2/4 (50%) |
+| physics | 1/2 (50%) |
+| chemistry | **0/3 (0%)** |
+
+### What it says
+
+**0/7 was not simply "bad at deriving".** The same model derives every maths item correctly and
+no chemistry item at all. Whatever the earlier number measured, it was not a uniform inability to
+reason from parameters.
+
+**It is not a clean answer either, and the sample is why.** Two to four items per subject. A 4/4
+and a 0/3 are four and three observations; neither carries weight on its own, and the physics
+derived count is 2 here against 7 in `P-50`, so even that comparison is not like for like.
+
+**Every failure was the answer check.** Six failures, all of them `answer`; schema, primitive,
+params, completion and invariants passed every time. Form is no longer the problem.
+
+**Five of the six missed the balanced case, in the same direction:**
+
+| Primitive | Claimed | Actually |
+|---|---|---|
+| `limiting-reagent` | `a` | `neither` |
+| `limiting-reagent` | `a` | `neither` |
+| `sealed-jar` | `lighter` | `same` |
+| `search-race` | `binary` | `tie` |
+| `cache-walk` | `rows` | `same` |
+
+The generator never predicts the tie. That is `boundary-ignored` — the misconception named in
+`spec/04` and baited by several of our own items — exhibited by the thing writing the items. It is
+also the reason `P-79` and `P-98` insisted those balanced outcomes be reachable: they are where
+this generator goes wrong, and an unreachable one would have hidden it.
+
+**The sixth** was `free-fall` claiming `together` where the simulation dropped the heavier one
+first — air resistance ignored.
+
+**The `subject` field is currently worthless.** Eleven of sixteen scenarios named a subject their
+primitive does not belong to, and every disagreement was the same: maths → physics, chemistry →
+physics, computing → physics. The prompt opens *"You are writing prediction items for a physics
+lab"*, written when physics was the only subject. The model is believing its instructions.
+`P-103` carries the fix and the re-run, together, so the before and after stay comparable — it was
+deliberately not corrected inside this measurement.
+
 ### The frontier run was attempted on 2026-10-17 and could not start
 
 `P-90` is blocked, not forgotten. The only model credential on this machine is an

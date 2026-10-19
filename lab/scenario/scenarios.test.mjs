@@ -46,6 +46,10 @@ test("every primitive satisfies the contract", () => {
       assert.equal(typeof p[fn], "function", `${id}: missing ${fn}()`);
     assert.ok(Array.isArray(p.controls) && p.controls.length, `${id}: needs controls`);
     assert.ok(Array.isArray(p.outcomes) && p.outcomes.length >= 2, `${id}: needs outcomes`);
+    // Ours, not the model's (P-102). A generated scenario claims a subject
+    // too; knowing the primitive's own is what lets a measurement be split
+    // by subject without trusting what the generator wrote.
+    assert.ok(typeof p.subject === "string" && p.subject, `${id}: needs a subject`);
     for (const c of p.controls) {
       for (const k of ["key", "label", "min", "max", "step", "default"])
         assert.ok(c[k] !== undefined, `${id}: control ${c.key} missing ${k}`);

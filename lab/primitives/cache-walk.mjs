@@ -20,6 +20,9 @@ const CELL_SECONDS = 0.035;
 const SETTLE = 0.6;
 
 export const id = "cache-walk";
+// Ours, not the model's. A generated scenario names a subject too, and the
+// two can disagree — which is worth reporting rather than trusting (P-102).
+export const subject = "computing";
 export const outcomes = ["rows", "same"];
 export const outcomeText = {
   rows: "Going along the rows fetched fewer lines from memory.",

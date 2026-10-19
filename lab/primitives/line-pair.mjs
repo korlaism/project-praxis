@@ -17,6 +17,9 @@ const SPAN = 10;                 // the view runs -10..10 in both directions
 const DRAW_SECONDS = 1.1;        // long enough to watch them arrive
 
 export const id = "line-pair";
+// Ours, not the model's. A generated scenario names a subject too, and the
+// two can disagree — which is worth reporting rather than trusting (P-102).
+export const subject = "maths";
 export const outcomes = ["one-point", "parallel", "same-line"];
 export const outcomeText = {
   "one-point": "They crossed once, at a single point.",

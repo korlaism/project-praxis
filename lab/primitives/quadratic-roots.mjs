@@ -18,6 +18,9 @@ const SPAN_X = 6, SPAN_Y = 14;
 const DRAW_SECONDS = 1.1;
 
 export const id = "quadratic-roots";
+// Ours, not the model's. A generated scenario names a subject too, and the
+// two can disagree — which is worth reporting rather than trusting (P-102).
+export const subject = "maths";
 export const outcomes = ["two", "one", "none"];
 export const outcomeText = {
   two: "It crossed the axis twice — two solutions.",
