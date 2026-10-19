@@ -18,7 +18,7 @@ import { openNotebook, memoryBackend } from "../notebook/store.mjs";
 import { openSessions } from "../session/store.mjs";
 
 async function start({ search = "", hash = "", scenarios, store, sessionStore,
-                      modelSettings, composeWith } = {}) {
+                      modelSettings, composeWith, snapshotStore } = {}) {
   const dom = installDom();
   if (search) location.search = search;      // set before the hub reads it
   if (hash) location.hash = hash;            // the learner arriving on a saved address
@@ -28,7 +28,8 @@ async function start({ search = "", hash = "", scenarios, store, sessionStore,
   // tie on touchedAt and the resume order becomes arbitrary.
   let clock = 1_700_000_000_000;
   const sessions = sessionStore ?? openSessions({ backend: memoryBackend(), now: () => (clock += 1000) });
-  startHub({ store: notebook, sessionStore: sessions, scenarios, modelSettings, composeWith });
+  startHub({ store: notebook, sessionStore: sessions, scenarios, modelSettings, composeWith,
+             snapshotStore });
   const one = (cls) => dom.body.find((n) => n.className?.split?.(" ").includes(cls));
   const all = (cls) => dom.body.findAll((n) => n.className?.split?.(" ").includes(cls));
   const text = () => {
@@ -651,5 +652,94 @@ test("the settings page no longer claims notes are never sent", async () => {
   assert.ok(!/notes[^.]*are never sent/i.test(said), `the old promise is still on the page: ${said.slice(0, 200)}`);
   assert.match(said, /only sent if you pick it/i);
   assert.match(said, /see the exact words/i);
+  h.dom.restore();
+});
+
+/* ── P-43: keeping a scenario, exactly as it was ────────────────────────── */
+
+import { openSnapshots } from "../notebook/snapshots.mjs";
+
+/** A session with one scenario open, and somewhere to keep it. */
+async function inAScenario() {
+  const snapshotStore = openSnapshots({ backend: memoryBackend() });
+  const h = await start({ snapshotStore });
+  h.byId("hub-topic").value = "quadratics";
+  h.button("Start").onclick();
+  h.all("hub-card")[0].onclick();
+  return { ...h, snapshots: snapshotStore };
+}
+
+test("a scenario can be kept, with the settings the learner had", async () => {
+  const h = await inAScenario();
+  const slider = h.dom.body.find((n) => n.id?.startsWith("param-"));
+  slider.value = String(Number(slider.value) + 1);
+  slider.oninput();
+  h.button("Keep this").onclick();
+
+  const [kept] = h.snapshots.list();
+  assert.ok(kept, "nothing was kept");
+  assert.equal(kept.spec.primitive, "quadratic-roots");
+  assert.equal(kept.params[slider.id.replace("param-", "")], Number(slider.value),
+    "it kept the author's setting, not the one on screen");
+  h.dom.restore();
+});
+
+test("a kept scenario belongs to the session it was kept in", async () => {
+  const h = await inAScenario();
+  h.button("Keep this").onclick();
+  assert.equal(h.snapshots.list()[0].session, h.sessions.list()[0].id);
+  h.dom.restore();
+});
+
+test("keeping says so, and stops saying so once the setup changes", async () => {
+  const h = await inAScenario();
+  h.button("Keep this").onclick();
+  assert.match(h.text(), /Kept, with these settings/);
+  const slider = h.dom.body.find((n) => n.id?.startsWith("param-"));
+  slider.value = String(Number(slider.value) + 1);
+  slider.oninput();
+  assert.ok(!h.text().includes("Kept, with these settings"),
+    "it still claims the setup on screen is the one kept");
+  h.dom.restore();
+});
+
+test("a kept scenario is listed in its session and re-opens at the same setup", async () => {
+  const h = await inAScenario();
+  const slider = h.dom.body.find((n) => n.id?.startsWith("param-"));
+  const key = slider.id.replace("param-", "");
+  slider.value = String(Number(slider.value) + 1);
+  slider.oninput();
+  h.button("Keep this").onclick();
+  const wanted = h.snapshots.list()[0].params[key];
+
+  h.dom.body.find((n) => n.className === "hub-back").onclick();
+  const row = h.all("hub-session").find((b) => b.find((n) => /cross the x-axis|y = x/.test(n.textContent ?? "")));
+  assert.ok(row, "the kept scenario is not listed in the session");
+  row.onclick();
+
+  const reopened = h.dom.body.find((n) => n.id === `param-${key}`);
+  assert.equal(Number(reopened.value), wanted, "it re-opened at the author's setup, not the kept one");
+  h.dom.restore();
+});
+
+test("a kept scenario can be written about, once", async () => {
+  const h = await inAScenario();
+  h.button("Keep this").onclick();
+  h.dom.body.find((n) => n.className === "hub-back").onclick();
+  h.all("hub-session").find((b) => b.find((n) => /cross the x-axis|y = x/.test(n.textContent ?? ""))).onclick();
+
+  h.byId("kept-note").value = "I wanted the discriminant to land on zero";
+  h.button("Save note").onclick();
+  assert.equal(h.snapshots.list()[0].note, "I wanted the discriminant to land on zero");
+  assert.ok(!h.byId("kept-note"), "the box is still there after it has been written");
+  h.dom.restore();
+});
+
+test("with nowhere to keep it, nothing offers to", async () => {
+  const h = await start();
+  h.byId("hub-topic").value = "quadratics";
+  h.button("Start").onclick();
+  h.all("hub-card")[0].onclick();
+  assert.ok(h.button("Keep this"), "the hub always has a snapshot store, so it should offer");
   h.dom.restore();
 });
