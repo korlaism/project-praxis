@@ -96,7 +96,7 @@ Still the right answer where PhET has a sim, and `P-33` remains open. It does no
 
 ## Consequences
 
-**Costs.** The primitive library becomes load-bearing rather than convenient, which promotes `P-31` sharply. Each primitive now owes an analytic solution as well as an implementation. A verification harness is real engineering and must exist before generation is exposed to anyone.
+**Costs.** The primitive library becomes load-bearing rather than convenient, which promotes `P-31` sharply. Each primitive now owes an analytic solution as well as an implementation. **`P-47` made that enforceable** rather than aspirational: `lab/primitives/analytic.test.mjs` fails if a primitive has no entry, and an entry must either compare a run against the closed form or give a reason it cannot. Auditing it found the real gap — **six of the ten primitives classify straight from the parameters and never read the state the learner watches**, so for those the answer check was comparing a claim against a formula rather than against what happens on screen. A verification harness is real engineering and must exist before generation is exposed to anyone.
 
 **Makes harder later.** Anything that assumes a fixed catalogue — pre-rendered thumbnails, hand-written lesson plans, a static sitemap.
 

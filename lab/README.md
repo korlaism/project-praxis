@@ -170,6 +170,33 @@ browser, so nothing runs server-side and nothing is stored there. The
 previous build stays as `site.prev` on the server, so a bad deploy rolls back
 with one `mv`.
 
+
+## Adding a primitive
+
+ADR 0007 makes the closed-form oracle part of how a generated scenario is verified: a primitive
+owes **an analytic solution as well as an implementation**. `P-47` turned that from a sentence
+into a check.
+
+`lab/primitives/analytic.test.mjs` holds one entry per primitive and **fails if a new primitive
+has none**. An entry either runs the simulation and compares it with the closed form, or says in
+a sentence why there is nothing to compare — and "n/a" is not a sentence; the test requires a
+reason long enough to disagree with.
+
+It exists because **six of the ten primitives classify straight from the parameters** and never
+read the state the learner watches evolve. For those, the answer check compares a scenario's
+claim against a formula rather than against what happens on screen. If the stepper and the
+formula drift apart, the learner sees one thing, is told another, and every other test stays
+green.
+
+Two primitives legitimately have nothing to compare — `line-pair` and `quadratic-roots` draw a
+curve rather than integrating one, and their truth is entirely in `algebra.mjs`. Their entries
+say so, and point at `maths-draw.test.mjs`, which is where that pair went wrong before.
+
+Tolerances are written as the physics, not as magic numbers: a simulation stops on the first
+frame past the event, so it may overshoot by one, and Euler integration under friction undershoots
+by about `u·dt/2`. Stated that way they stay correct if the timestep changes.
+
+
 ## Running
 
 Any static server, because ES modules will not load over `file://`:
