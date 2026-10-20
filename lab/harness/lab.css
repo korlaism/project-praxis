@@ -1,6 +1,12 @@
 /* Praxis lab harness — deliberately screen-recordable: no chrome, large type,
    high contrast, nothing that reads as a web page when cropped to the canvas. */
+/* Tell the browser this is a dark page (P-105). Without it every
+   NATIVE control — the four range sliders on every scenario, a
+   select, textarea scrollbars — renders in default light chrome
+   inside a black app. Nothing we style ourselves shows it. */
 :root{
+  color-scheme: dark;
+
   --bg:#12100E; --panel:#1B1815; --line:#332E28;
   --ink:#F2EEE8; --ink-2:#A79E92; --ink-3:#6E665C;
   --accent:#E8703A; --accent-2:#F5A05F;
