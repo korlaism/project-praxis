@@ -87,7 +87,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
 .lab-note-box{font-family:var(--font);font-size:.95rem;line-height:1.45;
   color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:2px;
   padding:10px 12px;resize:vertical;min-height:72px;width:100%}
-.lab-note-box:focus{outline:none;border-color:var(--accent)}
+.lab-note-box:focus{border-color:var(--accent)}
 .lab-note-acts{display:flex;gap:8px;flex-wrap:wrap}
 .lab-note-acts button{font-family:var(--font);font-weight:500;font-size:.88rem;
   padding:8px 14px;border-radius:2px;cursor:pointer;
@@ -121,7 +121,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
 .lab-confusion-words{font-family:var(--font);font-size:.82rem;padding:6px 10px;
   color:var(--ink);background:var(--bg);border:1px solid var(--line);
   border-radius:2px;width:min(220px,40vw)}
-.lab-confusion-words:focus{outline:none;border-color:var(--accent)}
+.lab-confusion-words:focus{border-color:var(--accent)}
 .lab-confusion-words[hidden]{display:none!important}
 
 .lab-clock{font-family:var(--mono);font-size:.78rem;color:var(--ink-3);
@@ -132,3 +132,15 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);
   .lab-foot{gap:10px}
   .lab-params{order:3;width:100%}
 }
+
+/* One focus treatment, as in hub.css (P-107). */
+.lab-note-box:focus-visible,
+.lab-confusion-words:focus-visible,
+.lab-transport button:focus-visible,
+.lab-note-acts button:focus-visible,
+.lab-confusion button:focus-visible,
+.lab-verdict-acts button:focus-visible,
+.lab-conf button:focus-visible,
+.lab-param input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.lab{touch-action:manipulation;-webkit-tap-highlight-color:transparent}

@@ -415,3 +415,46 @@ test("a select carries its own colours, not borrowed ones", () => {
   assert.match(rule[1], /background/, "select sets no background-color");
   assert.match(rule[1], /color\s*:/, "select sets no color");
 });
+
+test("no stylesheet takes a focus ring away", () => {
+  // P-107. Six rules used to do this and replace it with a border-colour
+  // change — which in a browser turned out to be visible on the textareas and
+  // nearly nothing on the heading-styled topic field. Rather than judge each
+  // one, nothing removes the outline now, and this stops the next one.
+  //
+  // The guideline is "never outline-none without a replacement"; this is
+  // stricter and simpler, and it costs nothing because every control that
+  // needs a custom ring has one.
+  const offenders = [];
+  for (const f of walkAll(join(ROOT, "lab")).filter((x) => x.endsWith(".css"))) {
+    const body = readFileSync(f, "utf8");
+    body.split("\n").forEach((line, n) => {
+      if (/outline\s*:\s*none/i.test(line.replace(/\/\*.*?\*\//g, "")))
+        offenders.push(`${relative(ROOT, f)}:${n + 1}  ${line.trim()}`);
+    });
+  }
+  assert.deepEqual(offenders, [], `a focus ring is removed here:\n  ${offenders.join("\n  ")}`);
+});
+
+test("every control a learner can tab to is given the same ring", () => {
+  // Consistency is the point: a learner should not have to learn two focus
+  // languages between the hub and a scenario.
+  const css = [join(ROOT, "lab/hub/hub.css"), join(ROOT, "lab/harness/lab.css")]
+    .map((f) => readFileSync(f, "utf8")).join("\n");
+  for (const cls of ["hub-topic", "hub-session-topic", "hub-note-box", "hub-field-i",
+                     "hub-start", "hub-note-save", "hub-forget", "hub-settings",
+                     "hub-note-share", "lab-note-box", "lab-confusion-words",
+                     "lab-transport button", "lab-conf button", "lab-param input"])
+    assert.ok(new RegExp(`\\.${cls.replace(" ", " ")}:focus-visible`).test(css),
+      `.${cls} has no :focus-visible rule`);
+});
+
+test("touch targets do not wait to find out they were not a double tap", () => {
+  // Per file, not concatenated: with both joined, dropping it from one still
+  // matched the other and the mutation went uncaught.
+  for (const f of ["lab/hub/hub.css", "lab/harness/lab.css"]) {
+    const css = readFileSync(join(ROOT, f), "utf8");
+    assert.match(css, /touch-action:\s*manipulation/, `${f} has no touch-action`);
+    assert.match(css, /-webkit-tap-highlight-color/, `${f} leaves the tap flash to the browser`);
+  }
+});
