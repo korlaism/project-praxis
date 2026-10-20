@@ -92,7 +92,10 @@ export function openSnapshots({ backend, now = Date.now, newId = defaultId } = {
   return {
     /** Keep this scenario, as it is right now. */
     take({ spec, params, session = null } = {}) {
-      if (!spec?.id || !spec?.primitive)
+      // A wrapped scenario (ADR 0009) has an embed instead of a primitive and
+      // is still a scenario. Requiring a primitive quietly refused to keep
+      // one, and the refusal looked like a button that did nothing.
+      if (!spec?.id || !(spec.primitive || spec.embed))
         return { ok: false, errors: ["a snapshot needs a scenario to be a snapshot of"] };
 
       const snapshot = { id: newId(), takenAt: now() };

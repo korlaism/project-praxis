@@ -315,3 +315,112 @@ test("a scenario opened outside a session carries no session at all", async () =
   assert.equal("session" in notebook.cards("physics")[0], false);
   dom.restore();
 });
+
+/* ── P-63: a wrapped scenario, and what it cannot check ──────────────────
+ *
+ * ADR 0009 added a second scenario kind whose stage is someone else's
+ * simulation. Its premise turned out to be false — ADR 0012 supersedes it and
+ * no PhET simulation ships — so nothing in the bank is wrapped, and the whole
+ * path went a month of heavy refactoring without a test that mounts one.
+ *
+ * It is the one kind of scenario the answer check cannot touch. If it is kept
+ * at all, the properties that make it honest have to be asserted, not assumed.
+ */
+
+const WRAPPED = {
+  schema: 1, id: "wrapped-probe", subject: "physics", concept: "falling", difficulty: "easy",
+  embed: { src: "embeds/example/index.html", title: "An example",
+           attribution: { work: "Example", author: "Someone", licence: "CC BY 4.0" } },
+  question: "Which lands first?",
+  options: [{ id: "together", label: "Together" }, { id: "heavier", label: "The heavy one" }],
+  correct: "together",
+  errorTags: { heavier: "heavier-falls-faster" },
+  cues: { "heavier-falls-faster": "Watch both of them all the way down, not just the finish." },
+  explain: "They land together.",
+};
+
+async function wrapped(opts = {}) {
+  const dom = installDom();
+  const { mountScenario } = await import("./mount.js?" + Math.random());
+  const notebook = openNotebook({ backend: memoryBackend() });
+  const lab = mountScenario(WRAPPED, { notebook, ...opts });
+  return { dom, lab, notebook,
+           frame: () => dom.body.find((n) => n.tagName === "IFRAME"),
+           button: (t) => dom.body.find((n) => n.tagName === "BUTTON" && n.textContent === t) };
+}
+
+test("a wrapped scenario does not load the simulation until something is committed", async () => {
+  // R-010 at its strictest, and the reason it is not merely hidden: before a
+  // commit the other simulation does not exist on the page at all.
+  const w = await wrapped();
+  assert.equal(w.frame(), null, "someone else's simulation loaded before the learner committed");
+  w.dom.body.find((n) => n.id === "opt-heavier").onclick();
+  assert.ok(w.frame(), "it never loaded after the commit either");
+  w.dom.restore();
+});
+
+test("asking again does not leave two simulations on the page", async () => {
+  // The embed is removed on reset and recreated on the next commit. If the
+  // removal stopped happening, a learner would end up watching two copies.
+  const w = await wrapped();
+  const frames = () => w.dom.body.findAll((n) => n.tagName === "IFRAME");
+  w.dom.body.find((n) => n.id === "opt-heavier").onclick();
+  assert.equal(frames().length, 1);
+  w.button("Ask again").onclick();
+  assert.equal(frames().length, 0, "the simulation outlived the question it answered");
+  w.dom.body.find((n) => n.id === "opt-together").onclick();
+  assert.equal(frames().length, 1, "a second copy was left behind");
+  w.dom.restore();
+});
+
+test("a wrapped card says its answer was asserted, not observed", async () => {
+  // The distinction R-002 analysis needs: nothing watched this one, so the
+  // answer is the author's word. A card that claimed otherwise would put
+  // unverifiable evidence in the same column as verified evidence.
+  const w = await wrapped({ session: "s1" });
+  w.dom.body.find((n) => n.id === "opt-heavier").onclick();
+  w.button("Show the answer").onclick();
+  const [card] = w.notebook.cards("physics");
+  assert.equal(card.outcomeSource, "asserted");
+  assert.equal(card.observed, "together", "it falls back to the authored answer");
+  assert.equal(card.session, "s1");
+  w.dom.restore();
+});
+
+test("a wrapped scenario credits whose work it is", async () => {
+  // ADR 0009's compensating rule, and the licence's requirement. The answer
+  // check cannot run here, so attribution is the only thing holding it honest.
+  const w = await wrapped();
+  const text = [];
+  (function walk(n) { if (n.textContent) text.push(n.textContent); n.children?.forEach(walk); })(w.dom.body);
+  const said = text.join(" ");
+  assert.match(said, /Example/);
+  assert.match(said, /Someone/);
+  assert.match(said, /CC BY 4\.0/);
+  w.dom.restore();
+});
+
+test("a wrapped scenario still cues a wrong answer", async () => {
+  // ADR 0014 does not depend on owning the simulation.
+  const w = await wrapped();
+  w.dom.body.find((n) => n.id === "opt-heavier").onclick();
+  w.button("Show the answer").onclick();
+  const text = [];
+  (function walk(n) { if (n.textContent) text.push(n.textContent); n.children?.forEach(walk); })(w.dom.body);
+  assert.match(text.join(" "), /all the way down/);
+  w.dom.restore();
+});
+
+test("a wrapped scenario can be kept, like any other", async () => {
+  // It has no parameters, so the snapshot is the question itself — which is
+  // still a thing a learner may want to come back to.
+  const { openSnapshots } = await import("../notebook/snapshots.mjs");
+  const snapshots = openSnapshots({ backend: memoryBackend() });
+  const w = await wrapped({ snapshots, session: "s1" });
+  assert.ok(w.button("Keep this"), "a wrapped scenario cannot be kept");
+  w.button("Keep this").onclick();
+  const [kept] = snapshots.list();
+  assert.equal(kept.spec.id, "wrapped-probe");
+  assert.ok(kept.spec.embed, "the snapshot forgot it was a wrapped scenario");
+  w.dom.restore();
+});

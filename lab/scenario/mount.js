@@ -24,7 +24,7 @@ export function mountScenario(spec, { notebook = openNotebook(), session = null,
   // A wrapped scenario (ADR 0009) embeds someone else's simulation. Nothing
   // can watch it, so there is no primitive, no parameters and no answer check
   // — its answer is asserted by the author, and the card says so.
-  if (spec.embed) return mountWrapped(spec, notebook, session);
+  if (spec.embed) return mountWrapped(spec, notebook, session, snapshots);
 
   const primitive = getPrimitive(spec.primitive);
   // A snapshot re-opens at the setup the learner had, not the author's (P-43).
@@ -66,7 +66,7 @@ export function mountScenario(spec, { notebook = openNotebook(), session = null,
   return lab;
 }
 
-function mountWrapped(spec, notebook, session = null) {
+function mountWrapped(spec, notebook, session = null, snapshots = null) {
   return mountLab({
     question: spec.question,
     note: spec.note,
@@ -78,6 +78,9 @@ function mountWrapped(spec, notebook, session = null) {
     // No observation is possible, so reveal() carries nothing and the gate
     // falls back to the authored answer — the seam P-52 already left open.
     ...filer(spec, notebook, "asserted", session),
+    // It has no parameters, so a snapshot of it is the question itself — which
+    // is still a thing a learner may want to come back to (P-43).
+    ...(snapshots ? { onKeep: () => snapshots.take({ spec, params: {}, session }) } : {}),
   });
 }
 
