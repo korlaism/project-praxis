@@ -10,7 +10,9 @@
   --accent:#E8703A; --right:#4FB286; --wrong:#D65442;
   --mono:"Spline Sans Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
 }
-html{background:var(--bg)}
+/* P-105: the landing's native controls are the option buttons and
+   nothing else today, but the scrollbar is one too. */
+html{background:var(--bg);color-scheme:dark}
 body{margin:0;background:var(--bg);color:var(--ink);
      font:400 16px/1.5 "Familjen Grotesk",system-ui,-apple-system,sans-serif;
      -webkit-text-size-adjust:100%}

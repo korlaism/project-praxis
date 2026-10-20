@@ -241,7 +241,10 @@ export function buildBundle(entry, outDir) {
   //
   // Keeping both is safe: the source tags are byte-identical to the skeleton's,
   // so an artifact simply carries each declaration twice.
-  const keepMeta = (l) => /^\s*<meta\s+(name="viewport"|charset)/i.test(l);
+  // Theme-colour (P-105): the phone paints its own chrome around the page,
+  // and without this it paints it white around a black app. Same reasoning as
+  // the two above — a self-hosted bundle has to describe itself.
+  const keepMeta = (l) => /^\s*<meta\s+(name="viewport"|name="theme-color"|charset)/i.test(l);
   let html = readFileSync(entryAbs, "utf8")
     .split("\n")
     .filter((l) => !/^\s*<!doctype/i.test(l) && (keepMeta(l) || !/^\s*<meta\b/i.test(l)))

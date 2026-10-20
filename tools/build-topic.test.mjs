@@ -366,3 +366,52 @@ test("the word from inside exported data is still not an import", () => {
               'import { stepFall } from "../components/falling.mjs";\n';
   assert.deepEqual(only(src), ["../components/falling.mjs"]);
 });
+
+/* ── P-105: a dark app has to say it is dark ─────────────────────────────
+ *
+ * The bundle drops every meta tag except viewport and charset, for the reason
+ * given in build-topic.mjs: an artifact's skeleton supplies them, but a
+ * bundle ADR 0008 invites other people to host has to describe itself. The
+ * same argument applies to these, and they have to survive the filter.
+ */
+
+test("the built page says it is dark, and in what colour", () => {
+  // Without color-scheme, every NATIVE control falls back to the browser's
+  // light chrome inside a dark page — the topic select, the four range
+  // sliders on every scenario, textarea scrollbars. Nothing we style
+  // ourselves shows it, which is why it survived a month of screenshots.
+  const out = fresh("dark");
+  buildBundle(join(ROOT, "lab/index.html"), out);
+  const html = readFileSync(join(out, "index.html"), "utf8");
+  assert.match(html, /<meta\s+name="theme-color"[^>]*#12100E/i,
+    "theme-color was dropped by the meta filter, or never added");
+  assert.match(html, /<html[^>]+lang="en"/i, "the page declares no language");
+
+  // color-scheme lives in CSS rather than a meta tag, so it cannot be
+  // filtered out and applies to the landing bundle too.
+  const css = walkAll(out).filter((f) => f.endsWith(".css"))
+    .map((f) => readFileSync(f, "utf8")).join("\n");
+  assert.match(css, /color-scheme:\s*dark/i, "nothing tells the browser this is a dark page");
+});
+
+test("the phone landing says the same", () => {
+  const out = fresh("dark-landing");
+  buildBundle(join(ROOT, "lab/landing/index.html"), out);
+  const html = readFileSync(join(out, "index.html"), "utf8");
+  assert.match(html, /<meta\s+name="theme-color"/i);
+  assert.match(html, /<html[^>]+lang="en"/i);
+  const css = walkAll(out).filter((f) => f.endsWith(".css"))
+    .map((f) => readFileSync(f, "utf8")).join("\n");
+  assert.match(css, /color-scheme:\s*dark/i);
+});
+
+test("a select carries its own colours, not borrowed ones", () => {
+  // The link picker renders readably only because it is given a class that
+  // happens to set them. A native select with neither is the one control
+  // that goes white-on-white when color-scheme is wrong.
+  const css = readFileSync(join(ROOT, "lab/hub/hub.css"), "utf8");
+  const rule = css.match(/\.hub-related-row select\s*\{([^}]*)\}/);
+  assert.ok(rule, "the select has no rule of its own");
+  assert.match(rule[1], /background/, "select sets no background-color");
+  assert.match(rule[1], /color\s*:/, "select sets no color");
+});

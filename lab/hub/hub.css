@@ -119,7 +119,16 @@
 .hub-related{display:grid;gap:8px}
 .hub-related-row{display:flex;gap:8px;align-items:stretch}
 .hub-related-row .hub-session{flex:1}
-.hub-related-row select{flex:1;min-width:0}
+/* Its own colours, not borrowed from a class it happens to be given.
+   This is the control the audit was actually about: left to the browser, the
+   selected option rendered dark grey on a dark panel and was all but
+   invisible. Checked with a before and after rather than assumed — the range
+   sliders, which the ticket also accused, turned out to be fine already
+   because accent-color was handling them (P-105). */
+.hub-related-row select{flex:1;min-width:0;font-family:var(--font);font-size:.98rem;
+  padding:12px 14px;border-radius:3px;
+  color:var(--ink);background-color:var(--panel);border:1px solid var(--line)}
+.hub-related-row select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* ── Choosing which notes the model sees (P-101, ADR 0024) ────────────────
    The choice sits beside the words it is about, and an unchosen note looks
